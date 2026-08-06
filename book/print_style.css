@@ -1,0 +1,431 @@
+/* ==========================================================================
+   Print CSS for "Principles of Software Engineering, Concurrency & Architecture"
+   Technical Manual Style — Sans-serif throughout
+   Updated: 2026-08-06 | v2
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   PAGE SETUP
+   -------------------------------------------------------------------------- */
+@page {
+    size: A4 portrait;
+    margin: 2.5cm 2cm 2.5cm 2.5cm;
+
+    @bottom-center {
+        content: counter(page);
+        font-family: "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+        font-size: 10pt;
+        color: #555555;
+    }
+
+    @top-right {
+        content: string(chapter-title);
+        font-family: "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+        font-size: 9pt;
+        font-style: italic;
+        color: #777777;
+    }
+
+    @top-left {
+        content: "Principles of Software Engineering, Concurrency & Architecture";
+        font-family: "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+        font-size: 8pt;
+        color: #999999;
+    }
+}
+
+/* First page — no header/footer on cover */
+@page :first {
+    @top-left { content: none; }
+    @top-right { content: none; }
+    @bottom-center { content: none; }
+}
+
+/* --------------------------------------------------------------------------
+   BASE BODY — SANS-SERIF TECHNICAL MANUAL
+   -------------------------------------------------------------------------- */
+body {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 11pt;
+    line-height: 1.65;
+    color: #111111;
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   HEADINGS — ALL SANS-SERIF
+   -------------------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-weight: 700;
+    color: #000000;
+    page-break-after: avoid;
+    break-after: avoid;
+    margin-top: 0;
+}
+
+h1 {
+    font-size: 26pt;
+    font-weight: 800;
+    margin-top: 24pt;
+    margin-bottom: 14pt;
+    border-bottom: 3px solid #111111;
+    padding-bottom: 8pt;
+    string-set: chapter-title content();
+    letter-spacing: -0.5pt;
+}
+
+h2 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin-top: 20pt;
+    margin-bottom: 10pt;
+    border-bottom: 1.5px solid #cccccc;
+    padding-bottom: 5pt;
+}
+
+h3 {
+    font-size: 14pt;
+    font-weight: 700;
+    margin-top: 16pt;
+    margin-bottom: 6pt;
+    color: #1a1a1a;
+}
+
+h4 {
+    font-size: 12pt;
+    font-weight: 600;
+    margin-top: 12pt;
+    margin-bottom: 5pt;
+    color: #2a2a2a;
+}
+
+h5 {
+    font-size: 11pt;
+    font-weight: 600;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+    color: #333333;
+}
+
+h6 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    margin-top: 8pt;
+    margin-bottom: 3pt;
+    color: #444444;
+    font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   BODY TEXT
+   -------------------------------------------------------------------------- */
+p {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 11pt;
+    margin-top: 0;
+    margin-bottom: 10pt;
+    text-align: justify;
+    hyphens: auto;
+    orphans: 3;
+    widows: 3;
+}
+
+/* --------------------------------------------------------------------------
+   CODE — MONOSPACE (unchanged — correct for technical content)
+   -------------------------------------------------------------------------- */
+code, pre, kbd, samp {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "Courier New", Courier, monospace;
+    font-size: 9pt;
+}
+
+code {
+    background-color: #f4f4f4;
+    padding: 1pt 4pt;
+    border-radius: 2px;
+    border: 1px solid #e0e0e0;
+}
+
+pre {
+    background-color: #fafafa;
+    padding: 11pt 13pt;
+    border: 1px solid #e0e0e0;
+    border-left: 3px solid #555555;
+    border-radius: 3px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin: 10pt 0;
+    line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   BLOCKQUOTES — VERBATIM AND PULL QUOTES
+   -------------------------------------------------------------------------- */
+blockquote {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    margin: 12pt 0 12pt 0;
+    padding: 8pt 16pt;
+    border-left: 4px solid #333333;
+    background-color: #f9f9f9;
+    font-size: 10.5pt;
+    color: #222222;
+    font-style: normal;
+    page-break-inside: avoid;
+}
+
+/* --------------------------------------------------------------------------
+   SOURCE ATTRIBUTION BOX (verbatim source header)
+   Used before every verbatim research paper / article section
+   -------------------------------------------------------------------------- */
+.source-attribution,
+blockquote.source-attribution {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 9pt;
+    font-style: normal;
+    background-color: #eef3fb;
+    border-left: 4px solid #2b5797;
+    border-top: 1px solid #c0d0e8;
+    border-bottom: 1px solid #c0d0e8;
+    padding: 10pt 14pt;
+    margin: 14pt 0 4pt 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    color: #1a2a4a;
+    line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   VERBATIM BLOCK (the actual verbatim text body)
+   -------------------------------------------------------------------------- */
+.verbatim-block {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 10.5pt;
+    background-color: #fafcff;
+    border-left: 3px solid #2b5797;
+    border-right: 1px solid #d8e4f0;
+    padding: 12pt 16pt;
+    margin: 0 0 14pt 0;
+    page-break-inside: auto;
+    line-height: 1.7;
+    color: #111111;
+}
+
+/* --------------------------------------------------------------------------
+   PRIMER BLOCK (section 1 background content)
+   -------------------------------------------------------------------------- */
+.primer-block {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    background-color: #f4f8fb;
+    border: 1px solid #c8d7e6;
+    padding: 12pt;
+    margin: 10pt 0;
+    border-radius: 3px;
+    page-break-inside: avoid;
+}
+
+/* --------------------------------------------------------------------------
+   REFERENCE BLOCK (citation and deep-dive sections)
+   -------------------------------------------------------------------------- */
+.reference-block {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    background-color: #fefcf5;
+    border-left: 3px solid #d99b00;
+    padding: 10pt 14pt;
+    margin: 10pt 0;
+    page-break-inside: avoid;
+}
+
+/* --------------------------------------------------------------------------
+   PAGE BREAKS
+   -------------------------------------------------------------------------- */
+.page-break {
+    page-break-before: always;
+    break-before: always;
+    height: 0;
+    display: block;
+}
+
+/* --------------------------------------------------------------------------
+   TABLES
+   -------------------------------------------------------------------------- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12pt 0;
+    page-break-inside: avoid;
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 9.5pt;
+}
+
+th, td {
+    border: 1px solid #cccccc;
+    padding: 6pt 9pt;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.4;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-weight: 700;
+    font-size: 9pt;
+    color: #111111;
+    letter-spacing: 0.2pt;
+}
+
+tr:nth-child(even) td {
+    background-color: #fafafa;
+}
+
+/* --------------------------------------------------------------------------
+   LISTS
+   -------------------------------------------------------------------------- */
+ul, ol {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    font-size: 11pt;
+    margin: 6pt 0 10pt 0;
+    padding-left: 20pt;
+    line-height: 1.6;
+}
+
+li {
+    margin-bottom: 4pt;
+}
+
+li > ul, li > ol {
+    margin-top: 3pt;
+    margin-bottom: 3pt;
+}
+
+/* --------------------------------------------------------------------------
+   HORIZONTAL RULES (section separators)
+   -------------------------------------------------------------------------- */
+hr {
+    border: none;
+    border-top: 1px solid #cccccc;
+    margin: 18pt 0;
+}
+
+/* --------------------------------------------------------------------------
+   LINKS — show URL in print
+   -------------------------------------------------------------------------- */
+a {
+    color: #1a5ca8;
+    text-decoration: underline;
+}
+
+@media print {
+    a[href^="http"]::after,
+    a[href^="https"]::after {
+        content: " [" attr(href) "]";
+        font-size: 7.5pt;
+        color: #666666;
+        font-style: normal;
+        word-break: break-all;
+    }
+
+    /* Don't show URL for anchor links (#) */
+    a[href^="#"]::after {
+        content: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   MATH / FORMULA (inline LaTeX rendered text)
+   -------------------------------------------------------------------------- */
+.math, .katex {
+    font-size: 10.5pt;
+    page-break-inside: avoid;
+}
+
+/* --------------------------------------------------------------------------
+   COVER PAGE STYLES
+   -------------------------------------------------------------------------- */
+.cover-page {
+    text-align: center;
+    page-break-after: always;
+    padding-top: 80pt;
+}
+
+.cover-title {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 30pt;
+    font-weight: 800;
+    color: #000000;
+    letter-spacing: -1pt;
+    line-height: 1.15;
+    margin-bottom: 16pt;
+}
+
+.cover-subtitle {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14pt;
+    font-weight: 400;
+    color: #333333;
+    margin-bottom: 40pt;
+    line-height: 1.4;
+}
+
+.cover-meta {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10pt;
+    color: #666666;
+    line-height: 1.8;
+    border-top: 1px solid #cccccc;
+    padding-top: 16pt;
+    margin-top: 60pt;
+}
+
+/* --------------------------------------------------------------------------
+   CHAPTER OPENING STYLES
+   -------------------------------------------------------------------------- */
+.chapter-opener {
+    page-break-before: always;
+    padding-bottom: 20pt;
+    border-bottom: 2px solid #111111;
+    margin-bottom: 24pt;
+}
+
+/* --------------------------------------------------------------------------
+   PRINT OVERRIDES
+   -------------------------------------------------------------------------- */
+@media print {
+    body {
+        background-color: #ffffff;
+    }
+
+    pre {
+        background-color: #ffffff;
+        border: 1px solid #aaaaaa;
+        border-left: 3px solid #333333;
+    }
+
+    code {
+        background-color: #ffffff;
+        border: 1px solid #cccccc;
+    }
+
+    th {
+        background-color: #eeeeee !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .source-attribution {
+        background-color: #eef3fb !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
+
+    p, li {
+        orphans: 3;
+        widows: 3;
+    }
+}

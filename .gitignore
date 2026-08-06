@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Maven / Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.log
+logs/
+
+# Build and compiled artifacts
+# Book compilation
+*_compiled.md
+*.pdf
+*.aux
+*.out
+*.toc
+*.log
+
+# Misc
+node_modules/
+dist/
+build/
