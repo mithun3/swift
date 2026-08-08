@@ -40,14 +40,13 @@ def main():
     # We will mock the rendering step based on standard output format.
     
     print("WARNING: This script requires a parsed .hgrm (histogram percentile distribution) file.")
-    print("To generate it, run the HdrHistogram processor:")
-    print("  java -cp ~/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar \\")
-    print("       org.hdrhistogram.HistogramLogProcessor -i " + hlog_file + " -o " + hlog_file + ".hgrm")
+    print("To generate it, we recommend using the process_latency.sh utility:")
+    print("  ./scripts/process_latency.sh " + hlog_file)
     
     hgrm_file = hlog_file + ".hgrm"
     
     if not os.path.exists(hgrm_file):
-        print(f"File {hgrm_file} not found. Please run the Java processor first.")
+        print(f"File {hgrm_file} not found. Please run process_latency.sh first.")
         sys.exit(1)
         
     # Read the .hgrm file, skipping header and footer
@@ -60,12 +59,12 @@ def main():
             if not line or line.startswith('#') or line.startswith('"'):
                 continue
             parts = line.split()
-            if len(parts) >= 4:
+            if len(parts) >= 3:
                 try:
                     val = float(parts[0]) # Value
                     pct = float(parts[1]) # Percentile
                     
-                    if pct > 0:
+                    if pct >= 0:
                         latencies.append(val)
                         percentiles.append(pct)
                 except ValueError:

@@ -64,22 +64,35 @@ public final class PersistenceMain {
         // The TelemetryRecorder uses HdrHistogram's SingleWriterRecorder to capture
         // end-to-end latencies (T3 - T0) on the hot path without any allocation.
         // A background daemon thread flushes interval histograms to an .hlog file
-        // every second for offline visualisation via scripts/plot_latency.py.
+        // every second for offline visualisation via scripts/process_latency.sh.
         final boolean telemetryEnabled = Boolean.parseBoolean(
                 System.getProperty("fx.telemetry.enabled", "true"));
         final String telemetryLogPath = System.getProperty(
                 "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
 
-        TelemetryRecorder telemetryRecorder = null;
+        TelemetryRecorder e2eRecorder = null;
+        TelemetryRecorder qaRecorder = null;
+        TelemetryRecorder saRecorder = null;
+        TelemetryRecorder sbRecorder = null;
+
         if (telemetryEnabled) {
             try {
                 // highestTrackableValue: 10 seconds in nanoseconds (covers extreme outliers).
                 // intervalMillis: flush histogram to disk every 1000ms.
-                telemetryRecorder = new TelemetryRecorder(
+                String basePath = telemetryLogPath.replace(".hlog", "");
+                
+                e2eRecorder = new TelemetryRecorder(
                         new File(telemetryLogPath), 10_000_000_000L, 1_000L);
-                logger.info("[serv-c] Telemetry enabled. Writing latency log to: " + telemetryLogPath);
+                qaRecorder = new TelemetryRecorder(
+                        new File(basePath + "-queue-a.hlog"), 10_000_000_000L, 1_000L);
+                saRecorder = new TelemetryRecorder(
+                        new File(basePath + "-serv-a.hlog"), 10_000_000_000L, 1_000L);
+                sbRecorder = new TelemetryRecorder(
+                        new File(basePath + "-serv-b.hlog"), 10_000_000_000L, 1_000L);
+                        
+                logger.info("[serv-c] Telemetry enabled. Writing latency logs to: " + basePath + "*");
             } catch (final Exception e) {
-                logger.warn("[serv-c] WARNING: Failed to init TelemetryRecorder: "
+                logger.warn("[serv-c] WARNING: Failed to init TelemetryRecorders: "
                         + e.getMessage() + " — continuing without telemetry.");
             }
         } else {
@@ -88,10 +101,13 @@ public final class PersistenceMain {
 
         // ── Event Loop Construction ───────────────────────────────────────────
         final PersistenceEventLoop loop = new PersistenceEventLoop(
-                PersistenceEventLoop.DEFAULT_JDBC_URL, telemetryRecorder);
+                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, qaRecorder, saRecorder, sbRecorder);
 
         // ── Shutdown Hook ─────────────────────────────────────────────────────
-        final TelemetryRecorder finalRecorder = telemetryRecorder;
+        final TelemetryRecorder finalE2e = e2eRecorder;
+        final TelemetryRecorder finalQa = qaRecorder;
+        final TelemetryRecorder finalSa = saRecorder;
+        final TelemetryRecorder finalSb = sbRecorder;
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             logger.info("[serv-c] Shutdown signal received.");
             loop.stop();
@@ -101,10 +117,14 @@ public final class PersistenceMain {
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            // Close the TelemetryRecorder — flushes the final interval histogram to disk.
-            if (finalRecorder != null) {
-                finalRecorder.close();
-                logger.info("[serv-c] Telemetry flushed to: " + telemetryLogPath);
+            // Close the TelemetryRecorders — flushes the final interval histograms to disk.
+            if (finalE2e != null) finalE2e.close();
+            if (finalQa != null) finalQa.close();
+            if (finalSa != null) finalSa.close();
+            if (finalSb != null) finalSb.close();
+            
+            if (finalE2e != null) {
+                logger.info("[serv-c] Telemetry flushed to: " + telemetryLogPath + "*");
             }
             h2Server.stop();
             logger.info("[serv-c] Stopped. All batches flushed. H2 Server stopped.");

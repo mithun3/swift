@@ -125,7 +125,7 @@ class FullPipelineIntegrationTest {
     @DisplayName("All events injected at serv-0 should be persisted by serv-c")
     void testAllEventsPersistedEndToEnd() throws Exception {
         // ── Start all pipeline services ───────────────────────────────────────
-        persistenceService = new PersistenceEventLoop(JDBC_URL);
+        persistenceService = new PersistenceEventLoop(JDBC_URL, null, null, null, null);
         pricingService     = new PricingEventLoop();
         riskService        = new RiskValidationEventLoop();
 
@@ -231,7 +231,7 @@ class FullPipelineIntegrationTest {
      * Starts the full pipeline, waits for all events to be persisted, then stops.
      */
     private void startPipelineAndDrain(final int count) throws Exception {
-        persistenceService = new PersistenceEventLoop(JDBC_URL);
+        persistenceService = new PersistenceEventLoop(JDBC_URL, null, null, null, null);
         pricingService     = new PricingEventLoop();
         riskService        = new RiskValidationEventLoop();
         telemetryStitcher  = new TelemetryStitcher(queueCPath, traceLogPath);

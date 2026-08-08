@@ -62,34 +62,52 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
     private final BatchPersistenceEngine persistenceEngine;
 
     /**
-     * Optional zero-allocation latency recorder (HdrHistogram-backed).
-     * If non-null, records the nanosecond delta from event ingress to persistence
-     * for every event processed by this service.
-     * {@code null} means telemetry is disabled (no performance impact).
+     * Optional zero-allocation latency recorder for end-to-end latency (T3 - T0).
      */
-    private final TelemetryRecorder telemetryRecorder;
+    private final TelemetryRecorder e2eRecorder;
+
+    /**
+     * Optional zero-allocation latency recorder for queue-a wait time (T1 - T0).
+     */
+    private final TelemetryRecorder queueARecorder;
+
+    /**
+     * Optional zero-allocation latency recorder for serv-a duration (T2 - T1).
+     */
+    private final TelemetryRecorder servARecorder;
+
+    /**
+     * Optional zero-allocation latency recorder for serv-b duration (T3 - T2).
+     */
+    private final TelemetryRecorder servBRecorder;
 
     /**
      * Constructs the persistence event loop with no telemetry recording.
      *
-     * <p>Equivalent to {@code PersistenceEventLoop(jdbcUrl, null)}.
+     * <p>Equivalent to {@code PersistenceEventLoop(jdbcUrl, null, null, null, null)}.
      *
      * @param jdbcUrl JDBC URL for the database sink
      * @throws SQLException if the database connection cannot be established
      */
     public PersistenceEventLoop(final String jdbcUrl) throws SQLException {
-        this(jdbcUrl, null);
+        this(jdbcUrl, null, null, null, null);
     }
 
     /**
      * Constructs the persistence event loop with optional telemetry recording.
      *
      * @param jdbcUrl           JDBC URL for the database sink
-     * @param telemetryRecorder optional HdrHistogram recorder; {@code null} disables telemetry
+     * @param e2eRecorder       optional HdrHistogram recorder for end-to-end latency
+     * @param queueARecorder    optional HdrHistogram recorder for queue-a latency
+     * @param servARecorder     optional HdrHistogram recorder for serv-a latency
+     * @param servBRecorder     optional HdrHistogram recorder for serv-b latency
      * @throws SQLException if the database connection cannot be established
      */
     public PersistenceEventLoop(final String jdbcUrl,
-                                 final TelemetryRecorder telemetryRecorder) throws SQLException {
+                                 final TelemetryRecorder e2eRecorder,
+                                 final TelemetryRecorder queueARecorder,
+                                 final TelemetryRecorder servARecorder,
+                                 final TelemetryRecorder servBRecorder) throws SQLException {
         super(
                 "persist-c",
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_C, "queue-c"),
@@ -98,7 +116,10 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
                 CPU_CORE
         );
         this.persistenceEngine  = new BatchPersistenceEngine(jdbcUrl);
-        this.telemetryRecorder  = telemetryRecorder;
+        this.e2eRecorder        = e2eRecorder;
+        this.queueARecorder     = queueARecorder;
+        this.servARecorder      = servARecorder;
+        this.servBRecorder      = servBRecorder;
     }
 
     /**
@@ -131,10 +152,17 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
 
         // End-to-end pipeline latency = time from FIX ingress (T0) to persistence entry (T3).
         // Recorded via SingleWriterRecorder — zero-allocation, wait-free.
-        // The null check is a single CMP + branch instruction; the JIT eliminates it
-        // entirely if telemetryRecorder is never null in the compiled context.
-        if (telemetryRecorder != null) {
-            telemetryRecorder.recordValue(event.t3ServCEntry - event.ingressNanoTime);
+        if (e2eRecorder != null) {
+            e2eRecorder.recordValue(event.t3ServCEntry - event.ingressNanoTime);
+        }
+        if (queueARecorder != null) {
+            queueARecorder.recordValue(event.t1ServAEntry - event.ingressNanoTime);
+        }
+        if (servARecorder != null) {
+            servARecorder.recordValue(event.t2ServBEntry - event.t1ServAEntry);
+        }
+        if (servBRecorder != null) {
+            servBRecorder.recordValue(event.t3ServCEntry - event.t2ServBEntry);
         }
 
         try {

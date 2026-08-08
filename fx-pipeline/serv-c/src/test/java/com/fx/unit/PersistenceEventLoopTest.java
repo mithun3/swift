@@ -39,7 +39,7 @@ class PersistenceEventLoopTest {
     void setUp() throws Exception {
         // Construct the loop but do NOT call start() — we test handle() directly
         // by calling the close() method which flushes the batch engine.
-        loop  = new PersistenceEventLoop(JDBC_URL);
+        loop  = new PersistenceEventLoop(JDBC_URL, null, null, null, null);
         event = new FxMarketEvent();
         event.reset();
     }
@@ -97,7 +97,7 @@ class PersistenceEventLoopTest {
     @DisplayName("Loop constructed with null telemetry recorder does not throw")
     void testConstructorWithNullTelemetryDoesNotThrow() throws Exception {
         final String url = "jdbc:h2:mem:test_null_tel_" + System.nanoTime() + ";DB_CLOSE_DELAY=-1";
-        try (final PersistenceEventLoop nullLoop = new PersistenceEventLoop(url, null)) {
+        try (final PersistenceEventLoop nullLoop = new PersistenceEventLoop(url, null, null, null, null)) {
             assertNotNull(nullLoop, "PersistenceEventLoop must accept null TelemetryRecorder");
         }
     }
