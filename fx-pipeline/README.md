@@ -229,8 +229,8 @@ The pipeline includes a coordinated-omission-aware load generator and an HdrHist
 # Run load generator at 5M msgs/sec (infinite)
 ./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
 
-# Process and visualise end-to-end tail latency from the .hlog file
-./scripts/process_latency.sh /tmp/fx-latency.hlog
+# Process and visualise end-to-end and stage-specific tail latencies from the .hlog files
+./scripts/process_latency.sh /tmp/fx-latency*.hlog
 ```
 
 ---

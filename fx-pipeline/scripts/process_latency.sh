@@ -9,27 +9,14 @@
 
 set -e
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <path_to.hlog>"
-    echo "Example: $0 /tmp/fx-latency.hlog"
-    exit 1
-fi
-
-HLOG_FILE="$1"
-HGRM_FILE="${HLOG_FILE}.hgrm"
-
-if [ ! -f "$HLOG_FILE" ]; then
-    echo "Error: File not found: $HLOG_FILE"
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <path_to.hlog> [path_to2.hlog ...]"
+    echo "Example: $0 /tmp/fx-latency.hlog /tmp/fx-latency-queue-a.hlog"
     exit 1
 fi
 
 # Ensure we are in the project root
 cd "$(dirname "$0")/.."
-
-echo "=========================================="
-echo "    Processing HdrHistogram Log"
-echo "    File: $HLOG_FILE"
-echo "=========================================="
 
 # 1. Find HdrHistogram jar (future-proofed resolution)
 HDR_JAR=""
@@ -58,21 +45,34 @@ fi
 
 echo "Using HdrHistogram JAR: $HDR_JAR"
 
-# 2. Process .hlog to .hgrm
-echo "Extracting percentiles to $HGRM_FILE..."
-TMP_PREFIX="${HLOG_FILE}.tmp"
-java -cp "$HDR_JAR" org.HdrHistogram.HistogramLogProcessor -i "$HLOG_FILE" -o "$TMP_PREFIX"
-mv "${TMP_PREFIX}.hgrm" "$HGRM_FILE"
-rm -f "$TMP_PREFIX"
+for HLOG_FILE in "$@"; do
+    if [ ! -f "$HLOG_FILE" ]; then
+        echo "Warning: File not found: $HLOG_FILE. Skipping."
+        continue
+    fi
 
-# 3. Generate the plot
-if command -v python3 &>/dev/null; then
-    echo "Generating latency plots..."
-    python3 scripts/plot_latency.py "$HLOG_FILE"
-else
-    echo "Warning: python3 not found. Skipping plot generation."
-    echo "To plot manually later, run: python3 scripts/plot_latency.py $HLOG_FILE"
-fi
+    echo "=========================================="
+    echo "    Processing $HLOG_FILE"
+    echo "=========================================="
+
+    HGRM_FILE="${HLOG_FILE}.hgrm"
+
+    # 2. Process .hlog to .hgrm
+    echo "Extracting percentiles to $HGRM_FILE..."
+    TMP_PREFIX="${HLOG_FILE}.tmp"
+    java -cp "$HDR_JAR" org.HdrHistogram.HistogramLogProcessor -i "$HLOG_FILE" -o "$TMP_PREFIX"
+    mv "${TMP_PREFIX}.hgrm" "$HGRM_FILE"
+    rm -f "$TMP_PREFIX"
+
+    # 3. Generate the plot
+    if command -v python3 &>/dev/null; then
+        echo "Generating latency plots..."
+        python3 scripts/plot_latency.py "$HLOG_FILE"
+    else
+        echo "Warning: python3 not found. Skipping plot generation."
+        echo "To plot manually later, run: python3 scripts/plot_latency.py $HLOG_FILE"
+    fi
+done
 
 echo "=========================================="
 echo "    Processing Complete!"

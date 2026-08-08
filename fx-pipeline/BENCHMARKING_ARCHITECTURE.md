@@ -165,10 +165,10 @@ This architecture guarantees:
 
 ## 5. Visualizing the "Hockey Stick"
 
-The `.hlog` output from `TelemetryRecorder` is an HdrHistogram log file. Use the provided utility script to process the percentiles and generate a Percentile vs. Latency chart:
+The `.hlog` outputs from `TelemetryRecorder` are HdrHistogram log files. Use the provided utility script to process the percentiles and generate Percentile vs. Latency charts for all pipeline stages:
 
 ```bash
-./scripts/process_latency.sh /tmp/fx-latency.hlog
+./scripts/process_latency.sh /tmp/fx-latency.hlog /tmp/fx-latency-queue-a.hlog /tmp/fx-latency-serv-a.hlog /tmp/fx-latency-serv-b.hlog
 ```
 
 In high-throughput systems, latency is usually stable up to the 99th percentile, after which it spikes exponentially (the "hockey stick" curve). By using a logarithmic X-axis for percentiles (90%, 99%, 99.9%, 99.99%), the script clearly visualises the exact tail latencies where the system begins to saturate.
@@ -189,8 +189,8 @@ In high-throughput systems, latency is usually stable up to the 99th percentile,
 
 # 4. Wait 60 seconds, then stop the pipeline (Ctrl+C or kill the PIDs)
 
-# 5. Process and visualise the latency histogram
-./scripts/process_latency.sh /tmp/fx-latency.hlog
+# 5. Process and visualise the latency histograms for all stages
+./scripts/process_latency.sh /tmp/fx-latency*.hlog
 ```
 
 ---

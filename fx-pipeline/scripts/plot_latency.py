@@ -95,7 +95,8 @@ def main():
     plt.yscale('log')
     plt.grid(True, which="both", ls="--", alpha=0.5)
     
-    plt.title('End-to-End Tail Latency Profile')
+    basename = os.path.basename(hlog_file).replace('.hlog', '')
+    plt.title(f'{basename} Tail Latency Profile')
     plt.xlabel('Percentile')
     plt.ylabel('Latency (Nanoseconds)')
     

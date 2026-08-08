@@ -28,4 +28,4 @@ The pipeline should be run with the following JVM flags (included in `deploy.sh`
 2. Pin `serv-0`, `serv-a`, `serv-b`, `serv-c` to Cores 3, 4, 5, 6 respectively.
 3. Start the services.
 4. Run the load generator at the desired rate.
-5. Process the output `.hlog` file using the provided Python visualization script.
+5. Process the output `.hlog` files using the provided Python visualization script.
