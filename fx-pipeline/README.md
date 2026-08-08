@@ -62,7 +62,7 @@ The system consists of **6 runnable modules/processes** communicating sequential
 Ensure you have Java 21 and Maven installed.
 
 ```bash
-./build.sh
+scripts/build.sh
 ```
 
 *(Alternatively: `mvn clean package dependency:copy-dependencies -DskipTests`)*
@@ -74,7 +74,7 @@ Ensure you have Java 21 and Maven installed.
 The easiest way to run the pipeline locally is the provided deployment script. It configures OS-specific JVM arguments (ZGC tuning, Chronicle module exports) and launches all four services in reverse order (consumers first):
 
 ```bash
-./deploy.sh
+scripts/deploy.sh
 ```
 
 *Pressing `Ctrl+C` cleanly stops all background services.*
@@ -119,7 +119,7 @@ java $JVM_OPTS -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0-SNAPSHOT.jar:s
 Once the gateway (`serv-0`) is in TCP mode, inject a FIX 4.4 NewOrderSingle:
 
 ```bash
-./send_test_message.sh [HOST] [PORT]
+scripts/send_test_message.sh [HOST] [PORT]
 ```
 
 *(Default: `localhost:5001`)*
@@ -211,12 +211,12 @@ mvn verify -pl test -Dfailsafe.fork.count=1
 
 ```bash
 # Build first
-./build.sh
+scripts/build.sh
 
 # Start pipeline, send 1 message, then verify DB
-./deploy.sh &
-./run_load_generator.sh /tmp/fx-queues/queue-a 1 1
-./view_db.sh
+scripts/deploy.sh &
+scripts/run_load_generator.sh /tmp/fx-queues/queue-a 1 1
+scripts/view_db.sh
 ```
 
 ---
@@ -227,7 +227,7 @@ The pipeline includes a coordinated-omission-aware load generator and an HdrHist
 
 ```bash
 # Run load generator at 5M msgs/sec (infinite)
-./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
+scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000
 
 # Process and visualise end-to-end and stage-specific tail latencies from the .hlog files
 ./scripts/process_latency.sh /tmp/fx-latency*.hlog
@@ -239,14 +239,14 @@ The pipeline includes a coordinated-omission-aware load generator and an HdrHist
 
 ### No Messages Appearing in Database During Load Generation
 
-Check that you are sending to the correct queue path. By default, `deploy.sh` starts services reading from `/tmp/fx-queues/`:
+Check that you are sending to the correct queue path. By default, `scripts/deploy.sh` starts services reading from `/tmp/fx-queues/`:
 
 ```bash
 # Correct:
-./run_load_generator.sh /tmp/fx-queues/queue-a 1 1
+scripts/run_load_generator.sh /tmp/fx-queues/queue-a 1 1
 
 # Incorrect (wrong base dir):
-./run_load_generator.sh /tmp/queue-a 1 1
+scripts/run_load_generator.sh /tmp/queue-a 1 1
 ```
 
 ### Diagnostic Scripts
@@ -254,7 +254,7 @@ Check that you are sending to the correct queue path. By default, `deploy.sh` st
 For NIO or `SelectorProvider` issues (macOS vs Linux):
 
 ```bash
-./test.sh
+scripts/test.sh
 ```
 
 This verifies which `SelectorProvider` is loaded in the JVM — important on macOS where `EPollSelectorProvider` is not available.

@@ -19,7 +19,7 @@ set -euo pipefail
 # --- Configuration & Defaults ---
 # Change to the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "${SCRIPT_DIR}"
+cd "${SCRIPT_DIR}/.."
 
 HOST="${1:-127.0.0.1}"
 PORT="${2:-5001}"
@@ -44,7 +44,7 @@ log_error() {
 # --- Pre-flight Checks ---
 
 if [[ ! -f "$CLIENT_JAR" ]]; then
-    log_error "Client JAR not found at $CLIENT_JAR. Please build the project by running ./build.sh first."
+    log_error "Client JAR not found at $CLIENT_JAR. Please build the project by running ./scripts/build.sh first."
 fi
 
 # --- Main Execution ---

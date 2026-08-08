@@ -16,7 +16,7 @@ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governo
 ```
 
 ## 3. JVM Flags (Production & Benchmark)
-The pipeline should be run with the following JVM flags (included in `deploy.sh` and `pom.xml`):
+The pipeline should be run with the following JVM flags (included in `scripts/deploy.sh` and `pom.xml`):
 - `-XX:+UseZGC`: Z Garbage Collector for sub-millisecond pause times.
 - `-XX:+AlwaysPreTouch`: Touch all allocated memory pages at startup to avoid page faults during runtime.
 - `-XX:-UseBiasedLocking`: (If using JDK < 15) Disable biased locking which can cause safepoint pauses when revoking locks.

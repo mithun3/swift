@@ -8,13 +8,14 @@
 # ==============================================================================
 
 set -euo pipefail
-cd "$(dirname "$0")"
+# Ensure we are in the project root directory
+cd "$(dirname "$0")/.."
 
 # Find the H2 jar in the project dependencies
 H2_JAR=$(find . -name "h2-*.jar" | head -n 1 || true)
 
 if [[ -z "$H2_JAR" ]]; then
-    echo "H2 jar not found. Please build the project by running ./build.sh first."
+    echo "H2 jar not found. Please build the project by running ./scripts/build.sh first."
     exit 1
 fi
 

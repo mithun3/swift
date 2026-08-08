@@ -42,5 +42,5 @@ java $JVM_OPTS -Dfx.gateway.mode=tcp -cp target/serv-0-1.0-SNAPSHOT.jar:target/d
 *(Make sure to run the downstream services `serv-c`, `serv-b`, and `serv-a` first so no messages are dropped.)*
 
 > [!TIP]
-> **Easier Execution**: Rather than running these manually, use the `./deploy.sh` script from the project root to start all services in the correct order. 
-> To test the TCP Gateway once running, use `./send_test_message.sh` from the root directory instead of configuring the Java client manually.
+> **Easier Execution**: Rather than running these manually, use the `scripts/deploy.sh` script from the project root to start all services in the correct order. 
+> To test the TCP Gateway once running, use `scripts/send_test_message.sh` from the root directory instead of configuring the Java client manually.

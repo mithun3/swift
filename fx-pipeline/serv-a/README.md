@@ -33,4 +33,4 @@ java $JVM_OPTS -cp target/serv-a-1.0-SNAPSHOT.jar:target/dependency/* com.fx.ris
 ```
 
 > [!TIP]
-> **Easier Execution**: Rather than running this manually, use the `./deploy.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `./test.sh` to diagnose OS-specific JVM properties if needed.
+> **Easier Execution**: Rather than running this manually, use the `scripts/deploy.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `scripts/test.sh` to diagnose OS-specific JVM properties if needed.

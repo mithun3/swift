@@ -7,8 +7,8 @@
 # Usage: ./run_client.sh
 # ==============================================================================
 
-# Dynamically change directory to where this script is located
-cd "$(dirname "$0")"
+# Ensure we are in the project root directory
+cd "$(dirname "$0")/.."
 
 echo "Starting FX Standalone Client..."
 java -cp "client/target/client-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:client/target/dependency/*" com.fx.client.FixClientMain

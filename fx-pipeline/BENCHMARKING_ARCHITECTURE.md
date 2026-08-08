@@ -179,13 +179,13 @@ In high-throughput systems, latency is usually stable up to the 99th percentile,
 
 ```bash
 # 1. Build all modules
-./build.sh
+scripts/build.sh
 
 # 2. Start the pipeline (all 4 services)
-./deploy.sh
+scripts/deploy.sh
 
 # 3. Run the load generator at 5M msgs/sec (infinite loop, coordinated-omission-aware)
-./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
+scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000
 
 # 4. Wait 60 seconds, then stop the pipeline (Ctrl+C or kill the PIDs)
 

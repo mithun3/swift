@@ -21,13 +21,13 @@ QUEUE_PATH=$1
 TARGET_RATE=$2
 MESSAGE_COUNT=${3:-"-1"}
 
-# Ensure we are in the script's directory
-cd "$(dirname "$0")"
+# Ensure we are in the project root directory
+cd "$(dirname "$0")/.."
 
 # Check if JAR exists, if not warn the user to run build.sh
 if [ ! -f "test/target/test-1.0.0-SNAPSHOT.jar" ]; then
     echo "Error: test-1.0.0-SNAPSHOT.jar not found."
-    echo "Please run ./build.sh first to compile and package the dependencies."
+    echo "Please run ./scripts/build.sh first to compile and package the dependencies."
     exit 1
 fi
 
