@@ -80,7 +80,8 @@ echo " Pipeline is RUNNING. Tailing logs..."
 echo " Press Ctrl+C to STOP"
 echo "=========================================="
 
-tail -f logs/serv-c.log logs/telemetry.log logs/serv-b.log logs/serv-a.log logs/serv-0.log &
+touch logs/traces.jsonl
+tail -f logs/serv-c.log logs/telemetry.log logs/serv-b.log logs/serv-a.log logs/serv-0.log logs/traces.jsonl &
 
 # Wait indefinitely for background processes
 wait
