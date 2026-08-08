@@ -6,7 +6,6 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
-import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
 /**
@@ -21,23 +20,28 @@ import net.openhft.chronicle.queue.ExcerptAppender;
  *
  * <h2>Processing Flow per Event</h2>
  * <ol>
- *   <li>Read next raw FIX byte buffer from the source.</li>
- *   <li>Reset the flyweight and the decode frame.</li>
- *   <li>Call {@link FixDecoder#decode} — zero-allocation byte parsing.</li>
- *   <li>If decode fails → write to error queue; skip to next message.</li>
- *   <li>Assign a {@link CorrelationIdGenerator#next() correlationId}.</li>
- *   <li>Stamp {@link System#nanoTime()} as {@code ingressNanoTime}.</li>
- *   <li>Populate remaining flyweight fields from the decode frame.</li>
- *   <li>Set {@code eventStatus = RECEIVED}.</li>
- *   <li>Append flyweight to {@code queue-a} via pre-acquired {@link ExcerptAppender}.</li>
+ * <li>Read next raw FIX byte buffer from the source.</li>
+ * <li>Reset the flyweight and the decode frame.</li>
+ * <li>Call {@link FixDecoder#decode} — zero-allocation byte parsing.</li>
+ * <li>If decode fails → write to error queue; skip to next message.</li>
+ * <li>Assign a {@link CorrelationIdGenerator#next() correlationId}.</li>
+ * <li>Stamp {@link System#nanoTime()} as {@code ingressNanoTime}.</li>
+ * <li>Populate remaining flyweight fields from the decode frame.</li>
+ * <li>Set {@code eventStatus = RECEIVED}.</li>
+ * <li>Append flyweight to {@code queue-a} via pre-acquired
+ * {@link ExcerptAppender}.</li>
  * </ol>
  *
  * <h2>FIX Source</h2>
  * <p>
- * In this implementation, the FIX source is a {@link FixMessageSource} that generates
- * deterministic synthetic FIX messages in a byte buffer. This allows full pipeline
- * testing without a live FIX counterparty or TCP socket. The interface is designed
- * so that a real TCP NIO socket reader can be plugged in without changing this class.
+ * In this implementation, the FIX source is a {@link FixMessageSource} that
+ * generates
+ * deterministic synthetic FIX messages in a byte buffer. This allows full
+ * pipeline
+ * testing without a live FIX counterparty or TCP socket. The interface is
+ * designed
+ * so that a real TCP NIO socket reader can be plugged in without changing this
+ * class.
  *
  * @author FX Pipeline Team
  * @version 1.0.0
@@ -50,7 +54,9 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     /** The FIX byte-level parser — pre-allocated, stateful (holds temp buffers). */
     private final FixDecoder decoder;
 
-    /** Reusable decode frame — populated by FixDecoder, transferred to flyweight. */
+    /**
+     * Reusable decode frame — populated by FixDecoder, transferred to flyweight.
+     */
     private final FixDecoder.FxMessageFrame frame;
 
     /** Source of raw FIX byte messages — injectable for testability. */
@@ -62,7 +68,8 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     /**
      * Constructs the gateway event loop.
      *
-     * <p>The output queue ({@code queue-a}) and error queue are opened here.
+     * <p>
+     * The output queue ({@code queue-a}) and error queue are opened here.
      * The input queue parameter inherited from {@link AbstractEventLoop} is not
      * used in the gateway (it reads from {@link FixMessageSource} instead of a
      * Chronicle Queue), but the abstract loop structure is preserved for lifecycle
@@ -72,7 +79,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
      * @param idGenerator   the correlation ID generator
      */
     public GatewayEventLoop(final FixMessageSource messageSource,
-                             final CorrelationIdGenerator idGenerator) {
+            final CorrelationIdGenerator idGenerator) {
         super(
                 "gateway",
                 // The gateway reads from the FIX source, not a Chronicle Queue.
@@ -82,21 +89,23 @@ public final class GatewayEventLoop extends AbstractEventLoop {
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_A, "queue-a"),
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_A, "queue-a"),
                 new ErrorQueueWriter(QueuePaths.QUEUE_ERR),
-                CPU_CORE
-        );
+                CPU_CORE);
         this.messageSource = messageSource;
-        this.idGenerator   = idGenerator;
-        this.decoder       = new FixDecoder();
+        this.idGenerator = idGenerator;
+        this.decoder = new FixDecoder();
         // Pre-allocate the decode frame once — reused across all messages.
-        this.frame         = new FixDecoder.FxMessageFrame();
+        this.frame = new FixDecoder.FxMessageFrame();
     }
 
     /**
      * Overrides the standard tail-and-dispatch loop from {@link AbstractEventLoop}.
      *
-     * <p>The gateway does not tail a Chronicle Queue — it reads from the
-     * {@link FixMessageSource} directly. We override {@link AbstractEventLoop#run()}
-     * to provide a custom loop body while preserving the thread lifecycle management
+     * <p>
+     * The gateway does not tail a Chronicle Queue — it reads from the
+     * {@link FixMessageSource} directly. We override
+     * {@link AbstractEventLoop#run()}
+     * to provide a custom loop body while preserving the thread lifecycle
+     * management
      * (pinned platform thread, busy-spin, clean stop signal).
      */
     @Override
@@ -127,14 +136,16 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     /**
      * Processes a single FIX message from the source buffer.
      *
-     * <p>This method contains the entire hot-path logic for serv-0. Every operation
+     * <p>
+     * This method contains the entire hot-path logic for serv-0. Every operation
      * is allocation-free: no new objects are created, no String conversions occur.
      *
      * @param appender  the queue-a appender to write the decoded event into
      * @param bytesRead the number of valid bytes in the source buffer
      */
     private void processFixMessage(final ExcerptAppender appender, final int bytesRead) {
-        // Step 1: Reset the decode frame to clear any stale fields from the previous message.
+        // Step 1: Reset the decode frame to clear any stale fields from the previous
+        // message.
         frame.reset();
 
         // Step 2: Invoke the zero-allocation FIX parser.
@@ -163,12 +174,12 @@ public final class GatewayEventLoop extends AbstractEventLoop {
         flyweight.ingressNanoTime = System.nanoTime();
 
         // Step 6: Transfer all decoded FIX fields into the flyweight.
-        flyweight.fixMsgType          = frame.msgType;
-        flyweight.fixSeqNum           = frame.seqNum;
-        flyweight.clientId            = frame.clientId;
-        flyweight.currencyPairCode    = frame.currencyPairCode;
-        flyweight.side                = frame.side;
-        flyweight.notionalMinorUnits  = frame.notionalMinorUnits;
+        flyweight.fixMsgType = frame.msgType;
+        flyweight.fixSeqNum = frame.seqNum;
+        flyweight.clientId = frame.clientId;
+        flyweight.currencyPairCode = frame.currencyPairCode;
+        flyweight.side = frame.side;
+        flyweight.notionalMinorUnits = frame.notionalMinorUnits;
         flyweight.requestedPriceScaled = frame.requestedPriceScaled;
 
         // Step 7: Set the initial processing status.
@@ -191,24 +202,25 @@ public final class GatewayEventLoop extends AbstractEventLoop {
      */
     @Override
     protected void handle(final FxMarketEvent event,
-                           final long sequence,
-                           final boolean endOfBatch,
-                           final ExcerptAppender appender) {
+            final long sequence,
+            final boolean endOfBatch,
+            final ExcerptAppender appender) {
         // Intentionally empty — gateway uses a custom run() loop.
     }
 
     // ──────────────────────────────────────────────────────────────────────────
     // INNER INTERFACE: FIX MESSAGE SOURCE
     // Separating the source behind an interface enables:
-    //   1. In tests: inject a synthetic deterministic source (no TCP).
-    //   2. In production: inject an NIO selector-based TCP socket reader.
+    // 1. In tests: inject a synthetic deterministic source (no TCP).
+    // 2. In production: inject an NIO selector-based TCP socket reader.
     // This follows the Dependency Inversion Principle without any framework.
     // ──────────────────────────────────────────────────────────────────────────
 
     /**
      * {@code FixMessageSource} — Abstraction over FIX byte message delivery.
      *
-     * <p>A {@code FixMessageSource} provides a pre-allocated byte buffer and a
+     * <p>
+     * A {@code FixMessageSource} provides a pre-allocated byte buffer and a
      * {@link #poll} method that fills the buffer with the next FIX message bytes.
      * This design avoids byte[] allocation per-poll and makes the source
      * swappable (TCP socket, file replay, synthetic generator).
@@ -218,7 +230,8 @@ public final class GatewayEventLoop extends AbstractEventLoop {
         /**
          * Returns the pre-allocated byte buffer for message storage.
          *
-         * <p>The buffer is provided by the source implementation to allow
+         * <p>
+         * The buffer is provided by the source implementation to allow
          * caller-side reuse without allocation. The gateway always reads from
          * {@code buffer[0..bytesRead-1}} after a successful {@link #poll}.
          *
@@ -240,7 +253,8 @@ public final class GatewayEventLoop extends AbstractEventLoop {
 
         /**
          * Returns {@code true} if the source has been exhausted (for finite sources
-         * like file replay). For infinite sources (TCP socket), always returns {@code false}.
+         * like file replay). For infinite sources (TCP socket), always returns
+         * {@code false}.
          *
          * @return {@code true} if no further messages will ever be produced
          */

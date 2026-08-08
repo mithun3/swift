@@ -32,7 +32,7 @@ class BatchPersistenceEngineTest {
     @BeforeEach
     void setUp() throws SQLException {
         // Unique DB per test method — prevents row count bleed between tests.
-        jdbcUrl = "jdbc:h2:mem:test_batch_" + Thread.currentThread().getId()
+        jdbcUrl = "jdbc:h2:mem:test_batch_" + Thread.currentThread().threadId()
                 + "_" + System.nanoTime() + ";DB_CLOSE_DELAY=-1";
         engine = new BatchPersistenceEngine(jdbcUrl);
         event  = new FxMarketEvent();

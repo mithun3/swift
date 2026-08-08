@@ -26,6 +26,7 @@ public final class AsyncLogger implements Logger {
     private static LogProcessor processor;
     private static Thread processorThread;
 
+    @SuppressWarnings("unused")
     private final String name;
 
     static {
