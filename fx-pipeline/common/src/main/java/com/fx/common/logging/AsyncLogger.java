@@ -7,20 +7,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * {@code AsyncLogger} — LMAX-style garbage-free asynchronous logger.
  *
- * <p>Uses Agrona's {@link ManyToOneConcurrentArrayQueue} to buffer log events
+ * <p>
+ * Uses Agrona's {@link ManyToOneConcurrentArrayQueue} to buffer log events
  * off the hot path. A background thread processes the events.
  */
 public final class AsyncLogger implements Logger {
     private static final int QUEUE_CAPACITY = 65536;
-    
+
     // Shared queue for all async loggers in the JVM
-    private static final ManyToOneConcurrentArrayQueue<LogEvent> LOG_QUEUE = 
-        new ManyToOneConcurrentArrayQueue<>(QUEUE_CAPACITY);
-    
+    private static final ManyToOneConcurrentArrayQueue<LogEvent> LOG_QUEUE = new ManyToOneConcurrentArrayQueue<>(
+            QUEUE_CAPACITY);
+
     // Object pool for LogEvents (lock-free concurrent queue)
-    private static final ManyToOneConcurrentArrayQueue<LogEvent> EVENT_POOL = 
-        new ManyToOneConcurrentArrayQueue<>(QUEUE_CAPACITY);
-    
+    private static final ManyToOneConcurrentArrayQueue<LogEvent> EVENT_POOL = new ManyToOneConcurrentArrayQueue<>(
+            QUEUE_CAPACITY);
+
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
     private static LogProcessor processor;
     private static Thread processorThread;
@@ -46,7 +47,7 @@ public final class AsyncLogger implements Logger {
         processorThread = new Thread(processor, "AsyncLogProcessor");
         processorThread.setDaemon(true);
         processorThread.start();
-        
+
         // Add shutdown hook to flush logs
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             processor.stop();
@@ -76,7 +77,7 @@ public final class AsyncLogger implements Logger {
         event.objArg = objArg;
         event.throwable = t;
         event.threadName = Thread.currentThread().getName();
-        
+
         if (!LOG_QUEUE.offer(event)) {
             // If the logging queue is full, we drop the log to save the hot path.
             // Alternatively, we could block or fall back to SyncLogger.

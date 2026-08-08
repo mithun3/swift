@@ -1,6 +1,5 @@
 package com.fx.unit;
 
-import com.fx.common.event.EventStatus;
 import com.fx.common.event.FxMarketEvent;
 import com.fx.gateway.SyntheticFixSource;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link SyntheticFixSource}.
  *
- * <p>Validates the zero-allocation message generation, exhaustion semantics,
+ * <p>
+ * Validates the zero-allocation message generation, exhaustion semantics,
  * and the allocation-free integer-to-bytes writer ({@code writeLong}).
  *
  * @author FX Pipeline Team
@@ -75,10 +75,10 @@ class SyntheticFixSourceTest {
         final String msg = new String(buf, 0, length, java.nio.charset.StandardCharsets.US_ASCII)
                 .replace((char) SOH, '|');
 
-        assertTrue(msg.contains("35=D"),       "Must contain MsgType=D");
+        assertTrue(msg.contains("35=D"), "Must contain MsgType=D");
         assertTrue(msg.contains("49=CLIENT1"), "Must contain SenderCompID=CLIENT1");
         assertTrue(msg.contains("55=EUR/USD"), "Must contain Symbol=EUR/USD");
-        assertTrue(msg.contains("54=1"),       "Must contain Side=1 (BUY)");
+        assertTrue(msg.contains("54=1"), "Must contain Side=1 (BUY)");
         assertTrue(msg.contains("38=1000000"), "Must contain OrderQty=1000000");
         assertTrue(msg.contains("44=1.08500"), "Must contain Price=1.08500");
     }
@@ -125,11 +125,11 @@ class SyntheticFixSourceTest {
 
         assertTrue(decoder.decode(buf, 0, len, frame),
                 "FixDecoder must successfully decode a message from SyntheticFixSource");
-        assertEquals('D',      frame.msgType,           "MsgType must be D");
-        assertEquals(1L,       frame.seqNum,            "First seqNum must be 1");
-        assertEquals((byte) 1, frame.side,              "Side must be BUY (+1)");
+        assertEquals('D', frame.msgType, "MsgType must be D");
+        assertEquals(1L, frame.seqNum, "First seqNum must be 1");
+        assertEquals((byte) 1, frame.side, "Side must be BUY (+1)");
         assertEquals(1000000L, frame.notionalMinorUnits, "OrderQty must be 1000000");
-        assertEquals(108500L,  frame.requestedPriceScaled, "Price must scale to 108500");
+        assertEquals(108500L, frame.requestedPriceScaled, "Price must scale to 108500");
 
         // Verify the currency pair decodes to EUR/USD
         final String pair = FxMarketEvent.CurrencyPairCodec.decode(frame.currencyPairCode);

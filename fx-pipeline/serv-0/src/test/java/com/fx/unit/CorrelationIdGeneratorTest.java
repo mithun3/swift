@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,7 +50,7 @@ class CorrelationIdGeneratorTest {
         gen.next(); // ID = 2
         assertEquals(2L, gen.current());
         assertEquals(2L, gen.current()); // Still 2
-        assertEquals(3L, gen.next());    // Now advances
+        assertEquals(3L, gen.next()); // Now advances
     }
 
     @Test
@@ -72,7 +71,6 @@ class CorrelationIdGeneratorTest {
         final int idsPerThread = 10_000;
         final long[] allIds = new long[threadCount * idsPerThread];
         final CountDownLatch latch = new CountDownLatch(threadCount);
-        final AtomicBoolean failed = new AtomicBoolean(false);
 
         for (int t = 0; t < threadCount; t++) {
             final int offset = t * idsPerThread;
