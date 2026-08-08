@@ -42,7 +42,6 @@ All intellectual property rights remain with the original authors and publishers
 
 </div>
 
-
 # Principles of Software Engineering, Concurrency & System Architecture
 ## A Comprehensive Compendium of 37 Foundational Papers, Verbatim Research Texts, Technical Primers & Deep-Dive References
 
@@ -57,54 +56,54 @@ All intellectual property rights remain with the original authors and publishers
 
 ### Module 1: Core Foundations of Software Engineering & Design Philosophy
 
-- [Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)](#chapter-11-what-is-software-design-jack-w-reeves)
-- [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](#chapter-11b-letter-to-the-editor-13-years-later)
-- [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](#chapter-12-code-as-documentation-martin-fowler)
-- [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](#chapter-13-the-almighty-thud-martin-fowler)
-- [Chapter 1.4: Citation & Reference Deep-Dives — Module 1](#chapter-14-citation-reference-deep-dives-for-module-1)
-- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](#chapter-15-null-references-the-billion-dollar-mistake-tony-hoare-2009)
+- [Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)](#chapter-11-what-is-software-design-jack-w-reeves-1992)
+- [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](#chapter-11b-letter-to-the-editor--what-is-software-design--13-years-later-jack-w-reeves)
+- [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](#chapter-12-code-as-documentation-martin-fowler-2005)
+- [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](#chapter-13-the-almighty-thud-martin-fowler-1997)
+- [Chapter 1.4: Citation & Reference Deep-Dives — Module 1](#chapter-14-citation--reference-deep-dives--module-1)
+- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](#chapter-15-null-references--the-billion-dollar-mistake-tony-hoare-2009)
 
 ---
 
 ### Module 2: Hardware Evolution, Concurrency & Memory Models
 
-- [Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter, 2011)](#chapter-21-welcome-to-the-jungle-the-concurrency-revolution-herb-sutter)
-- [Chapter 2.2: Moore's Law — Past, Present, and Future (Schaller 1997 & Intel 2023)](#chapter-22-moores-law-past-present-and-future-robert-r-schaller-gordon-e-moore)
-- [Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh et al.)](#chapter-23-synchronization-the-java-memory-model-doug-lea-william-pugh)
-- [Chapter 2.4: Citation & Reference Deep-Dives — Module 2](#chapter-24-citation-reference-deep-dives-for-module-2)
+- [Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter, 2011)](#chapter-21-welcome-to-the-jungle--the-concurrency-revolution-herb-sutter-2011)
+- [Chapter 2.2: Moore's Law — Past, Present, and Future (Schaller 1997 & Intel 2023)](#chapter-22-moores-law--past-present-and-future)
+- [Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh et al.)](#chapter-23-synchronization--the-java-memory-model)
+- [Chapter 2.4: Citation & Reference Deep-Dives — Module 2](#chapter-24-citation--reference-deep-dives--module-2)
 
 ---
 
 ### Module 3: High-Performance Architecture, Actor Model & LMAX Disruptor
 
-- [Chapter 3.1: Actors: A Model of Concurrent Computation in Distributed Systems (Gul A. Agha, 1985)](#chapter-31-actors-a-model-of-concurrent-computation-in-distributed-systems-gul-a-agha)
-- [Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team, 2011)](#chapter-32-the-lmax-architecture-the-disruptor-pattern-martin-fowler-lmax-team)
-- [Chapter 3.3: LMAX Technology Blog — Scale, Testing, Constructors, Coverage & The Impossible NullPointerException](#chapter-33-lmax-technology-blog-lessons-scale-testing-code-hygiene)
-- [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](#chapter-34-bad-concurrency-michael-barker)
-- [Chapter 3.5: Citation & Reference Deep-Dives — Module 3](#chapter-35-citation-reference-deep-dives-for-module-3)
+- [Chapter 3.1: Actors: A Model of Concurrent Computation in Distributed Systems (Gul A. Agha, 1985)](#chapter-31-actors-a-model-of-concurrent-computation-in-distributed-systems-gul-a-agha-1985)
+- [Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team, 2011)](#chapter-32-the-lmax-architecture--the-disruptor-pattern)
+- [Chapter 3.3: LMAX Technology Blog — Scale, Testing, Constructors, Coverage & The Impossible NullPointerException](#chapter-33-lmax-technology-blog-articles)
+- [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](#chapter-34-bad-concurrency--mechanical-sympathy--lock-free-systems-michael-barker)
+- [Chapter 3.5: Citation & Reference Deep-Dives — Module 3](#chapter-35-citation--reference-deep-dives--module-3)
 
 ---
 
 ### Module 4: Software & UI Architecture Patterns
 
-- [Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)](#chapter-41-presentation-domain-separation-gui-architectures-martin-fowler)
-- [Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)](#chapter-42-micro-frontends-modular-react-architecture-cam-jackson-martin-fowler-addy-osmani)
-- [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](#chapter-43-serverless-architectures-feature-toggles-mike-roberts-pete-hodgson-martin-fowler)
-- [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](#chapter-44-separated-presentation-martin-fowler)
-- [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](#chapter-45-presentation-domain-data-layering-martin-fowler)
+- [Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)](#chapter-41-presentation-domain-separation--gui-architectures-martin-fowler)
+- [Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)](#chapter-42-micro-frontends--modular-react-architecture)
+- [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](#chapter-43-serverless-architectures--feature-toggles)
+- [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](#chapter-44-separated-presentation-martin-fowler-2006)
+- [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](#chapter-45-presentation-domain-data-layering-martin-fowler-2015)
 - [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](#chapter-44-citation-reference-deep-dives-for-module-4)
 
 ---
 
 ### Module 5: Code Evolution & Refactoring Patterns
 
-- [Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](#chapter-51-refactoring-fundamentals-preparatory-refactoring-martin-fowler)
+- [Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](#chapter-51-refactoring-fundamentals--preparatory-refactoring)
 - [Chapter 5.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](#chapter-51b-refactoring-a-javascript-video-store-martin-fowler-2016)
-- [Chapter 5.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](#chapter-52-advanced-specialized-refactoring-patterns-martin-fowler)
+- [Chapter 5.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](#chapter-52-advanced--specialized-refactoring-patterns)
 - [Chapter 5.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](#chapter-52b-refactoring-with-loops-and-collection-pipelines-martin-fowler-2015)
 - [Chapter 5.2c: Refactoring to an Adaptive Model (Martin Fowler)](#chapter-52c-refactoring-to-an-adaptive-model-martin-fowler)
-- [Chapter 5.2d: Refactoring Code that Accesses External Services (Martin Fowler)](#chapter-52d-refactoring-code-that-accesses-external-services-martin-fowler-2015)
-- [Chapter 5.3: Citation & Reference Deep-Dives — Module 5](#chapter-53-citation-reference-deep-dives-for-module-5)
+- [Chapter 5.2d: Refactoring Code that Accesses External Services (Martin Fowler)](#chapter-52d-refactoring-code-that-accesses-external-services-martin-fowler)
+- [Chapter 5.3: Citation & Reference Deep-Dives — Module 5](#chapter-53-citation--reference-deep-dives--module-5)
 
 ---
 
@@ -229,7 +228,6 @@ All 38 source materials are reproduced verbatim with full attribution. Sources i
 - **developer.* Magazine** — Jack W. Reeves essays on software design philosophy
 - **Intel Newsroom** — Intel's 2023 perspective on the future of Moore's Law
 - **lmax-exchange.github.io** — The LMAX Disruptor technical paper (Thompson et al., 2011)
-
 
 # Module 1: Core Foundations of Software Engineering & Design Philosophy
 
@@ -427,7 +425,6 @@ Object oriented techniques, and C++ in particular, seem to be taking the softwar
  - Software development is still more a craft than an engineering discipline. This is primarily because of a lack of rigor in the critical processes of validating and improving a design. 
  - Ultimately, real advances in software development depend upon advances in programming techniques, which in turn mean advances in programming languages. C++ is such an advance. It has exploded in popularity because it is a mainstream programming language that directly supports better software design.
  - C++ is a step in the right direction, but still more advances are needed.
-
 
 <div class="page-break"></div>
 
@@ -653,7 +650,6 @@ People have occasionally asked whether I did any follow-on writing to my "What I
 
  *Copyright ©2005 by Jack W. Reeves. Author owns and reserves all future rights. Reprint or distribute only with written permission.*
 
-
 <div class="page-break"></div>
 
 # Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)
@@ -836,7 +832,6 @@ Combined with pattern matching (`match` or `if let`), the compiler guarantees at
 In 1978, C.A.R. Hoare published *"Communicating Sequential Processes"* (CACM), establishing the foundational formal algebra for concurrent computation. CSP introduced synchronous channel communication between independent processes, directly inspiring the concurrency architecture of modern systems languages, most notably Go (channels and goroutines) and Erlang (actors).
 
 
-
 <div class="page-break"></div>
 
 ## Chapter 1.2: Code As Documentation (Martin Fowler)
@@ -941,7 +936,6 @@ You'll always find people will disagree on various points. Remember that a code 
 - **Collective Ownership**: No single developer "owns" a module; any team member can improve any part of the codebase.
 - **Pair Programming as Continuous Code Review**: Two programmers work at one workstation (Driver and Navigator). This acts as a real-time feedback loop, forcing the code to be written clearly enough for both engineers to understand immediately.
 
-
 <div class="page-break"></div>
 
 ## Chapter 1.3: The Almighty Thud (Martin Fowler)
@@ -1045,7 +1039,6 @@ When I started to write this article I was overwhelmed by the things I could tal
 - **Agile Practice**: Originating in Extreme Programming and Lean Software Engineering (Kanban boards and Radiators), physical wall-mounted diagrams with color-coding provide passive information radiators.
 - **Why It Beats Electronic CASE Tools**: Electronic repositories hide architectural models behind menus. Wall diagrams make key system collaborations immediately visible to anyone walking through the office.
 
-
 <div class="page-break"></div>
 
 ## Chapter 1.4: Citation & Reference Deep-Dives for Module 1
@@ -1131,7 +1124,6 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 
 **Subject Index Cross-References:**
 - Software Design ..... Ch 1.1, Ch 1.1b
-
 
 # Module 2: Hardware Evolution, Concurrency & Memory Models
 
@@ -1370,7 +1362,6 @@ Heterogeneous computing involves combining CPU cores with specialized accelerato
 - **CUDA (Compute Unified Device Architecture)**: NVIDIA's proprietary parallel computing platform and API.
 - **C++ AMP (C++ Accelerated Massive Parallelism)**: A library specification by Microsoft designed to accelerate execution of C++ code on data-parallel hardware.
 
-
 <div class="page-break"></div>
 
 ## Chapter 2.2: Moore's Law — Past, Present, and Future (Robert R. Schaller & Gordon E. Moore)
@@ -1531,7 +1522,6 @@ Extreme Ultraviolet (EUV) lithography operates at a wavelength of 13.5 nm, repla
 
 #### Chiplets & Advanced Packaging Architecture
 Rather than relying on monolithic die scaling, modern high-performance processors leverage multi-chiplet disaggregation. Technologies such as TSMC's CoWoS (Chip-on-Wafer-on-Substrate) and Intel's Foveros utilize high-density silicon interposers and micro-bumps to connect disaggregated compute, memory, and I/O dies with ultra-low latency.
-
 
 
 <div class="page-break"></div>
@@ -1734,7 +1724,6 @@ Many of the issues raised in this paper have been discussed on a mailing list de
 
 
 
-
 <div class="page-break"></div>
 
 ## Chapter 2.4: Citation & Reference Deep-Dives for Module 2
@@ -1887,7 +1876,6 @@ If neither $a \rightarrow b$ nor $b \rightarrow a$ holds, the two events are **c
 - Memory Barriers ..... Ch 2.3, Ch 2.4, Ch 3.4
 - Moore's Law ......... Ch 2.1, Ch 2.2
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
-
 
 # Module 3: High-Performance Architecture, Actor Model & LMAX Disruptor
 
@@ -2064,7 +2052,6 @@ By abstracting away the low-level locking mechanisms, Agha's model paved the way
 - **SAL Grammar**: Developed by Agha as a minimal, Algol-like kernel language for proving operational semantics of actors.
 - **Act3**: Developed at MIT AI Lab by Hewitt, Agha, Theriault, and Attardi. Featured pattern-matching communication handlers, futures, and automatic continuation creation.
 
-
 # Chapter 3.6: Deep Dive: Concepts of the LMAX Disruptor
 
 The **LMAX Disruptor** is a high-performance inter-thread messaging library originally developed by the LMAX Exchange. Described in the seminal 2011 whitepaper *"Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads"*, it fundamentally challenged how developers approach concurrency. 
@@ -2231,7 +2218,6 @@ public class DisruptorPrimer {
 }
 ```
 
-
 # Chapter 3.7: Deep Dive: Mechanical Sympathy
 
 > *"You don't have to be an engineer to be a racing driver, but you do have to have **Mechanical Sympathy**."* — Jackie Stewart (Three-time Formula One World Champion)
@@ -2368,7 +2354,6 @@ public class FalseSharingDemonstration {
 **Expected Results on a Multi-Core CPU:**
 - The unpadded test (False Sharing) will take significantly longer (often 3x to 5x slower) because the two CPU cores are constantly invalidating each other's cache lines.
 - The padded test will execute nearly instantaneously, as both cores operate entirely independently within their own L1 caches.
-
 
 <div class="page-break"></div>
 
@@ -3275,7 +3260,6 @@ public class PaddedAtomicLong {
 - **Core Axiom**: Concurrency contention disappears if a memory location is written to by exactly one thread.
 - **Ring Buffer Cursor Arbitration**: Producers claim sequence slots using atomic Compare-And-Swap (CAS), but consumers only read the sequence pointers of upstream processing stages, enabling lock-free dependency graphs.
 
-
 <div class="page-break"></div>
 
 ## Chapter 3.3: LMAX Technology Blog Lessons — Scale, Testing & Code Hygiene
@@ -3926,7 +3910,6 @@ Looking for heap distress
 - **TDD Cycle**: Red -> Green -> Refactor (Kent Beck).
 - **At LMAX**: Automated acceptance tests act as living documentation. Tests run in live-emulation environments to continuously measure latency regressions before deployment.
 
-
 <div class="page-break"></div>
 
 ## Chapter 3.4: Bad Concurrency (Michael Barker)
@@ -4292,7 +4275,6 @@ about the alternatives package that I can now easily switch between the Oracle J
 Simple theme. Powered by Blogger.
 </div>
 
-
 <div class="page-break"></div>
 
 ## Chapter 3.5: Citation & Reference Deep-Dives for Module 3
@@ -4419,7 +4401,6 @@ Hardware memory reordering forces low-latency lock-free data structures (like th
 - Single-Writer Principle ......... Ch 3.2, Ch 3.4
 - TDD ................. Ch 5.1, Ch 3.3
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
-
 
 # Module 4: Software & UI Architecture Patterns
 
@@ -4548,7 +4529,6 @@ Historically, the evolution of GUI architectures traces back to Trygve Reenskaug
 - **Passive View**: The View contains almost zero logic. The Presenter explicitly reads data from the Model and sets properties on the View directly.
 - **Supervising Controller**: The View binds directly to Model attributes for simple data display, while the Controller handles complex user interaction flows.
 
-
 <div class="page-break"></div>
 
 ## Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)
@@ -4641,7 +4621,6 @@ Parallel to the macro-architecture of micro frontends, Addy Osmani emphasizes st
 #### Reference 4.2.B: Atomic Design System (Brad Frost)
 - **Hierarchy**: Atoms -> Molecules -> Organisms -> Templates -> Pages.
 - **Value**: Provides a shared design language between product designers (Figma) and frontend engineers (React component libraries).
-
 
 <div class="page-break"></div>
 
@@ -4764,7 +4743,6 @@ Complementing this agility in deployment is the architectural implementation of 
 - **Trunk-Based Development**: All engineers commit code to `main` daily, using Feature Toggles to hide uncompleted features.
 - **GitFlow**: Relies on long-lived feature branches, leading to complex "Merge Hells" when integrating branches after weeks of divergence.
 
-
 # Module 4: Software UI Architecture
 <div class="page-break"></div>
 
@@ -4886,7 +4864,6 @@ The original Smalltalk-80 Model-View-Controller framework was the first to imple
 #### Reference 4.4.B: Patterns of Enterprise Application Architecture (PEAA)
 Martin Fowler's PEAA book catalogs several variations of this separation, such as Passive View, Supervising Controller, and Presentation Model, each offering different ways to implement Separated Presentation.
 
-
 <div class="page-break"></div>
 
 ## Chapter 4.4: Citation & Reference Deep-Dives for Module 4
@@ -4952,7 +4929,6 @@ Module Federation allows a container shell application to load remote bundles ov
 - MVC ................. Ch 4.1, Ch 4.4
 - Presentation Domain Separation ........ Ch 4.1, Ch 4.4, Ch 4.5
 - Serverless .......... Ch 4.3
-
 
 # Module 4: Software UI Architecture
 <div class="page-break"></div>
@@ -5142,7 +5118,6 @@ A variation of the layered architecture where the domain model is completely iso
 
 #### Reference 4.5.B: Clean Architecture
 Similar to Hexagonal Architecture, Clean Architecture places the domain logic and entities at the absolute center, ensuring the core business rules have no external dependencies on frameworks, UIs, or databases.
-
 
 # Module 5: Code Evolution & Refactoring Patterns
 
@@ -5515,7 +5490,6 @@ The mechanics of refactoring rely on a catalogue of precise, behavior-preserving
 
 ---
 
-
 <div class="page-break"></div>
 
 ## Chapter 5.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)
@@ -5784,7 +5758,6 @@ As the refactoring progresses, the example demonstrates the transition from comp
 
 ---
 
-
 # Module 5: Code Evolution & Refactoring Patterns
 
 <div class="page-break"></div>
@@ -5970,7 +5943,6 @@ A key objective of advanced refactoring is guiding the codebase toward establish
 
 ---
 
-
 <div class="page-break"></div>
 
 ## Chapter 5.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)
@@ -6140,7 +6112,6 @@ Traditional loop structures often obscure the core business logic beneath boiler
 By transitioning to pipelines, developers naturally adopt immutability and reduce side-effects. Operations within a pipeline typically return new collections rather than mutating existing ones, leading to safer, more predictable code that is easier to parallelize and test.
 
 ---
-
 
 <div class="page-break"></div>
 
@@ -6363,7 +6334,6 @@ Adaptive refactoring is not a distinct phase but a continuous, integrated activi
 A robust adaptive model relies heavily on rapid feedback loops, primarily provided by a comprehensive suite of automated tests. This safety net allows developers to experiment and iterate aggressively, confidently reshaping the architecture as new insights are gained.
 
 ---
-
 
 <div class="page-break"></div>
 
@@ -6639,7 +6609,6 @@ Refactoring integrations often involves formalizing how the system handles trans
 
 ---
 
-
 <div class="page-break"></div>
 
 ## Chapter 5.3: Citation & Reference Deep-Dives for Module 5
@@ -6721,7 +6690,6 @@ The SOLID principles guide the target structure of refactoring efforts:
 - Notification Pattern .......... Ch 5.1, Ch 5.2
 - Preparatory Refactoring ......... Ch 5.1
 - Refactoring ......... Ch 5.1, Ch 5.1b, Ch 5.2, Ch 5.2b, Ch 5.2c, Ch 5.2d
-
 
 # Module 6: Bibliography and Index
 
@@ -6855,7 +6823,6 @@ The SOLID principles guide the target structure of refactoring efforts:
 - Martin Fowler (External Service): https://martinfowler.com/articles/refactoring-external-service.html
 - Martin Fowler (PD Data Layering): https://martinfowler.com/bliki/PresentationDomainDataLayering.html
 
-
 # 07. Real-Time Implementations: Case Study of an HFT FX Pipeline
 
 In previous chapters, we discussed the LMAX Disruptor architecture, mechanical sympathy, and zero-allocation techniques. This chapter puts those concepts into practice by examining a real-world ultra-low-latency Foreign Exchange (FX) Pipeline designed using pure Java 21 and Chronicle Queue.
@@ -6881,7 +6848,6 @@ Synthetic FIX ──> [serv-0] ──queue-a──> [serv-a] ──queue-b──
 
 > [!TIP]
 > This architecture demonstrates how replacing traditional in-memory queues with memory-mapped inter-process communication (IPC) can drastically reduce latency and garbage collection overhead.
-
 
 # Zero-Allocation and Mechanical Sympathy in Practice
 
@@ -6949,7 +6915,6 @@ To maximize performance, specific JVM arguments are used to configure ZGC, ensur
 > [!NOTE]
 > Thread affinity is also critical. By pinning the event loops of `serv-a` and `serv-b` to specific CPU cores, we prevent the OS from migrating the thread, keeping L1/L2 caches hot and avoiding costly context switches.
 
-
 # Event Loop and Pricing Mechanisms
 
 In distributed HFT pipelines, microservices don't use traditional thread pools or callback-based HTTP handlers. Instead, they employ single-threaded, busy-spin event loops that continuously tail memory-mapped queues.
@@ -7013,4 +6978,49 @@ public long requestedPriceScaled;
 
 This guarantees that applying spreads and calculating final execution prices involves simple, precise integer arithmetic, eliminating the need for `BigDecimal` (which creates garbage) while retaining absolute accuracy.
 
+# Advanced HFT Patterns and Tuning
 
+While the core architecture relies on memory-mapped queues and zero-allocation flyweights, the `fx-pipeline` implementation employs several advanced patterns to maintain strict microsecond latencies across error handling, logging, and observability.
+
+## Hot Path Error Routing
+
+In a typical enterprise application, exceptional states are handled by throwing JVM exceptions. In an HFT context, throwing an exception requires unwinding the stack and populating the stack trace, which is a very expensive operation that creates garbage and causes immediate latency spikes.
+
+Instead, the pipeline uses **Zero-Allocation Error Routing**. 
+Each service holds a reference to an `ErrorQueueWriter`. When a processing failure occurs (e.g., a validation failure), the service populates a pre-allocated `ErrorEvent` flyweight and writes it to a dedicated error Chronicle Queue. This allows the main event loop to continue processing subsequent events immediately without being interrupted by a JVM exception table lookup.
+
+## Garbage-Free Asynchronous Logging
+
+Standard logging frameworks (like logback or log4j) often allocate strings, varargs arrays, and wrapper objects in their hot path, which can trigger garbage collection.
+
+To solve this, the pipeline uses an LMAX-style garbage-free `AsyncLogger`. 
+- **Object Pooling:** A pool of `LogEvent` objects is pre-allocated.
+- **Concurrent Queueing:** Log statements populate a pooled `LogEvent` and offer it to a `ManyToOneConcurrentArrayQueue` (provided by Agrona).
+- **Background Processing:** A separate background thread (`LogProcessor`) reads from the queue, formats the text, and performs the actual I/O. This keeps all disk and string-formatting overhead completely off the critical path.
+
+## Telemetry and Latency Recording (HdrHistogram)
+
+Measuring latency accurately without perturbing the system requires specialized data structures. The pipeline uses **HdrHistogram** (`SingleWriterRecorder`) for concurrent, zero-allocation latency recording.
+
+- The `TelemetryRecorder` allows the hot path thread to record nanosecond latency values using lock-free, allocation-free array updates.
+- A background `TelemetryStitcher` thread periodically harvests the interval histograms and writes them to a `.hlog` file for later analysis. This separation ensures that metrics collection does not introduce jitter.
+
+## Primitive Constants vs. Enums
+
+Java `enum` values are object references. Using them for state machines (like event statuses) requires virtual dispatch (e.g., `enum.ordinal()`) or array lookups under the hood, and risks auto-boxing in certain scenarios.
+
+The pipeline completely avoids `enum` for event states. Instead, `EventStatus` defines a registry of `static final int` constants (e.g., `RECEIVED = 0`, `ACCEPTED = 1`). 
+- **CPU Registers:** Integers fit directly into CPU registers.
+- **JIT Optimization:** The JIT compiler can emit highly optimal branch-table `switch` bytecodes.
+- **Flyweight Storage:** They can be directly stored inside the `FxMarketEvent` flyweight as primitive fields, avoiding object graph pointer chasing.
+
+## Chronicle Queue Tuning
+
+The `QueueFactory` centrally configures Chronicle Queues with specific mechanical sympathy optimizations:
+1. **WireType.BINARY_LIGHT:** Used because it is the most compact binary format. It strips out field name metadata, significantly reducing the bytes written per event and utilizing the fastest serialization path in Chronicle Wire.
+2. **Block Size Tuning:** The block size is explicitly set to `64 MB`. This determines how much of the queue file is memory-mapped at one time. A larger block reduces the frequency of `mmap` remapping syscalls, which are a common source of latency jitter.
+3. **Runtime Overrides:** The factory supports system property overrides (`fx.queue.<name>.path`), allowing ops teams to mount queues directly to fast NVMe drives or RAM disks (e.g., `/dev/shm`) in production without code changes.
+
+## TCP FIX Ingestion
+
+While synthetic data generation is used for benchmarking, the pipeline's gateway (`serv-0`) also supports a `TcpFixSource`. This handles real TCP socket ingestion, reading bytes directly from a socket channel into direct memory buffers before they are parsed by the `FixDecoder`—maintaining the zero-allocation constraint from the very edge of the network.
