@@ -6,7 +6,7 @@
 ## Table of Contents
 
 - [How to Use This Book](#how-to-use-this-book)
-- [Preface & Overview](#preface--overview)
+- [Preface & Overview](#preface-overview)
 
 ---
 
@@ -47,7 +47,7 @@
 - [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](#chapter-43-serverless-architectures--feature-toggles)
 - [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](#chapter-44-separated-presentation-martin-fowler-2006)
 - [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](#chapter-45-presentation-domain-data-layering-martin-fowler-2015)
-- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](#chapter-46-citation--reference-deep-dives--module-4)
+- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](#chapter-44-citation-reference-deep-dives-for-module-4)
 
 ---
 
@@ -65,15 +65,15 @@
 
 ### Module 6: Bibliography & Subject Index
 
-- [Chapter 6.1: Complete IEEE Bibliography & Subject Index](#chapter-61-complete-ieee-bibliography--subject-index)
+- [Chapter 6.1: Complete IEEE Bibliography & Subject Index](#module-6-bibliography-and-index)
 
 ---
 
 ### Module 7: Real-Time Implementations (Case Study)
 
-- [Chapter 7.1: FX Pipeline Architecture Overview](#chapter-71-fx-pipeline-architecture-overview)
-- [Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice](#chapter-72-zero-allocation-and-mechanical-sympathy-in-practice)
-- [Chapter 7.3: Event Loop and Pricing Mechanisms](#chapter-73-event-loop-and-pricing-mechanisms)
+- [Chapter 7.1: FX Pipeline Architecture Overview](#07-real-time-implementations-case-study-of-an-hft-fx-pipeline)
+- [Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice](#zero-allocation-and-mechanical-sympathy-in-practice)
+- [Chapter 7.3: Event Loop and Pricing Mechanisms](#event-loop-and-pricing-mechanisms)
 
 ---
 
