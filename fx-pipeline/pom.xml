@@ -67,6 +67,9 @@
 
         <!-- Agrona: lock-free off-heap data structures (ManyToOneConcurrentArrayQueue etc.) -->
         <agrona.version>2.5.0</agrona.version>
+        
+        <!-- HdrHistogram: for high-resolution latency tracking -->
+        <hdrhistogram.version>2.2.2</hdrhistogram.version>
 
         <!-- Test stack -->
         <junit.version>5.11.4</junit.version>
@@ -121,6 +124,16 @@
                 <groupId>org.agrona</groupId>
                 <artifactId>agrona</artifactId>
                 <version>${agrona.version}</version>
+            </dependency>
+            
+            <!-- ── HdrHistogram ──────────────────────────────────────────
+                 Zero-allocation interval recording for tail latency 
+                 measurements.
+                 ─────────────────────────────────────────────────────── -->
+            <dependency>
+                <groupId>org.hdrhistogram</groupId>
+                <artifactId>HdrHistogram</artifactId>
+                <version>${hdrhistogram.version}</version>
             </dependency>
 
             <!-- ── Internal module dependencies ─────────────────────────
@@ -221,6 +234,7 @@
                             --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
                             --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
                             --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+                            --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
                             --add-opens=java.base/java.lang=ALL-UNNAMED
                             --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
                             --add-opens=java.base/java.io=ALL-UNNAMED
@@ -244,6 +258,7 @@
                             --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
                             --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
                             --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+                            --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
                             --add-opens=java.base/java.lang=ALL-UNNAMED
                             --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
                             --add-opens=java.base/java.io=ALL-UNNAMED

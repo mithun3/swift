@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# ==============================================================================
+# Script: build.sh
+# Description: Compiles and packages the FX Pipeline Maven artifacts.
+#              Copies dependencies into the target directories for easier
+#              execution via shell scripts.
+# Usage: ./build.sh
+# ==============================================================================
+
 # Exit immediately if a command exits with a non-zero status
 set -e
 

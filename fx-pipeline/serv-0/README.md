@@ -5,7 +5,7 @@ The Client Gateway Service is the ingress point of the HFT FX Pipeline.
 ## Responsibilities & Flow
 1. **Ingestion:** Reads FIX 4.4 messages. It supports two modes:
    - **Synthetic (Default):** Uses `SyntheticFixSource` to deterministically generate mock New Order Single (`MsgType=D`) payloads.
-   - **TCP Client Mode:** Uses `TcpFixSource` to listen on a non-blocking `ServerSocketChannel` (port 5000), allowing real clients to connect and send FIX payloads.
+   - **TCP Client Mode:** Uses `TcpFixSource` to listen on a non-blocking `ServerSocketChannel` (port 5001), allowing real clients to connect and send FIX payloads.
 2. **Decoding:** Uses `FixDecoder` to parse the raw byte buffer tag-by-tag. All parsing is string-free, reading ASCII characters directly into `long` or `byte` primitives.
 3. **Enrichment:** 
    - Assigns a monotonically increasing `correlationId` using `CorrelationIdGenerator` (an `AtomicLong`).
@@ -36,7 +36,11 @@ export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 # Synthetic Mode
 java $JVM_OPTS -cp target/serv-0-1.0-SNAPSHOT.jar:target/dependency/* com.fx.gateway.GatewayMain
 
-# TCP Client Mode (listens on port 5000)
+# TCP Client Mode (listens on port 5001)
 java $JVM_OPTS -Dfx.gateway.mode=tcp -cp target/serv-0-1.0-SNAPSHOT.jar:target/dependency/* com.fx.gateway.GatewayMain
 ```
 *(Make sure to run the downstream services `serv-c`, `serv-b`, and `serv-a` first so no messages are dropped.)*
+
+> [!TIP]
+> **Easier Execution**: Rather than running these manually, use the `./deploy.sh` script from the project root to start all services in the correct order. 
+> To test the TCP Gateway once running, use `./send_test_message.sh` from the root directory instead of configuring the Java client manually.

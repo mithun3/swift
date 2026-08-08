@@ -6,7 +6,7 @@
 # 
 # Usage: ./send_test_message.sh [HOST] [PORT]
 #   HOST - Optional. The gateway host (default: 127.0.0.1)
-#   PORT - Optional. The gateway TCP port (default: 5000)
+#   PORT - Optional. The gateway TCP port (default: 5001)
 #
 # Design & Best Practices:
 # - Bash Strict Mode (set -euo pipefail) ensures fail-fast behavior.
@@ -22,7 +22,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
 HOST="${1:-127.0.0.1}"
-PORT="${2:-5000}"
+PORT="${2:-5001}"
 
 CLIENT_JAR="client/target/client-1.0.0-SNAPSHOT.jar"
 COMMON_JAR="common/target/common-1.0.0-SNAPSHOT.jar"

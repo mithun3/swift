@@ -82,19 +82,22 @@ public final class SyntheticFixSource implements GatewayEventLoop.FixMessageSour
         int pos = offset;
 
         // Tag 35: MsgType = D (New Order Single)
-        pos = writeField(buf, pos, "35", "D");
+        pos = writeField(buf, pos, (byte)'3', (byte)'5', "D");
         // Tag 34: MsgSeqNum (monotonically increasing)
-        pos = writeField(buf, pos, "34", longToAscii(currentSeqNum));
+        // writeLong() writes the decimal digits directly into buf — zero allocation.
+        pos = writeTagPrefix(buf, pos, (byte)'3', (byte)'4');
+        pos = writeLong(buf, pos, currentSeqNum);
+        buf[pos++] = SOH;
         // Tag 49: SenderCompID = CLIENT1
-        pos = writeField(buf, pos, "49", "CLIENT1");
+        pos = writeField(buf, pos, (byte)'4', (byte)'9', "CLIENT1");
         // Tag 55: Symbol = EUR/USD
-        pos = writeField(buf, pos, "55", "EUR/USD");
+        pos = writeField(buf, pos, (byte)'5', (byte)'5', "EUR/USD");
         // Tag 54: Side = 1 (Buy)
-        pos = writeField(buf, pos, "54", "1");
+        pos = writeField(buf, pos, (byte)'5', (byte)'4', "1");
         // Tag 38: OrderQty = 1000000 (1 million units / 10 standard lots)
-        pos = writeField(buf, pos, "38", "1000000");
+        pos = writeField(buf, pos, (byte)'3', (byte)'8', "1000000");
         // Tag 44: Price = 1.08500
-        pos = writeField(buf, pos, "44", "1.08500");
+        pos = writeField(buf, pos, (byte)'4', (byte)'4', "1.08500");
 
         currentSeqNum++;
         return pos - offset; // number of bytes written
@@ -109,22 +112,24 @@ public final class SyntheticFixSource implements GatewayEventLoop.FixMessageSour
     /**
      * Writes a FIX tag=value pair followed by SOH into {@code buf} at {@code pos}.
      *
+     * <p>Tag is written as two literal ASCII bytes (both provided by the caller as
+     * pre-computed constants) to avoid String indexing overhead.
+     *
      * @param buf   destination buffer
      * @param pos   current write position
-     * @param tag   FIX tag number string
-     * @param value FIX field value string
+     * @param tag0  first ASCII byte of the 2-digit tag number (e.g., '3' for tag 35)
+     * @param tag1  second ASCII byte of the 2-digit tag number (e.g., '5' for tag 35)
+     * @param value FIX field value string literal (compile-time constant)
      * @return updated write position after the written bytes
      */
     private static int writeField(final byte[] buf,
                                    int pos,
-                                   final String tag,
+                                   final byte tag0,
+                                   final byte tag1,
                                    final String value) {
-        // Write tag bytes
-        for (int i = 0; i < tag.length(); i++) {
-            buf[pos++] = (byte) tag.charAt(i);
-        }
+        buf[pos++] = tag0;
+        buf[pos++] = tag1;
         buf[pos++] = (byte) '=';
-        // Write value bytes
         for (int i = 0; i < value.length(); i++) {
             buf[pos++] = (byte) value.charAt(i);
         }
@@ -133,18 +138,58 @@ public final class SyntheticFixSource implements GatewayEventLoop.FixMessageSour
     }
 
     /**
-     * Converts a {@code long} to its ASCII decimal representation in a temporary
-     * stack-allocated char array pattern — avoids {@code Long.toString()} heap allocation.
+     * Writes a tag prefix ({@code tag0}{@code tag1}{@code =}) into {@code buf} without SOH.
      *
-     * <p>Note: Returns a {@code String} for use in the synthetic source only (this class
-     * is a test helper, not on the hot critical path). In the real FixDecoder, numbers
-     * are parsed byte-by-byte without any String intermediary.
+     * <p>Used when the value is written separately (e.g., for the sequence number
+     * written via {@link #writeLong}).
      *
-     * @param value the long to convert
-     * @return ASCII string representation
+     * @param buf  destination buffer
+     * @param pos  current write position
+     * @param tag0 first ASCII byte of the tag
+     * @param tag1 second ASCII byte of the tag
+     * @return updated write position
      */
-    private static String longToAscii(final long value) {
-        // Acceptable for a synthetic test source — not on the production hot path.
-        return Long.toString(value);
+    private static int writeTagPrefix(final byte[] buf, int pos,
+                                       final byte tag0, final byte tag1) {
+        buf[pos++] = tag0;
+        buf[pos++] = tag1;
+        buf[pos++] = (byte) '=';
+        return pos;
+    }
+
+    /**
+     * Writes a non-negative {@code long} as ASCII decimal digits directly into {@code buf}.
+     *
+     * <p>This method is the allocation-free replacement for {@code Long.toString()}.
+     * It uses a classic digit-extraction technique: repeatedly divides by 10 and writes
+     * each digit from the rightmost position. The result is then reversed in-place.
+     * No objects are created — all operations are on the pre-allocated {@code byte[]}.
+     *
+     * @param buf   destination buffer
+     * @param pos   current write position
+     * @param value the non-negative {@code long} to write
+     * @return updated write position after the last digit byte
+     */
+    private static int writeLong(final byte[] buf, final int pos, long value) {
+        if (value == 0L) {
+            buf[pos] = (byte) '0';
+            return pos + 1;
+        }
+        final int start = pos;
+        int end = pos;
+        // Write digits in reverse order
+        while (value > 0L) {
+            buf[end++] = (byte) ('0' + (value % 10L));
+            value /= 10L;
+        }
+        // Reverse the digit bytes in-place
+        int left = start;
+        int right = end - 1;
+        while (left < right) {
+            final byte tmp = buf[left];
+            buf[left++] = buf[right];
+            buf[right--] = tmp;
+        }
+        return end;
     }
 }

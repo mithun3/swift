@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# ==============================================================================
+# Script: test.sh
+# Description: Diagnostic script to verify the JVM options, specifically checking
+#              the default SelectorProvider for the current operating system.
+# Usage: ./test.sh
+# ==============================================================================
 OS=$(uname)
 if [ "$OS" = "Linux" ]; then
     SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider"

@@ -83,6 +83,15 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
      */
     public long ingressNanoTime;
 
+    /** T1: Entry to serv-a (Risk). Captured right after reading from queue-a. */
+    public long t1ServAEntry;
+
+    /** T2: Entry to serv-b (Pricing). Captured right after reading from queue-b. */
+    public long t2ServBEntry;
+
+    /** T3: Entry to serv-c (Persistence). Captured right after reading from queue-c. */
+    public long t3ServCEntry;
+
     // ─────────────────────────────────────────────────────────────────────────
     // FX INSTRUMENT GROUP  (offset 16)
     // ─────────────────────────────────────────────────────────────────────────
@@ -206,6 +215,9 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
     public void reset() {
         correlationId        = 0L;
         ingressNanoTime      = 0L;
+        t1ServAEntry         = 0L;
+        t2ServBEntry         = 0L;
+        t3ServCEntry         = 0L;
         currencyPairCode     = 0L;
         side                 = 0;
         notionalMinorUnits   = 0L;
@@ -235,6 +247,9 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
         // hot path, so the cost of a reference read is acceptable.
         this.correlationId        = source.correlationId;
         this.ingressNanoTime      = source.ingressNanoTime;
+        this.t1ServAEntry         = source.t1ServAEntry;
+        this.t2ServBEntry         = source.t2ServBEntry;
+        this.t3ServCEntry         = source.t3ServCEntry;
         this.currencyPairCode     = source.currencyPairCode;
         this.side                 = source.side;
         this.notionalMinorUnits   = source.notionalMinorUnits;

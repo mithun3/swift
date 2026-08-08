@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# ==============================================================================
+# Script: run_client.sh
+# Description: Legacy script to run the standalone FX client. 
+#              Consider using send_test_message.sh instead for more robustness.
+# Usage: ./run_client.sh
+# ==============================================================================
+
 # Dynamically change directory to where this script is located
 cd "$(dirname "$0")"
 

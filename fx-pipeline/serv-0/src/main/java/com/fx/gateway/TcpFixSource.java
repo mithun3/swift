@@ -6,6 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import com.fx.common.logging.Logger;
+import com.fx.common.logging.LoggerFactory;
+
 /**
  * {@code TcpFixSource} — Non-blocking TCP socket reader for FIX messages.
  *
@@ -19,6 +22,7 @@ import java.nio.channels.SocketChannel;
 public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, AutoCloseable {
 
     private static final int BUFFER_SIZE = 1024;
+    private static final Logger logger = LoggerFactory.getLogger(TcpFixSource.class);
 
     private final byte[] messageBuffer = new byte[BUFFER_SIZE];
     private final ByteBuffer nioBuffer = ByteBuffer.wrap(messageBuffer);
@@ -37,7 +41,7 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
             serverChannel = ServerSocketChannel.open();
             serverChannel.configureBlocking(false);
             serverChannel.bind(new InetSocketAddress(port));
-            System.out.println("[TcpFixSource] Listening for FIX connections on port " + port);
+            logger.info("[TcpFixSource] Listening for FIX connections on port ", port);
         } catch (final IOException e) {
             throw new RuntimeException("Failed to bind TCP source to port " + port, e);
         }
@@ -66,7 +70,7 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
                 activeClient = serverChannel.accept(); // Non-blocking
                 if (activeClient != null) {
                     activeClient.configureBlocking(false);
-                    System.out.println("[TcpFixSource] Client connected: " + activeClient.getRemoteAddress());
+                    logger.info("[TcpFixSource] Client connected: ", activeClient.getRemoteAddress());
                 }
                 return 0; // Yield to event loop
             }
@@ -77,7 +81,7 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
 
             final int bytesRead = activeClient.read(nioBuffer);
             if (bytesRead < 0) {
-                System.out.println("[TcpFixSource] Client disconnected.");
+                logger.info("[TcpFixSource] Client disconnected.");
                 activeClient.close();
                 activeClient = null;
                 return 0; // Return 0 to keep the event loop alive but yield
@@ -85,7 +89,7 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
 
             return bytesRead;
         } catch (final IOException e) {
-            System.err.println("[TcpFixSource] I/O error during poll: " + e.getMessage());
+            logger.error("[TcpFixSource] I/O error during poll: ", e);
             try {
                 if (activeClient != null) {
                     activeClient.close();
@@ -110,9 +114,9 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
             if (serverChannel != null) {
                 serverChannel.close();
             }
-            System.out.println("[TcpFixSource] Server socket closed.");
+            logger.info("[TcpFixSource] Server socket closed.");
         } catch (final IOException e) {
-            System.err.println("[TcpFixSource] Error closing sockets: " + e.getMessage());
+            logger.error("[TcpFixSource] Error closing sockets: ", e);
         }
     }
 }

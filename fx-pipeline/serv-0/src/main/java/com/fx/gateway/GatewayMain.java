@@ -1,5 +1,7 @@
 package com.fx.gateway;
 
+import com.fx.common.logging.Logger;
+import com.fx.common.logging.LoggerFactory;
 import com.fx.common.queue.QueuePaths;
 
 /**
@@ -37,6 +39,8 @@ import com.fx.common.queue.QueuePaths;
  */
 public final class GatewayMain {
 
+    private static final Logger logger = LoggerFactory.getLogger(GatewayMain.class);
+
     private GatewayMain() {
         throw new UnsupportedOperationException("Main class; not instantiable");
     }
@@ -48,20 +52,20 @@ public final class GatewayMain {
      * @throws InterruptedException if the main thread sleep is interrupted
      */
     public static void main(final String[] args) throws InterruptedException {
-        System.out.println("[serv-0] FX Gateway starting...");
-        System.out.println("[serv-0] Queue A path: " + QueuePaths.QUEUE_A);
+        logger.info("[serv-0] FX Gateway starting...");
+        logger.info("[serv-0] Queue A path: " + QueuePaths.QUEUE_A);
 
         final String mode = System.getProperty("fx.gateway.mode", "synthetic");
         final GatewayEventLoop.FixMessageSource source;
 
         if ("tcp".equalsIgnoreCase(mode)) {
-            final int port = Integer.getInteger("fx.gateway.port", 5000);
+            final int port = Integer.getInteger("fx.gateway.port", 5001);
             source = new TcpFixSource(port);
         } else {
             // Synthetic source for demonstration
             final long messagesToGenerate = Long.getLong("fx.gateway.messages", 10_000_000L);
             source = new SyntheticFixSource(messagesToGenerate);
-            System.out.println("[serv-0] Mode: Synthetic (generating " + messagesToGenerate + " messages)");
+            logger.info("[serv-0] Mode: Synthetic (generating " + messagesToGenerate + " messages)");
         }
 
         final CorrelationIdGenerator idGen    = new CorrelationIdGenerator();
@@ -69,7 +73,7 @@ public final class GatewayMain {
 
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
-            System.out.println("[serv-0] Shutdown signal received. Stopping event loop...");
+            logger.info("[serv-0] Shutdown signal received. Stopping event loop...");
             loop.stop();
             try {
                 loop.awaitTermination();
@@ -80,11 +84,11 @@ public final class GatewayMain {
             } catch (final Exception e) {
                 Thread.currentThread().interrupt();
             }
-            System.out.println("[serv-0] Event loop stopped. Queue closed.");
+            logger.info("[serv-0] Event loop stopped. Queue closed.");
         }));
 
         loop.start();
-        System.out.println("[serv-0] Event loop started on CPU core " + GatewayEventLoop.CPU_CORE);
+        logger.info("[serv-0] Event loop started on CPU core ", GatewayEventLoop.CPU_CORE);
 
         // Block the main thread indefinitely.
         Thread.currentThread().join();

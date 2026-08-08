@@ -19,6 +19,26 @@ import com.fx.common.event.FxMarketEvent;
  *       instance — the handler mutates it in-place and writes it to the output queue.</li>
  * </ul>
  *
+ * <h2>Architectural Role</h2>
+ * <p>
+ * This interface represents the <em>business logic contract</em> for a pipeline stage,
+ * decoupled from the <em>lifecycle contract</em> that {@link AbstractEventLoop} manages
+ * (thread creation, affinity pinning, busy-spin, queue open/close).
+ *
+ * <p>In tests, an {@code EventLoopHandler} implementation can be verified in isolation
+ * — injected as a mock or stub — without needing a full Chronicle Queue setup. The
+ * {@link AbstractEventLoop#handle} abstract method and this interface share the same
+ * semantic signature to keep the two contracts aligned.
+ *
+ * <h2>Example: Composing a handler with a mock in tests</h2>
+ * <pre>{@code
+ * EventLoopHandler handler = (event, sequence, endOfBatch) -> {
+ *     event.eventStatus = EventStatus.ACCEPTED;
+ * };
+ * handler.onEvent(flyweight, 1L, true);
+ * assertEquals(EventStatus.ACCEPTED, flyweight.eventStatus);
+ * }</pre>
+ *
  * <h2>Contract</h2>
  * <ul>
  *   <li>Implementations MUST NOT allocate heap objects in {@link #onEvent}.</li>

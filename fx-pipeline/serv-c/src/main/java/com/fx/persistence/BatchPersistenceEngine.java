@@ -1,6 +1,5 @@
 package com.fx.persistence;
 
-import com.fx.common.event.EventStatus;
 import com.fx.common.event.FxMarketEvent;
 
 import java.sql.Connection;
@@ -38,6 +37,19 @@ import java.sql.Statement;
  * A single {@link PreparedStatement} is created at startup and reused across all
  * batches. Re-using a prepared statement avoids SQL parsing and query plan generation
  * on every insert.
+ *
+ * <h2>Transaction Safety</h2>
+ * <p>
+ * Manual transaction control is used ({@code autoCommit=false}). A full JDBC batch
+ * execute is wrapped in a try-catch: on failure, {@code connection.rollback()} is
+ * called to discard any partial writes, and the error is propagated to the caller
+ * so the event loop can route it to the error queue.
+ *
+ * <h2>Per-Stage Timestamps</h2>
+ * <p>
+ * The {@code t1ServAEntry}, {@code t2ServBEntry}, and {@code t3ServCEntry} nanosecond
+ * timestamps from {@link FxMarketEvent} are persisted alongside the business fields.
+ * This allows post-hoc per-stage latency analysis directly from the database.
  *
  * @author FX Pipeline Team
  * @version 1.0.0
@@ -79,8 +91,9 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                         + "correlation_id, ingress_nano, client_id, client_tier, "
                         + "currency_pair_code, side, notional_minor, "
                         + "requested_price_scaled, executed_price_scaled, "
-                        + "spread_scaled, event_status"
-                        + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        + "spread_scaled, event_status, "
+                        + "t1_serv_a_entry, t2_serv_b_entry, t3_serv_c_entry"
+                        + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         // Pre-allocate all batch row objects once at construction.
         // These mutable objects are reused across all batch cycles,
@@ -120,6 +133,11 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         row.executedPriceScaled  = event.executedPriceScaled;
         row.spreadScaled         = event.spreadScaled;
         row.eventStatus          = event.eventStatus;
+        // Stage-entry timestamps — captured by each service's handle() method.
+        // Zero if the event did not reach that stage (e.g., rejected at serv-a).
+        row.t1ServAEntry         = event.t1ServAEntry;
+        row.t2ServBEntry         = event.t2ServBEntry;
+        row.t3ServCEntry         = event.t3ServCEntry;
 
         // Flush if batch is full or if no more events are immediately available.
         if (batchCount >= BATCH_SIZE || endOfBatch) {
@@ -133,37 +151,60 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      * <p>This method is NOT on the critical hot path — it is called at batch boundaries.
      * JDBC overhead is amortised across {@link #BATCH_SIZE} events.
      *
-     * @throws SQLException if any batch insert fails
+     * <p>On failure, a {@link #connection} rollback is performed to ensure partial
+     * writes do not corrupt the {@code fx_trades} table. The exception is re-thrown
+     * so the caller (the event loop) can route the batch to the error queue.
+     *
+     * @throws SQLException if any batch insert fails; the transaction is rolled back
      */
     public void flush() throws SQLException {
         if (batchCount == 0) {
             return; // Nothing to flush
         }
 
-        for (int i = 0; i < batchCount; i++) {
-            final BatchRow row = batchBuffer[i];
-            // Bind each field to the prepared statement parameters.
-            // JDBC setLong/setInt/setByte avoid boxing for primitive types
-            // in well-implemented JDBC drivers (H2 included).
-            insertStatement.setLong  (1,  row.correlationId);
-            insertStatement.setLong  (2,  row.ingressNanoTime);
-            insertStatement.setLong  (3,  row.clientId);
-            insertStatement.setInt   (4,  row.clientTier);
-            insertStatement.setLong  (5,  row.currencyPairCode);
-            insertStatement.setByte  (6,  row.side);
-            insertStatement.setLong  (7,  row.notionalMinorUnits);
-            insertStatement.setLong  (8,  row.requestedPriceScaled);
-            insertStatement.setLong  (9,  row.executedPriceScaled);
-            insertStatement.setLong  (10, row.spreadScaled);
-            insertStatement.setInt   (11, row.eventStatus);
-            insertStatement.addBatch();
+        try {
+            for (int i = 0; i < batchCount; i++) {
+                final BatchRow row = batchBuffer[i];
+                // Bind each field to the prepared statement parameters.
+                // JDBC setLong/setInt/setByte avoid boxing for primitive types
+                // in well-implemented JDBC drivers (H2 included).
+                insertStatement.setLong  (1,  row.correlationId);
+                insertStatement.setLong  (2,  row.ingressNanoTime);
+                insertStatement.setLong  (3,  row.clientId);
+                insertStatement.setInt   (4,  row.clientTier);
+                insertStatement.setLong  (5,  row.currencyPairCode);
+                insertStatement.setByte  (6,  row.side);
+                insertStatement.setLong  (7,  row.notionalMinorUnits);
+                insertStatement.setLong  (8,  row.requestedPriceScaled);
+                insertStatement.setLong  (9,  row.executedPriceScaled);
+                insertStatement.setLong  (10, row.spreadScaled);
+                insertStatement.setInt   (11, row.eventStatus);
+                insertStatement.setLong  (12, row.t1ServAEntry);
+                insertStatement.setLong  (13, row.t2ServBEntry);
+                insertStatement.setLong  (14, row.t3ServCEntry);
+                insertStatement.addBatch();
+            }
+
+            insertStatement.executeBatch();
+            connection.commit();
+        } catch (final SQLException e) {
+            // GAP-7 FIX: Roll back the entire batch on failure to prevent partial writes.
+            // This maintains ACID consistency: either all events in the batch are committed
+            // or none are. The exception is re-thrown so the event loop routes the poisoned
+            // batch to the error Chronicle Queue for replay investigation.
+            try {
+                connection.rollback();
+            } catch (final SQLException rollbackEx) {
+                // Log rollback failure to stderr — we're already in an error state.
+                System.err.println("[serv-c] Rollback failed after batch error: "
+                        + rollbackEx.getMessage());
+            }
+            throw e; // Re-throw so the event loop can handle it
+        } finally {
+            // Always reset batch counter — whether flush succeeded or failed.
+            // This prevents double-submission of the same events on the next call.
+            batchCount = 0;
         }
-
-        insertStatement.executeBatch();
-        connection.commit();
-
-        // Reset batch counter — the pre-allocated slots are ready for reuse.
-        batchCount = 0;
     }
 
     /**
@@ -177,6 +218,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
 
     /**
      * Initialises the database schema — creates the {@code fx_trades} table if absent.
+     *
+     * <p>The schema includes per-stage nanosecond timestamps ({@code t1_serv_a_entry},
+     * {@code t2_serv_b_entry}, {@code t3_serv_c_entry}) to enable offline per-stage
+     * latency analysis from the persisted data.
      *
      * @throws SQLException if table creation fails
      */
@@ -196,7 +241,11 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                             + "requested_price_scaled BIGINT NOT NULL, "
                             + "executed_price_scaled  BIGINT NOT NULL, "
                             + "spread_scaled          BIGINT NOT NULL, "
-                            + "event_status           INT NOT NULL"
+                            + "event_status           INT NOT NULL, "
+                            // Per-stage timestamps: 0 if the event did not reach that stage.
+                            + "t1_serv_a_entry        BIGINT NOT NULL DEFAULT 0, "
+                            + "t2_serv_b_entry        BIGINT NOT NULL DEFAULT 0, "
+                            + "t3_serv_c_entry        BIGINT NOT NULL DEFAULT 0"
                             + ")"
             );
             connection.commit();
@@ -221,9 +270,12 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     /**
      * {@code BatchRow} — Pre-allocated holder for one event's primitive fields.
      *
-     * <p>All fields are public primitives for maximum write throughput from the
+     * <p>All fields are package-private primitives for maximum write throughput from the
      * accumulate() loop. No accessor methods — direct field assignment is faster
      * and the single-threaded access model makes encapsulation irrelevant here.
+     *
+     * <p>Includes per-stage nanosecond timestamps aligned with the fields defined
+     * in {@link FxMarketEvent} for full pipeline stage-by-stage latency tracking.
      */
     static final class BatchRow {
         long correlationId;
@@ -237,5 +289,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         long executedPriceScaled;
         long spreadScaled;
         int  eventStatus;
+        // Per-stage entry timestamps (nanoseconds, monotonic System.nanoTime()).
+        // Default 0L = stage not reached.
+        long t1ServAEntry;
+        long t2ServBEntry;
+        long t3ServCEntry;
     }
 }

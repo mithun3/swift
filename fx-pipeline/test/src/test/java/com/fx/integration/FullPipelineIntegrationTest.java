@@ -6,6 +6,7 @@ import com.fx.gateway.SyntheticFixSource;
 import com.fx.persistence.PersistenceEventLoop;
 import com.fx.pricing.PricingEventLoop;
 import com.fx.risk.RiskValidationEventLoop;
+import com.fx.common.telemetry.TelemetryStitcher;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
@@ -73,6 +74,8 @@ class FullPipelineIntegrationTest {
     private RiskValidationEventLoop  riskService;
     private PricingEventLoop         pricingService;
     private PersistenceEventLoop     persistenceService;
+    private TelemetryStitcher        telemetryStitcher;
+    private String                   traceLogPath;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -82,6 +85,7 @@ class FullPipelineIntegrationTest {
         queueBPath   = tempQueueDir + "/queue-b";
         queueCPath   = tempQueueDir + "/queue-c";
         queueErrPath = tempQueueDir + "/queue-err";
+        traceLogPath = tempQueueDir + "/traces.jsonl";
 
         // Override queue paths via system properties (read by QueuePaths and QueueFactory).
         System.setProperty("fx.queue.queue-a.path", queueAPath);
@@ -94,6 +98,7 @@ class FullPipelineIntegrationTest {
     @AfterEach
     void tearDown() throws Exception {
         // Stop all services gracefully in reverse pipeline order.
+        stopQuietly(telemetryStitcher);
         stopQuietly(persistenceService);
         stopQuietly(pricingService);
         stopQuietly(riskService);
@@ -204,6 +209,22 @@ class FullPipelineIntegrationTest {
                 "Pipeline should complete " + EVENT_COUNT + " events in < " + DRAIN_TIMEOUT_MS + "ms");
     }
 
+    @Test
+    @Order(5)
+    @DisplayName("TelemetryStitcher outputs all events to trace log")
+    void testTelemetryStitcherOutput() throws Exception {
+        startPipelineAndDrain(EVENT_COUNT);
+        
+        // Allow a small buffer for the out-of-band stitcher to finish writing
+        Thread.sleep(1000);
+
+        File logFile = new File(traceLogPath);
+        assertTrue(logFile.exists(), "Trace log file should exist");
+        
+        long lineCount = Files.lines(logFile.toPath()).count();
+        assertTrue(lineCount >= EVENT_COUNT, "Trace log should contain at least " + EVENT_COUNT + " events, found: " + lineCount);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**
@@ -213,6 +234,7 @@ class FullPipelineIntegrationTest {
         persistenceService = new PersistenceEventLoop(JDBC_URL);
         pricingService     = new PricingEventLoop();
         riskService        = new RiskValidationEventLoop();
+        telemetryStitcher  = new TelemetryStitcher(queueCPath, traceLogPath);
 
         final SyntheticFixSource source = new SyntheticFixSource(count);
         gateway = new GatewayEventLoop(source, new CorrelationIdGenerator());

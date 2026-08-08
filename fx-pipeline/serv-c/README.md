@@ -33,4 +33,15 @@ export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 java $JVM_OPTS -cp target/serv-c-1.0-SNAPSHOT.jar:target/dependency/* com.fx.persistence.PersistenceMain
 ```
 
+> [!TIP]
+> **Easier Execution**: Rather than running this manually, use the `./deploy.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `./test.sh` to diagnose OS-specific JVM properties if needed.
+
 *Note: As a consumer, this service should generally be started **first** so that it establishes its tailer cursor at the end of the queue before producers start writing.*
+
+## Viewing Database Entries
+Since this service spins up an H2 TCP Server, you can view the persisted trades by connecting to the DB using any standard JDBC client (like DBeaver, DataGrip, or the H2 Console).
+- **Driver:** H2
+- **JDBC URL:** `jdbc:h2:tcp://localhost:9092/mem:fxdb`
+- **Username:** `sa`
+- **Password:** *(leave blank)*
+- **Query:** `SELECT * FROM fx_trades;`

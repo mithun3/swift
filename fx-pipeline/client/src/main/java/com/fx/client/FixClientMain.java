@@ -15,7 +15,7 @@ public final class FixClientMain {
 
     public static void main(String[] args) {
         final String host = System.getProperty("fx.client.host", "127.0.0.1");
-        final int port = Integer.getInteger("fx.client.port", 5000);
+        final int port = Integer.getInteger("fx.client.port", 5001);
 
         // A minimal FIX 4.4 New Order Single message
         String fixMessage = "35=D|34=1|49=CLIENT1|55=EUR/USD|54=1|38=1000000|44=1.08500|";

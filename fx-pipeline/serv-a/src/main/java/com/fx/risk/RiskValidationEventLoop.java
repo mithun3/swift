@@ -81,6 +81,11 @@ public final class RiskValidationEventLoop extends AbstractEventLoop {
                            final long sequence,
                            final boolean endOfBatch,
                            final ExcerptAppender appender) {
+        // Stage-entry timestamp — captured first thing, before any processing cost.
+        // This is T1 in the end-to-end latency chain defined in FxMarketEvent.
+        // System.nanoTime() is monotonic, allocation-free, and takes ~20ns on x86.
+        event.t1ServAEntry = System.nanoTime();
+
         // Step 1: Resolve the client tier from the clientId.
         // The tier is stored in the event so downstream services can access it
         // without re-performing the lookup. This is a key pattern: compute once,

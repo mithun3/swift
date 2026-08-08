@@ -3,8 +3,6 @@ package com.fx.common.handler;
 import com.fx.common.error.ErrorQueueWriter;
 import com.fx.common.event.FxMarketEvent;
 import net.openhft.affinity.AffinityLock;
-import net.openhft.affinity.AffinityStrategies;
-import net.openhft.affinity.AffinityThreadFactory;
 import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptAppender;
 import net.openhft.chronicle.queue.ExcerptTailer;
@@ -133,20 +131,15 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
         // in thread dumps and monitoring tools (jstack, async-profiler, etc.).
         final String threadName = "fx-" + name + "-cpu" + cpuCore;
 
-        if (cpuCore >= 0) {
-            // AffinityThreadFactory (from net.openhft:affinity) creates a thread and
-            // immediately pins it to the specified core via pthread_setaffinity_np (Linux)
-            // or thread_policy_set (macOS). On macOS the affinity is advisory, not strict.
-            final AffinityThreadFactory factory = new AffinityThreadFactory(
-                    threadName, AffinityStrategies.SAME_CORE);
-            eventLoopThread = factory.newThread(this);
-        } else {
-            // No pinning requested — create a standard platform thread.
-            // Using Thread.ofPlatform() (Java 21 API) for clarity over new Thread().
-            eventLoopThread = Thread.ofPlatform()
-                    .name(threadName)
-                    .unstarted(this);
-        }
+        // Create a standard platform thread regardless of pinning setting.
+        // The actual CPU affinity binding is deferred to the start of run(), where
+        // the OS-level thread identity exists. Binding inside the thread (via
+        // AffinityLock.acquireLock) is the correct approach on both Linux and macOS.
+        // AffinityThreadFactory with SAME_CORE incorrectly pins to the factory
+        // thread's core, not to the configured cpuCore — hence this design.
+        eventLoopThread = Thread.ofPlatform()
+                .name(threadName)
+                .unstarted(this);
 
         eventLoopThread.start();
     }
@@ -159,6 +152,17 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
      */
     @Override
     public void run() {
+        // CPU pinning: if a specific core is requested, acquire an AffinityLock
+        // from inside the thread where the OS thread identity has been established.
+        // This is the correct location — AffinityLock.acquireLock(core) calls
+        // pthread_setaffinity_np (Linux) / thread_policy_set (macOS) on the
+        // calling thread. On macOS, affinity is advisory; on Linux with isolcpus,
+        // it is strict. A cpuCore of -1 disables pinning (used in tests and
+        // environments without dedicated cores).
+        final AffinityLock affinityLock = (cpuCore >= 0)
+                ? AffinityLock.acquireLock(cpuCore)
+                : null;
+
         // A single ExcerptAppender reused across all writes to the output queue.
         // ExcerptAppender is NOT thread-safe — but that is fine here because this
         // method runs on exactly one thread (the single-writer principle).
@@ -201,9 +205,6 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                         // allocation-free and Chronicle-backed.
                         errorWriter.write(flyweight, name, ex.getMessage());
                         // Swallow — the loop continues with the next event.
-                        // The exception message is captured as a primitive char[],
-                        // not re-thrown, to keep the stack unwind cost zero on the
-                        // normal (non-error) path.
                     }
                 } else {
                     // No event available — busy-spin with a CPU hint.
@@ -213,6 +214,11 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                 }
             }
         } finally {
+            // Release the CPU affinity lock before the thread exits,
+            // returning the core to the system for potential reassignment.
+            if (affinityLock != null) {
+                affinityLock.release();
+            }
             // Close appender if it was opened. This flushes any pending writes
             // and releases the memory-mapped segment handle.
             if (appender != null) {

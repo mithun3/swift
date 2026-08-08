@@ -64,6 +64,10 @@ public final class PricingEventLoop extends AbstractEventLoop {
                            final long sequence,
                            final boolean endOfBatch,
                            final ExcerptAppender appender) {
+        // Stage-entry timestamp — T2 in the per-stage latency chain.
+        // Captured before any branch evaluation to measure true queue-to-handler latency.
+        event.t2ServBEntry = System.nanoTime();
+
         // Fast-path: if the event was already rejected upstream, skip pricing entirely.
         // Forward the event to queue-c so serv-c can persist the rejection record.
         if (EventStatus.isTerminalFailure(event.eventStatus)) {
