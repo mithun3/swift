@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 7.4: Advanced HFT Patterns, Kernel Bypass, and OS Tuning
 
 ---

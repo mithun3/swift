@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh)
 
 ---

@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 3.3: LMAX Technology Blog Lessons — Scale, Testing & Code Hygiene
 
 ---

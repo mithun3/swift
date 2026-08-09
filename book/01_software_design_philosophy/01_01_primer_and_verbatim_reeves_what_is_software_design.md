@@ -1,7 +1,7 @@
+<div class="page-break"></div>
 
 # Module 1: Core Foundations of Software Engineering & Design Philosophy
 
-<div class="page-break"></div>
 
 ## Chapter 1.1: What Is Software Design? (Jack W. Reeves)
 

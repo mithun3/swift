@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice
 
 A cornerstone of High-Frequency Trading (HFT) architectures is the avoidance of memory allocations in the critical path. The JVM's Garbage Collector (GC), even modern variants like ZGC, introduces non-deterministic pauses that are unacceptable when measuring latency in microseconds or nanoseconds.

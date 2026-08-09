@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 3.5: Deep Dive: Concepts of the LMAX Disruptor
 
 The **LMAX Disruptor** is a high-performance inter-thread messaging library originally developed by the LMAX Exchange. Described in the seminal 2011 whitepaper *"Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads"*, it fundamentally challenged how developers approach concurrency. 

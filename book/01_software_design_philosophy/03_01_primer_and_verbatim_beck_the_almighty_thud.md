@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler)
 
 ---

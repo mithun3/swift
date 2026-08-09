@@ -1,6 +1,7 @@
+<div class="page-break"></div>
+
 # Module 3: High-Performance Architecture, Actor Model & LMAX Disruptor
 
-<div class="page-break"></div>
 
 ## Chapter 3.1: Actors — A Model of Concurrent Computation in Distributed Systems (Gul A. Agha)
 

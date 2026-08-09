@@ -42,10 +42,11 @@ All intellectual property rights remain with the original authors and publishers
 
 </div>
 
+<div class="page-break"></div>
+
 # Principles of Software Engineering, Concurrency & System Architecture
 ## A Comprehensive Compendium of 37 Foundational Papers, Verbatim Research Texts, Technical Primers & Deep-Dive References
 
-<div class="page-break"></div>
 
 ## Table of Contents
 
@@ -232,10 +233,10 @@ All 38 source materials are reproduced verbatim with full attribution. Sources i
 - **Intel Newsroom** — Intel's 2023 perspective on the future of Moore's Law
 - **lmax-exchange.github.io** — The LMAX Disruptor technical paper (Thompson et al., 2011)
 
+<div class="page-break"></div>
 
 # Module 1: Core Foundations of Software Engineering & Design Philosophy
 
-<div class="page-break"></div>
 
 ## Chapter 1.1: What Is Software Design? (Jack W. Reeves)
 
@@ -823,6 +824,7 @@ Combined with pattern matching (`match` or `if let`), the compiler guarantees at
 ### Communicating Sequential Processes (CSP) & Hoare's Legacy
 In 1978, C.A.R. Hoare published *"Communicating Sequential Processes"* (CACM), establishing the foundational formal algebra for concurrent computation. CSP introduced synchronous channel communication between independent processes, directly inspiring the concurrency architecture of modern systems languages, most notably Go (channels and goroutines) and Erlang (actors).
 
+<div class="page-break"></div>
 
 # Chapter 1.3: Code As Documentation (Martin Fowler)
 
@@ -926,6 +928,8 @@ You'll always find people will disagree on various points. Remember that a code 
 - **Collective Ownership**: No single developer "owns" a module; any team member can improve any part of the codebase.
 - **Pair Programming as Continuous Code Review**: Two programmers work at one workstation (Driver and Navigator). This acts as a real-time feedback loop, forcing the code to be written clearly enough for both engineers to understand immediately.
 
+<div class="page-break"></div>
+
 # Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler)
 
 ---
@@ -1027,6 +1031,8 @@ When I started to write this article I was overwhelmed by the things I could tal
 - **Agile Practice**: Originating in Extreme Programming and Lean Software Engineering (Kanban boards and Radiators), physical wall-mounted diagrams with color-coding provide passive information radiators.
 - **Why It Beats Electronic CASE Tools**: Electronic repositories hide architectural models behind menus. Wall diagrams make key system collaborations immediately visible to anyone walking through the office.
 
+<div class="page-break"></div>
+
 # Chapter 1.6: Citation & Reference Deep-Dives for Module 1
 
 This chapter provides standalone, in-depth research and analytical profiles of all major cited books, foundational theories, historical figures, and methodologies referenced across Module 1.
@@ -1111,6 +1117,7 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 **Subject Index Cross-References:**
 - Software Design ..... Ch 1.1, Ch 1.1b
 
+<div class="page-break"></div>
 
 # Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter)
 
@@ -1345,6 +1352,8 @@ Heterogeneous computing involves combining CPU cores with specialized accelerato
 - **CUDA (Compute Unified Device Architecture)**: NVIDIA's proprietary parallel computing platform and API.
 - **C++ AMP (C++ Accelerated Massive Parallelism)**: A library specification by Microsoft designed to accelerate execution of C++ code on data-parallel hardware.
 
+<div class="page-break"></div>
+
 # Chapter 2.2: Moore's Law — Past, Present, and Future (Robert R. Schaller & Gordon E. Moore)
 
 ---
@@ -1504,6 +1513,7 @@ Extreme Ultraviolet (EUV) lithography operates at a wavelength of 13.5 nm, repla
 #### Chiplets & Advanced Packaging Architecture
 Rather than relying on monolithic die scaling, modern high-performance processors leverage multi-chiplet disaggregation. Technologies such as TSMC's CoWoS (Chip-on-Wafer-on-Substrate) and Intel's Foveros utilize high-density silicon interposers and micro-bumps to connect disaggregated compute, memory, and I/O dies with ultra-low latency.
 
+<div class="page-break"></div>
 
 # Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh)
 
@@ -2047,6 +2057,8 @@ An example of how this issue can impact a program can be seen in Figure 6. Witho
 
 A threading model that only switches threads when Thread.yield() is called will never allow Thread 2 to execute. A fairness guarantee would make this sort of implementation, which is used in a number of JVMs, illegal; it would force Thread 2 to be scheduled. Because this kind of implementation is often desirable, our proposed specification does not include a fairness guarantee. The flip side of this issue is the fact that library calls like Thread.yield() and Thread.sleep() are given no meaningful semantics by the Java API. The question of whether they should have one is outside the scope of this discussion, which centers on VM issues, not API changes.
 
+<div class="page-break"></div>
+
 # Chapter 2.4: Citation & Reference Deep-Dives for Module 2
 
 This chapter provides standalone, in-depth research profiles of foundational hardware architecture theories, low-latency messaging mechanisms, and concurrent execution models referenced across Module 2.
@@ -2198,9 +2210,10 @@ If neither $a \rightarrow b$ nor $b \rightarrow a$ holds, the two events are **c
 - Moore's Law ......... Ch 2.1, Ch 2.2
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
 
+<div class="page-break"></div>
+
 # Module 3: High-Performance Architecture, Actor Model & LMAX Disruptor
 
-<div class="page-break"></div>
 
 ## Chapter 3.1: Actors — A Model of Concurrent Computation in Distributed Systems (Gul A. Agha)
 
@@ -2373,6 +2386,8 @@ By abstracting away the low-level locking mechanisms, Agha's model paved the way
 - **SAL Grammar**: Developed by Agha as a minimal, Algol-like kernel language for proving operational semantics of actors.
 - **Act3**: Developed at MIT AI Lab by Hewitt, Agha, Theriault, and Attardi. Featured pattern-matching communication handlers, futures, and automatic continuation creation.
 
+<div class="page-break"></div>
+
 # Chapter 3.5: Deep Dive: Concepts of the LMAX Disruptor
 
 The **LMAX Disruptor** is a high-performance inter-thread messaging library originally developed by the LMAX Exchange. Described in the seminal 2011 whitepaper *"Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads"*, it fundamentally challenged how developers approach concurrency. 
@@ -2539,6 +2554,8 @@ public class DisruptorPrimer {
 }
 ```
 
+<div class="page-break"></div>
+
 # Chapter 3.6: Deep Dive: Mechanical Sympathy
 
 > *"You don't have to be an engineer to be a racing driver, but you do have to have **Mechanical Sympathy**."* — Jackie Stewart (Three-time Formula One World Champion)
@@ -2675,6 +2692,8 @@ public class FalseSharingDemonstration {
 **Expected Results on a Multi-Core CPU:**
 - The unpadded test (False Sharing) will take significantly longer (often 3x to 5x slower) because the two CPU cores are constantly invalidating each other's cache lines.
 - The padded test will execute nearly instantaneously, as both cores operate entirely independently within their own L1 caches.
+
+<div class="page-break"></div>
 
 # Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team)
 
@@ -3064,6 +3083,8 @@ We believe that the Disruptor establishes a new benchmark for high-performance c
 #### Reference 3.2.C: Single-Writer Principle & Lock-Free Data Structures
 - **Core Axiom**: Concurrency contention disappears if a memory location is written to by exactly one thread.
 - **Ring Buffer Cursor Arbitration**: Producers claim sequence slots using atomic Compare-And-Swap (CAS), but consumers only read the sequence pointers of upstream processing stages, enabling lock-free dependency graphs.
+
+<div class="page-break"></div>
 
 # Chapter 3.3: LMAX Technology Blog Lessons — Scale, Testing & Code Hygiene
 
@@ -3527,6 +3548,8 @@ It would be easy to blame the original author, but in fact, much of the blame la
 - **TDD Cycle**: Red -> Green -> Refactor (Kent Beck).
 - **At LMAX**: Automated acceptance tests act as living documentation. Tests run in live-emulation environments to continuously measure latency regressions before deployment.
 
+<div class="page-break"></div>
+
 # Chapter 3.4: Bad Concurrency (Michael Barker)
 
 ---
@@ -3744,6 +3767,7 @@ In Aeron's driver name resolver, each media driver:
 
 This ensures O(log N) convergence time — the time for a new node's address to propagate to all N nodes scales logarithmically with cluster size.
 
+<div class="page-break"></div>
 
 # Chapter 3.7: Citation & Reference Deep-Dives for Module 3
 
@@ -3870,9 +3894,10 @@ Hardware memory reordering forces low-latency lock-free data structures (like th
 - TDD ................. Ch 5.1, Ch 3.3
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
 
+<div class="page-break"></div>
+
 # Module 4: Software & UI Architecture Patterns
 
-<div class="page-break"></div>
 
 ## Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)
 
@@ -3996,6 +4021,8 @@ Historically, the evolution of GUI architectures traces back to Trygve Reenskaug
 #### Reference 4.1.B: Passive View vs. Supervising Controller
 - **Passive View**: The View contains almost zero logic. The Presenter explicitly reads data from the Model and sets properties on the View directly.
 - **Supervising Controller**: The View binds directly to Model attributes for simple data display, while the Controller handles complex user interaction flows.
+
+<div class="page-break"></div>
 
 # Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)
 
@@ -4355,6 +4382,7 @@ Based on Pete Hodgson's definitive guide on MartinFowler.com, Feature Toggles (i
 - **Trunk-Based Development**: All engineers commit code to `main` daily, using Feature Toggles to hide uncompleted features.
 - **GitFlow**: Relies on long-lived feature branches, leading to complex "Merge Hells" when integrating branches after weeks of divergence.
 
+<div class="page-break"></div>
 
 # Chapter 4.4: Separated Presentation (Martin Fowler)
 
@@ -4474,6 +4502,8 @@ The original Smalltalk-80 Model-View-Controller framework was the first to imple
 #### Reference 4.4.B: Patterns of Enterprise Application Architecture (PEAA)
 Martin Fowler's PEAA book catalogs several variations of this separation, such as Passive View, Supervising Controller, and Presentation Model, each offering different ways to implement Separated Presentation.
 
+<div class="page-break"></div>
+
 # Chapter 4.6: Citation & Reference Deep-Dives for Module 4
 
 This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 4.
@@ -4584,6 +4614,7 @@ Feature flags provide powerful deployment flexibility, but unmanaged toggles cre
 - Presentation Domain Separation ........ Ch 4.1, Ch 4.4, Ch 4.5
 - Serverless .......... Ch 4.3
 
+<div class="page-break"></div>
 
 # Chapter 4.5: Presentation Domain Data Layering (Martin Fowler)
 
@@ -4770,6 +4801,8 @@ A variation of the layered architecture where the domain model is completely iso
 
 #### Reference 4.5.B: Clean Architecture
 Similar to Hexagonal Architecture, Clean Architecture places the domain logic and entities at the absolute center, ensuring the core business rules have no external dependencies on frameworks, UIs, or databases.
+
+<div class="page-break"></div>
 
 # Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
 
@@ -5138,6 +5171,8 @@ The mechanics of refactoring rely on a catalogue of precise, behavior-preserving
 
 ---
 
+<div class="page-break"></div>
+
 # Chapter 5.2: Refactoring a JavaScript Video Store (Martin Fowler)
 
 ---
@@ -5404,8 +5439,6 @@ As the refactoring progresses, the example demonstrates the transition from comp
 
 ---
 
-
-
 <div class="page-break"></div>
 
 # Chapter 5.3: Advanced & Specialized Refactoring Patterns (Martin Fowler)
@@ -5589,6 +5622,8 @@ A key objective of advanced refactoring is guiding the codebase toward establish
 
 ---
 
+<div class="page-break"></div>
+
 # Chapter 5.4: Refactoring with Loops and Collection Pipelines (Martin Fowler)
 
 ---
@@ -5756,6 +5791,8 @@ Traditional loop structures often obscure the core business logic beneath boiler
 By transitioning to pipelines, developers naturally adopt immutability and reduce side-effects. Operations within a pipeline typically return new collections rather than mutating existing ones, leading to safer, more predictable code that is easier to parallelize and test.
 
 ---
+
+<div class="page-break"></div>
 
 # Chapter 5.5: Refactoring to an Adaptive Model (Martin Fowler)
 
@@ -5976,6 +6013,8 @@ Adaptive refactoring is not a distinct phase but a continuous, integrated activi
 A robust adaptive model relies heavily on rapid feedback loops, primarily provided by a comprehensive suite of automated tests. This safety net allows developers to experiment and iterate aggressively, confidently reshaping the architecture as new insights are gained.
 
 ---
+
+<div class="page-break"></div>
 
 # Chapter 5.6: Refactoring Code that Accesses External Services (Martin Fowler)
 
@@ -6249,6 +6288,8 @@ Refactoring integrations often involves formalizing how the system handles trans
 
 ---
 
+<div class="page-break"></div>
+
 # Chapter 5.7: Citation & Reference Deep-Dives for Module 5
 
 This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 5.
@@ -6328,6 +6369,8 @@ The SOLID principles guide the target structure of refactoring efforts:
 - Notification Pattern .......... Ch 5.1, Ch 5.2
 - Preparatory Refactoring ......... Ch 5.1
 - Refactoring ......... Ch 5.1, Ch 5.1b, Ch 5.2, Ch 5.2b, Ch 5.2c, Ch 5.2d
+
+<div class="page-break"></div>
 
 # Module 6: Bibliography and Index
 
@@ -6462,6 +6505,8 @@ The SOLID principles guide the target structure of refactoring efforts:
 - Martin Fowler (External Service): https://martinfowler.com/articles/refactoring-external-service.html
 - Martin Fowler (PD Data Layering): https://martinfowler.com/bliki/PresentationDomainDataLayering.html
 
+<div class="page-break"></div>
+
 # Chapter 7.1: Foreign Exchange (FX) Low-Latency Pipeline Architecture Overview
 
 ---
@@ -6557,6 +6602,8 @@ Simultaneously, single-writer thread isolation ensures that a designated CPU cor
 
 ### Reference 7.1.B: Lock-Free Single-Writer Principle
 - **Core Concept**: Proposed by LMAX Exchange engineers; asserts that mutating shared state on a single dedicated thread is orders of magnitude faster than managing lock contention or lock-free atomic CAS operations across multiple threads.
+
+<div class="page-break"></div>
 
 # Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice
 
@@ -6737,6 +6784,8 @@ To achieve maximum execution performance, software algorithms must exhibit spati
 ### Reference 7.2.B: Primitive Collections vs Boxed Wrappers
 - **Primitive Collections**: Frameworks such as Agrona (`DirectBuffer`, `Int2ObjectHashMap`) or HPPC provide collections operating directly on primitive types (`long`, `double`, `int`), avoiding `java.lang.Long` object boxing allocations.
 
+<div class="page-break"></div>
+
 # Chapter 7.3: Event Loop and Pricing Mechanisms
 
 ---
@@ -6873,6 +6922,8 @@ When an order matching engine processes incoming orders strictly sequentially on
 ### Reference 7.3.A: Bitwise Fixed-Point Operations
 - **Shift Operations**: Binary arithmetic right shift (`>> 1`) performs integer division by 2 in 1 clock cycle, avoiding hardware division pipeline stalls.
 - **Fixed-Point Scaling**: Storing prices as integer ticks (`108542`) avoids IEEE 754 floating-point denormalization penalties.
+
+<div class="page-break"></div>
 
 # Chapter 7.4: Advanced HFT Patterns, Kernel Bypass, and OS Tuning
 

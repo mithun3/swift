@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 3.7: Citation & Reference Deep-Dives for Module 3
 
 This chapter provides standalone research profiles, mathematical formalisms, hardware memory fence mechanics, and lock-free data structure implementations for all major citations across Module 3.

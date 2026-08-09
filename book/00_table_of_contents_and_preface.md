@@ -1,7 +1,8 @@
+<div class="page-break"></div>
+
 # Principles of Software Engineering, Concurrency & System Architecture
 ## A Comprehensive Compendium of 37 Foundational Papers, Verbatim Research Texts, Technical Primers & Deep-Dive References
 
-<div class="page-break"></div>
 
 ## Table of Contents
 

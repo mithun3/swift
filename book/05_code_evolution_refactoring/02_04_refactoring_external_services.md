@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 5.6: Refactoring Code that Accesses External Services (Martin Fowler)
 
 ---

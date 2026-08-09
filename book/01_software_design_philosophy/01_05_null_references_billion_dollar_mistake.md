@@ -178,4 +178,3 @@ Combined with pattern matching (`match` or `if let`), the compiler guarantees at
 
 ### Communicating Sequential Processes (CSP) & Hoare's Legacy
 In 1978, C.A.R. Hoare published *"Communicating Sequential Processes"* (CACM), establishing the foundational formal algebra for concurrent computation. CSP introduced synchronous channel communication between independent processes, directly inspiring the concurrency architecture of modern systems languages, most notably Go (channels and goroutines) and Erlang (actors).
-

@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team)
 
 ---

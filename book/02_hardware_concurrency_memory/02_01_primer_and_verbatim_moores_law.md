@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 2.2: Moore's Law — Past, Present, and Future (Robert R. Schaller & Gordon E. Moore)
 
 ---
@@ -156,4 +158,3 @@ Extreme Ultraviolet (EUV) lithography operates at a wavelength of 13.5 nm, repla
 
 #### Chiplets & Advanced Packaging Architecture
 Rather than relying on monolithic die scaling, modern high-performance processors leverage multi-chiplet disaggregation. Technologies such as TSMC's CoWoS (Chip-on-Wafer-on-Substrate) and Intel's Foveros utilize high-density silicon interposers and micro-bumps to connect disaggregated compute, memory, and I/O dies with ultra-low latency.
-

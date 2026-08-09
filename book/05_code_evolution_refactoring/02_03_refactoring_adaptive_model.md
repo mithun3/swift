@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 5.5: Refactoring to an Adaptive Model (Martin Fowler)
 
 ---

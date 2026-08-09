@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 2.4: Citation & Reference Deep-Dives for Module 2
 
 This chapter provides standalone, in-depth research profiles of foundational hardware architecture theories, low-latency messaging mechanisms, and concurrent execution models referenced across Module 2.

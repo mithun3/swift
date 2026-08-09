@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 3.4: Bad Concurrency (Michael Barker)
 
 ---
@@ -214,4 +216,3 @@ In Aeron's driver name resolver, each media driver:
 3. **Evicts stale entries** whose `lastActivityTimestamp` has not been updated within the timeout window.
 
 This ensures O(log N) convergence time — the time for a new node's address to propagate to all N nodes scales logarithmically with cluster size.
-

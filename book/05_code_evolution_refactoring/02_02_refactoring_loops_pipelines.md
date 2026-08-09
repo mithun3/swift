@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 5.4: Refactoring with Loops and Collection Pipelines (Martin Fowler)
 
 ---

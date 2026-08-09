@@ -1,3 +1,5 @@
+<div class="page-break"></div>
+
 # Chapter 4.6: Citation & Reference Deep-Dives for Module 4
 
 This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 4.
