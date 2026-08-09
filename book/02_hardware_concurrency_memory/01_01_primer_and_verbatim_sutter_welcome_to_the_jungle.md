@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
 ### SECTION 2: VERBATIM TEXT
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
 > **Author(s):** Herb Sutter
 > **Published:** March 2005, Dr. Dobb's Journal
@@ -128,7 +128,7 @@ What this means is that if you want your application to benefit from the perform
 
 ---
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket
 > **Author(s):** Herb Sutter
 > **Published:** December 2011, Sutter's Mill / Dr. Dobb's

@@ -349,7 +349,7 @@ When **validating user input**, throwing exceptions is the wrong tool. An except
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Refactoring Fundamentals & Preparatory Refactoring<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> 2014-2016, martinfowler.com<br>

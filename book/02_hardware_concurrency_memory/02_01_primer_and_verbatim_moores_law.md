@@ -120,7 +120,7 @@ Apart from the apparent constraints of physics and economics, one respondent to 
 
 ---
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** Moore's Law: The Engine of Innovation
 > **Author(s):** Intel Newsroom
 > **Published:** 2023, Intel Corporation

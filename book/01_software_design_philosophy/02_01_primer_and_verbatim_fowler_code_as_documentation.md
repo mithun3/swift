@@ -46,7 +46,7 @@ Fowler highlights key practices that turn source code into clear documentation:
 #### Paper 4: Code As Documentation (2005)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Code As Documentation<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> March 2005, martinfowler.com<br>

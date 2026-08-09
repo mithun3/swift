@@ -92,7 +92,7 @@ export const InvoiceComponent: React.FC<{ items: Array<{ price: number; qty: num
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> GUI Architectures / Presentation Domain Separation<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> 2001-2006, martinfowler.com<br>

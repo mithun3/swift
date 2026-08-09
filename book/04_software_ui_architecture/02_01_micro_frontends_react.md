@@ -61,7 +61,7 @@ Addy Osmani highlights how modern React applications scale cleanly by enforcing 
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Micro Frontends<br>
   <strong>Author(s):</strong> Cam Jackson & Martin Fowler<br>
   <strong>Published:</strong> June 2019, martinfowler.com<br>

@@ -1,3 +1,4 @@
+
 # Module 1: Core Foundations of Software Engineering & Design Philosophy
 
 <div class="page-break"></div>
@@ -102,7 +103,7 @@ When Jack Reeves published his essay in the *C++ Journal* in 1992, it was initia
 #### Paper 1: What Is Software Design? (1992)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> What Is Software Design?<br>
   <strong>Author(s):</strong> Jack W. Reeves<br>
   <strong>Published:</strong> Fall 1992, C++ Journal<br>
@@ -178,7 +179,7 @@ Object oriented techniques, and C++ in particular, seem to be taking the softwar
 
  The second important need for auxiliary documentation is to document those aspects of the design that are difficult to extract directly from the design itself. These can include both high level and low level aspects. Many of these aspects are best depicted graphically. This makes them hard to include as comments in the source code. This is *not* an argument for a graphical software design notation instead of a programming language. This is no different from the need for textual descriptions to accompany the graphical design documents of hardware disciplines. Never forget that the source code determines what the actual design really is, not the auxiliary documentation. Ideally, software tools would be available that post processed a source code design and generated the auxiliary documentation. That may be too much to expect. The next best thing might be some tools that let programmers (or technical writers) extract specific information from the source code that can then be documented in some other way. Undoubtedly, keeping such documentation up to date manually is difficult. This is another argument for the need for more expressive programming languages. It is also an argument for keeping such auxiliary documentation to a minimum and keeping it as informal as possible until as late in the project as possible. Again, we could use some better tools, otherwise we end up falling back on pencil, paper, and chalk boards.
 
- To summarize: 
+ #### To summarize: 
 
   - Real software runs on computers. It is a sequence of ones and zeros that is stored on some magnetic media. It is not a program listing in C++ (or any other programming language).
  - A program listing is a document that represents a software design. Compilers and linkers actually build software designs.

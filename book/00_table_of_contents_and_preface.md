@@ -102,7 +102,7 @@ This section provides a thorough introduction to the topic before any paper is p
 
 This section presents the original research paper, blog post, or article in **exact, word-for-word** form. Every verbatim section opens with a source attribution block that states:
 
-> 📄 **VERBATIM SOURCE**  
+> **VERBATIM SOURCE**  
 > Title, Author(s), Publication venue, Date, Original URL, DOI (where applicable)  
 > *This text is reproduced verbatim from the original published source for educational study.*
 

@@ -88,7 +88,7 @@ class CheckoutWindow(tk.Frame):
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Separated Presentation<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> June 2006, martinfowler.com<br>

@@ -48,7 +48,7 @@ The act of writing this code *is* the act of designing the system's memory manag
 #### Paper 2: Letter to the Editor (Precursor to What Is Software Design?) (1992)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Letter to the Editor<br>
   <strong>Author(s):</strong> Jack W. Reeves<br>
   <strong>Published:</strong> Written May 19, 1992<br>
@@ -138,7 +138,7 @@ May 19, 1992
 #### Paper 3: What Is Software Design: 13 Years Later (2005)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> What Is Software Design: 13 Years Later<br>
   <strong>Author(s):</strong> Jack W. Reeves<br>
   <strong>Published:</strong> 2005, developer.*<br>

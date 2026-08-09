@@ -49,7 +49,7 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
 *By Michael Barker (bad-concurrency.blogspot.com)*
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Bad Concurrency Blog Posts (I Heard a Rumour... & Flow Control in Aeron)<br>
   <strong>Author(s):</strong> Michael Barker<br>
   <strong>Published:</strong> April/March 2020<br>

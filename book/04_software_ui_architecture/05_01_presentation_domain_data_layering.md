@@ -159,7 +159,7 @@ class OrderRepository:
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Presentation Domain Data Layering<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> 2015, martinfowler.com<br>

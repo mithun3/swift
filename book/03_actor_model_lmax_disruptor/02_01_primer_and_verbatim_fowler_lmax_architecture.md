@@ -116,7 +116,7 @@ The conclusion they came to was that to get the best caching behavior, you need 
 #### Paper 2: Disruptor: High Performance Alternative to Bounded Queues for Exchanging Data Between Concurrent Threads (May 2011)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads<br>
   <strong>Author(s):</strong> Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart<br>
   <strong>Published:</strong> May 2011, LMAX Technical Paper<br>

@@ -146,7 +146,7 @@ This section provides a thorough introduction to the topic before any paper is p
 
 This section presents the original research paper, blog post, or article in **exact, word-for-word** form. Every verbatim section opens with a source attribution block that states:
 
-> 📄 **VERBATIM SOURCE**  
+> **VERBATIM SOURCE**  
 > Title, Author(s), Publication venue, Date, Original URL, DOI (where applicable)  
 > *This text is reproduced verbatim from the original published source for educational study.*
 
@@ -333,7 +333,7 @@ When Jack Reeves published his essay in the *C++ Journal* in 1992, it was initia
 #### Paper 1: What Is Software Design? (1992)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> What Is Software Design?<br>
   <strong>Author(s):</strong> Jack W. Reeves<br>
   <strong>Published:</strong> Fall 1992, C++ Journal<br>
@@ -476,7 +476,7 @@ The act of writing this code *is* the act of designing the system's memory manag
 #### Paper 2: Letter to the Editor (Precursor to What Is Software Design?) (1992)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Letter to the Editor<br>
   <strong>Author(s):</strong> Jack W. Reeves<br>
   <strong>Published:</strong> Written May 19, 1992<br>
@@ -566,7 +566,7 @@ May 19, 1992
 #### Paper 3: What Is Software Design: 13 Years Later (2005)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> What Is Software Design: 13 Years Later<br>
   <strong>Author(s):</strong> Jack W. Reeves<br>
   <strong>Published:</strong> 2005, developer.*<br>
@@ -764,7 +764,7 @@ def get_zip_safe(user: Optional[User]) -> str:
 ## SECTION 2 — VERBATIM TEXT
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Null References: The Billion Dollar Mistake (Presentation Abstract & Keynote Extract)<br>
   <strong>Author(s):</strong> Sir Tony Hoare<br>
   <strong>Publication venue:</strong> QCon London Software Development Conference<br>
@@ -880,7 +880,7 @@ Fowler highlights key practices that turn source code into clear documentation:
 #### Paper 4: Code As Documentation (2005)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Code As Documentation<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> March 2005, martinfowler.com<br>
@@ -983,7 +983,7 @@ Fowler's guidelines for effective auxiliary documentation:
 #### Paper 5: The Almighty Thud (1997)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> The Almighty Thud<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> November/December 1997, Distributed Computing<br>
@@ -1233,7 +1233,7 @@ if __name__ == '__main__':
 
 ### SECTION 2: VERBATIM TEXT
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
 > **Author(s):** Herb Sutter
 > **Published:** March 2005, Dr. Dobb's Journal
@@ -1255,7 +1255,7 @@ What this means is that if you want your application to benefit from the perform
 
 ---
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket
 > **Author(s):** Herb Sutter
 > **Published:** December 2011, Sutter's Mill / Dr. Dobb's
@@ -1484,7 +1484,7 @@ Apart from the apparent constraints of physics and economics, one respondent to 
 
 ---
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** Moore's Law: The Engine of Innovation
 > **Author(s):** Intel Newsroom
 > **Published:** 2023, Intel Corporation
@@ -1696,7 +1696,7 @@ Ordering rules fall under two cases: within-thread and between-thread:
 
 ---
 
-> **📄 VERBATIM SOURCE**
+> **VERBATIM SOURCE**
 > **Title:** Semantics of Multithreaded Java
 > **Author(s):** Jeremy Manson and William Pugh
 > **Published:** January 11, 2002
@@ -2473,7 +2473,7 @@ The conclusion they came to was that to get the best caching behavior, you need 
 #### Paper 2: Disruptor: High Performance Alternative to Bounded Queues for Exchanging Data Between Concurrent Threads (May 2011)
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads<br>
   <strong>Author(s):</strong> Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart<br>
   <strong>Published:</strong> May 2011, LMAX Technical Paper<br>
@@ -3429,7 +3429,7 @@ When using TDD we’re only supposed to write code in response to a failing test
 *By James Byatt (LMAX Technology Blog)*
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> The Impossible NullPointerException<br>
   <strong>Author(s):</strong> James Byatt<br>
   <strong>Published:</strong> June 2022, LMAX Technology Blog<br>
@@ -3961,7 +3961,7 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
 *By Michael Barker (bad-concurrency.blogspot.com)*
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Bad Concurrency Blog Posts (I Heard a Rumour... & Flow Control in Aeron)<br>
   <strong>Author(s):</strong> Michael Barker<br>
   <strong>Published:</strong> April/March 2020<br>
@@ -4496,7 +4496,7 @@ export const InvoiceComponent: React.FC<{ items: Array<{ price: number; qty: num
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> GUI Architectures / Presentation Domain Separation<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> 2001-2006, martinfowler.com<br>
@@ -4592,7 +4592,7 @@ Addy Osmani highlights how modern React applications scale cleanly by enforcing 
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Micro Frontends<br>
   <strong>Author(s):</strong> Cam Jackson & Martin Fowler<br>
   <strong>Published:</strong> June 2019, martinfowler.com<br>
@@ -4715,7 +4715,7 @@ class PricingEngineFactory {
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Serverless Architectures / Feature Toggles<br>
   <strong>Author(s):</strong> Mike Roberts, Pete Hodgson & Martin Fowler<br>
   <strong>Published:</strong> 2017-2018, martinfowler.com<br>
@@ -4833,7 +4833,7 @@ class CheckoutWindow(tk.Frame):
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Separated Presentation<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> June 2006, martinfowler.com<br>
@@ -5091,7 +5091,7 @@ class OrderRepository:
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Presentation Domain Data Layering<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> 2015, martinfowler.com<br>
@@ -5470,7 +5470,7 @@ When **validating user input**, throwing exceptions is the wrong tool. An except
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Refactoring Fundamentals & Preparatory Refactoring<br>
   <strong>Author(s):</strong> Martin Fowler<br>
   <strong>Published:</strong> 2014-2016, martinfowler.com<br>

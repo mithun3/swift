@@ -167,7 +167,7 @@ When using TDD we’re only supposed to write code in response to a failing test
 *By James Byatt (LMAX Technology Blog)*
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> The Impossible NullPointerException<br>
   <strong>Author(s):</strong> James Byatt<br>
   <strong>Published:</strong> June 2022, LMAX Technology Blog<br>

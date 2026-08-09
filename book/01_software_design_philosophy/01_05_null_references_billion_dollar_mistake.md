@@ -112,7 +112,7 @@ def get_zip_safe(user: Optional[User]) -> str:
 ## SECTION 2 — VERBATIM TEXT
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Null References: The Billion Dollar Mistake (Presentation Abstract & Keynote Extract)<br>
   <strong>Author(s):</strong> Sir Tony Hoare<br>
   <strong>Publication venue:</strong> QCon London Software Development Conference<br>

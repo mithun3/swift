@@ -91,7 +91,7 @@ class PricingEngineFactory {
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
-  <strong>📄 VERBATIM SOURCE</strong><br>
+  <strong>VERBATIM SOURCE</strong><br>
   <strong>Title:</strong> Serverless Architectures / Feature Toggles<br>
   <strong>Author(s):</strong> Mike Roberts, Pete Hodgson & Martin Fowler<br>
   <strong>Published:</strong> 2017-2018, martinfowler.com<br>
