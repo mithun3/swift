@@ -1,4 +1,3 @@
-# Module 5: Code Evolution & Refactoring Patterns
 
 <div class="page-break"></div>
 

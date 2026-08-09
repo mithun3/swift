@@ -33,7 +33,7 @@ Without a formal **Memory Model**, Thread 2 might observe `b == -1` while still 
                     THE THREE MEMORY MODEL PILLARS
                     
 ┌───────────────────────┬───────────────────────┬───────────────────────┐
-│       ATOMICIY        │       VISIBILITY      │       ORDERING        │
+│       ATOMICITY       │       VISIBILITY      │       ORDERING        │
 ├───────────────────────┼───────────────────────┼───────────────────────┤
 │ Which operations are  │ Under what conditions │ When operations appear│
 │ indivisible (e.g. 32- │ field writes by one   │ in program order to   │

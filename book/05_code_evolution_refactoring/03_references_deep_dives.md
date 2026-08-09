@@ -63,8 +63,8 @@ The SOLID principles guide the target structure of refactoring efforts:
 [32] M. Fowler, "Refactoring Module Dependencies," MartinFowler.com, 2018.
 [33] M. Fowler, "Refactoring a JavaScript Video Store," MartinFowler.com, 2016. Available: https://martinfowler.com/articles/refactoring-video-store.html
 [34] M. Fowler, "Refactoring with Loops and Collection Pipelines," MartinFowler.com, 2015. Available: https://martinfowler.com/articles/refactoring-pipelines.html
-[35] M. Fowler, "Refactoring to an Adaptive Model," MartinFowler.com, ~2020. Available: https://martinfowler.com/articles/refactoring-adaptive-model.html
-[36] M. Fowler, "Refactoring Code that Accesses External Services," MartinFowler.com, ~2019. Available: https://martinfowler.com/articles/refactoring-external-service.html
+[35] M. Fowler, "Refactoring to an Adaptive Model," MartinFowler.com, 2020. Available: https://martinfowler.com/articles/refactoring-adaptive-model.html
+[36] M. Fowler, "Refactoring Code that Accesses External Services," MartinFowler.com, 2019. Available: https://martinfowler.com/articles/refactoring-external-service.html
 
 **Supplementary Books**
 [S11] M. Fowler, *Refactoring: Improving the Design of Existing Code*, 1st ed. Boston, MA: Addison-Wesley, 1999.

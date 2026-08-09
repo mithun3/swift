@@ -56,7 +56,9 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
   <strong>Source type:</strong> Engineering Blog<br>
   <strong>Original URL:</strong> https://bad-concurrency.blogspot.com/<br>
   <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>#### I Heard a Rumour...
+</div>
+
+#### I Heard a Rumour...
 **Saturday, 11 April 2020**
 
 Where Aeron catches up on the goss.
@@ -170,3 +172,48 @@ aeron:udp?endpoint=224.20.30.39:24326|fc=tagged,g:1001/3,t:5s  // timeout 5s
 ##### Summary
 As mentioned earlier the idea of using flow control to provide dynamic back pressure for a multicast messaging bus is a unique and powerful feature of Aeron. Being able to configure these settings on a per publication provides a an extra level of flexibility that to help our users to build the system that they need.
 </div>
+
+---
+
+<div class="page-break"></div>
+
+### SECTION 3: CITATION & REFERENCE DEEP-DIVES
+
+#### Reference 3.4.A: Aeron — Ultra-Low-Latency Messaging
+- **Project**: Open-source, maintained by Real Logic (https://github.com/real-logic/aeron).
+- **Co-creators**: Martin Thompson and Todd Montgomery.
+- **Transport**: UDP unicast, UDP multicast, and IPC (inter-process communication via shared memory).
+- **Use cases**: High-frequency trading market data distribution, financial exchange order routing, and latency-sensitive event streaming.
+- **Key design constraint**: All data is transferred through memory-mapped files (off-heap). No JVM heap allocations on the hot message path, making it immune to GC pauses.
+
+#### Reference 3.4.B: UDP Multicast vs. TCP — Flow Control Contrast
+
+```
+   TCP (Unicast — One sender, one receiver)
+   ┌──────────────────────────────────────────────────────────────────┐
+   │ Sender         ←─── ACK (window size) ───         Receiver      │
+   │                ─── data (window bytes) ───▶                     │
+   │ Flow control built into every TCP segment header (16-bit field) │
+   └──────────────────────────────────────────────────────────────────┘
+
+   UDP Multicast (One sender, many receivers — Aeron's domain)
+   ┌──────────────────────────────────────────────────────────────────┐
+   │ Sender ──── data ────▶ Receiver A (fast)                        │
+   │             ──── data ────▶ Receiver B (slow) ← Status Msgs     │
+   │             ──── data ────▶ Receiver C (critical, tagged)       │
+   │                                                                  │
+   │ Flow control strategies (Max / Min / Tagged) determine which    │
+   │ receiver's window constrains the sender's publish rate.         │
+   └──────────────────────────────────────────────────────────────────┘
+```
+
+#### Reference 3.4.C: The Gossip Protocol — Distributed Name Resolution
+The gossip protocol is a class of peer-to-peer communication algorithms modeled on the way infectious diseases spread (epidemic protocols). Each node periodically shares what it knows with a small set of neighbors. Over time, all nodes converge on the same state without any central coordinator.
+
+In Aeron's driver name resolver, each media driver:
+1. **Sends a self-resolution frame** every 1 second to all known neighbors and the bootstrap node.
+2. **Propagates its full name cache** every 2 seconds to all neighbors.
+3. **Evicts stale entries** whose `lastActivityTimestamp` has not been updated within the timeout window.
+
+This ensures O(log N) convergence time — the time for a new node's address to propagate to all N nodes scales logarithmically with cluster size.
+

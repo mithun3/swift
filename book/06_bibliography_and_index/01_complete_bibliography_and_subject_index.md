@@ -16,7 +16,8 @@
 [8] Intel, "Moore's Law 2023," Intel Newsroom, 2023. Available: https://download.intel.com/newsroom/2023/manufacturing/moores-law-electronics.pdf
 [9] D. Lea, "Synchronization & Java Memory Model," Concurrent Programming in Java, 1999.
 [10] W. Pugh et al., "JSR-133 / Pugh Semantics Paper," POPL, 2004/05. DOI: 10.1145/1040305.1040336
-[11] M. Barker, "Bad Concurrency," Bad Concurrency Blog, ~2020. Available: http://bad-concurrency.blogspot.com
+[11] M. Barker, "Bad Concurrency: I Heard a Rumour," bad-concurrency.blogspot.com, April 2020. Available: https://bad-concurrency.blogspot.com/2020/04/i-heard-rumour.html
+[11b] M. Barker, "Bad Concurrency: Flow Control in Aeron," bad-concurrency.blogspot.com, March 2020. Available: https://bad-concurrency.blogspot.com/2020/03/flow-control-in-aeron.html
 
 ### Module 3: Actor Model and LMAX Disruptor
 [12] G. A. Agha, "AITR-844 Actors Thesis," MIT, 1985. Available: https://dspace.mit.edu/handle/1721.1/6952
@@ -46,8 +47,8 @@
 [32] M. Fowler, "Refactoring Module Dependencies," MartinFowler.com, 2018.
 [33] M. Fowler, "Refactoring a JavaScript Video Store," MartinFowler.com, 2016. Available: https://martinfowler.com/articles/refactoring-video-store.html
 [34] M. Fowler, "Refactoring with Loops and Collection Pipelines," MartinFowler.com, 2015. Available: https://martinfowler.com/articles/refactoring-pipelines.html
-[35] M. Fowler, "Refactoring to an Adaptive Model," MartinFowler.com, ~2020. Available: https://martinfowler.com/articles/refactoring-adaptive-model.html
-[36] M. Fowler, "Refactoring Code that Accesses External Services," MartinFowler.com, ~2019. Available: https://martinfowler.com/articles/refactoring-external-service.html
+[35] M. Fowler, "Refactoring to an Adaptive Model," MartinFowler.com, 2020. Available: https://martinfowler.com/articles/refactoring-adaptive-model.html
+[36] M. Fowler, "Refactoring Code that Accesses External Services," MartinFowler.com, 2019. Available: https://martinfowler.com/articles/refactoring-external-service.html
 
 ## Part B: Subject Index
 - Actor Model ......... Ch 3.1, Ch 3.4

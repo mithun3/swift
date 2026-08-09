@@ -1,12 +1,12 @@
 <div class="page-break"></div>
 
-## Chapter 4.4: Citation & Reference Deep-Dives for Module 4
+## Chapter 4.6: Citation & Reference Deep-Dives for Module 4
 
 This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 4.
 
 ---
 
-### Deep-Dive 4.4.1: The Model-View-Controller (MVC) Architectural Lineage
+### Deep-Dive 4.6.1: The Model-View-Controller (MVC) Architectural Lineage
 
 ```
 Smalltalk-80 (1979) ──▶ Desktop GUI Era (1990s) ──▶ Web Framework Era (2000s)
@@ -26,7 +26,7 @@ Smalltalk-80 (1979) ──▶ Desktop GUI Era (1990s) ──▶ Web Framework Er
 
 ---
 
-### Deep-Dive 4.4.2: Micro-Frontend Runtime Integration Mechanics
+### Deep-Dive 4.6.2: Micro-Frontend Runtime Integration Mechanics
 
 #### Webpack 5 Module Federation Architecture
 Module Federation allows a container shell application to load remote bundles over the network at runtime without shared build steps.
@@ -46,7 +46,7 @@ Module Federation allows a container shell application to load remote bundles ov
 
 ---
 
-### Deep-Dive 4.4.3: Summary of Cited Works for Module 4
+### Deep-Dive 4.6.3: Summary of Cited Works for Module 4
 
 [20] M. Fowler, "GUI Architectures," MartinFowler.com, 2006. Available: https://martinfowler.com/eaaDev/uiArchs.html
 [21] M. Fowler, "Presentation Domain Separation," MartinFowler.com, 2001/06. Available: https://martinfowler.com/eaaDev/SeparatedPresentation.html
