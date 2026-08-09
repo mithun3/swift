@@ -56,68 +56,71 @@ All intellectual property rights remain with the original authors and publishers
 
 ### Module 1: Core Foundations of Software Engineering & Design Philosophy
 
-- [Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)](#chapter-11-what-is-software-design-jack-w-reeves-1992)
-- [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](#chapter-11b-letter-to-the-editor--what-is-software-design--13-years-later-jack-w-reeves)
-- [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](#chapter-12-code-as-documentation-martin-fowler-2005)
-- [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](#chapter-13-the-almighty-thud-martin-fowler-1997)
-- [Chapter 1.4: Citation & Reference Deep-Dives — Module 1](#chapter-14-citation--reference-deep-dives--module-1)
-- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](#chapter-15-null-references--the-billion-dollar-mistake-tony-hoare-2009)
+- [Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)](./01_software_design_philosophy/01_01_primer_and_verbatim_reeves_what_is_software_design.md)
+- [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](./01_software_design_philosophy/01_02_primer_and_verbatim_reeves_13_years.md)
+- [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](./01_software_design_philosophy/02_01_primer_and_verbatim_fowler_code_as_documentation.md)
+- [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](./01_software_design_philosophy/03_01_primer_and_verbatim_beck_the_almighty_thud.md)
+- [Chapter 1.4: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/04_references_deep_dives.md)
+- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/01_05_null_references_billion_dollar_mistake.md)
 
 ---
 
 ### Module 2: Hardware Evolution, Concurrency & Memory Models
 
-- [Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter, 2011)](#chapter-21-welcome-to-the-jungle--the-concurrency-revolution-herb-sutter-2011)
-- [Chapter 2.2: Moore's Law — Past, Present, and Future (Schaller 1997 & Intel 2023)](#chapter-22-moores-law--past-present-and-future)
-- [Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh et al.)](#chapter-23-synchronization--the-java-memory-model)
-- [Chapter 2.4: Citation & Reference Deep-Dives — Module 2](#chapter-24-citation--reference-deep-dives--module-2)
+- [Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter, 2011)](./02_hardware_concurrency_memory/01_01_primer_and_verbatim_sutter_welcome_to_the_jungle.md)
+- [Chapter 2.2: Moore's Law — Past, Present, and Future (Schaller 1997 & Intel 2023)](./02_hardware_concurrency_memory/02_01_primer_and_verbatim_moores_law.md)
+- [Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh et al.)](./02_hardware_concurrency_memory/03_01_primer_and_verbatim_java_memory_model.md)
+- [Chapter 2.4: Citation & Reference Deep-Dives — Module 2](./02_hardware_concurrency_memory/04_references_deep_dives.md)
 
 ---
 
 ### Module 3: High-Performance Architecture, Actor Model & LMAX Disruptor
 
-- [Chapter 3.1: Actors: A Model of Concurrent Computation in Distributed Systems (Gul A. Agha, 1985)](#chapter-31-actors-a-model-of-concurrent-computation-in-distributed-systems-gul-a-agha-1985)
-- [Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team, 2011)](#chapter-32-the-lmax-architecture--the-disruptor-pattern)
-- [Chapter 3.3: LMAX Technology Blog — Scale, Testing, Constructors, Coverage & The Impossible NullPointerException](#chapter-33-lmax-technology-blog-articles)
-- [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](#chapter-34-bad-concurrency--mechanical-sympathy--lock-free-systems-michael-barker)
-- [Chapter 3.5: Citation & Reference Deep-Dives — Module 3](#chapter-35-citation--reference-deep-dives--module-3)
+- [Chapter 3.1: Actors: A Model of Concurrent Computation in Distributed Systems (Gul A. Agha, 1985)](./03_actor_model_lmax_disruptor/01_01_primer_and_verbatim_gul_agha_actors_thesis.md)
+- [Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team, 2011)](./03_actor_model_lmax_disruptor/02_01_primer_and_verbatim_fowler_lmax_architecture.md)
+- [Chapter 3.3: LMAX Technology Blog — Scale, Testing, Constructors, Coverage & The Impossible NullPointerException](./03_actor_model_lmax_disruptor/03_01_primer_and_verbatim_lmax_engineering_blogs.md)
+- [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](./03_actor_model_lmax_disruptor/04_01_primer_and_verbatim_barker_bad_concurrency.md)
+- [Chapter 3.5: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/05_references_deep_dives.md)
+- [Chapter 3.6: Deep Dive: Concepts of the LMAX Disruptor](./03_actor_model_lmax_disruptor/01_01_primer_lmax_disruptor_concepts.md)
+- [Chapter 3.7: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/01_01_primer_mechanical_sympathy.md)
 
 ---
 
 ### Module 4: Software & UI Architecture Patterns
 
-- [Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)](#chapter-41-presentation-domain-separation--gui-architectures-martin-fowler)
-- [Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)](#chapter-42-micro-frontends--modular-react-architecture)
-- [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](#chapter-43-serverless-architectures--feature-toggles)
-- [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](#chapter-44-separated-presentation-martin-fowler-2006)
-- [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](#chapter-45-presentation-domain-data-layering-martin-fowler-2015)
-- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](#chapter-44-citation-reference-deep-dives-for-module-4)
+- [Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)](./04_software_ui_architecture/01_01_presentation_domain_gui.md)
+- [Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)](./04_software_ui_architecture/02_01_micro_frontends_react.md)
+- [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](./04_software_ui_architecture/03_01_serverless_feature_toggles.md)
+- [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](./04_software_ui_architecture/04_01_separated_presentation.md)
+- [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](./04_software_ui_architecture/05_01_presentation_domain_data_layering.md)
+- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](./04_software_ui_architecture/04_references_deep_dives.md)
 
 ---
 
 ### Module 5: Code Evolution & Refactoring Patterns
 
-- [Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](#chapter-51-refactoring-fundamentals--preparatory-refactoring)
-- [Chapter 5.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](#chapter-51b-refactoring-a-javascript-video-store-martin-fowler-2016)
-- [Chapter 5.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](#chapter-52-advanced--specialized-refactoring-patterns)
-- [Chapter 5.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](#chapter-52b-refactoring-with-loops-and-collection-pipelines-martin-fowler-2015)
-- [Chapter 5.2c: Refactoring to an Adaptive Model (Martin Fowler)](#chapter-52c-refactoring-to-an-adaptive-model-martin-fowler)
-- [Chapter 5.2d: Refactoring Code that Accesses External Services (Martin Fowler)](#chapter-52d-refactoring-code-that-accesses-external-services-martin-fowler)
-- [Chapter 5.3: Citation & Reference Deep-Dives — Module 5](#chapter-53-citation--reference-deep-dives--module-5)
+- [Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./05_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
+- [Chapter 5.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./05_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
+- [Chapter 5.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./05_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
+- [Chapter 5.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./05_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
+- [Chapter 5.2c: Refactoring to an Adaptive Model (Martin Fowler)](./05_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
+- [Chapter 5.2d: Refactoring Code that Accesses External Services (Martin Fowler)](./05_code_evolution_refactoring/02_04_refactoring_external_services.md)
+- [Chapter 5.3: Citation & Reference Deep-Dives — Module 5](./05_code_evolution_refactoring/03_references_deep_dives.md)
 
 ---
 
 ### Module 6: Bibliography & Subject Index
 
-- [Chapter 6.1: Complete IEEE Bibliography & Subject Index](#module-6-bibliography-and-index)
+- [Chapter 6.1: Complete IEEE Bibliography & Subject Index](./06_bibliography_and_index/01_complete_bibliography_and_subject_index.md)
 
 ---
 
 ### Module 7: Real-Time Implementations (Case Study)
 
-- [Chapter 7.1: FX Pipeline Architecture Overview](#07-real-time-implementations-case-study-of-an-hft-fx-pipeline)
-- [Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice](#zero-allocation-and-mechanical-sympathy-in-practice)
-- [Chapter 7.3: Event Loop and Pricing Mechanisms](#event-loop-and-pricing-mechanisms)
+- [Chapter 7.1: FX Pipeline Architecture Overview](./07_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
+- [Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice](./07_real_time_implementations/02_01_zero_allocation_and_mechanical_sympathy.md)
+- [Chapter 7.3: Event Loop and Pricing Mechanisms](./07_real_time_implementations/03_01_event_loop_and_pricing.md)
+- [Chapter 7.4: Advanced HFT Patterns and Tuning](./07_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
 
 ---
 
