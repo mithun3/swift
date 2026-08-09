@@ -229,6 +229,7 @@ All 38 source materials are reproduced verbatim with full attribution. Sources i
 - **Intel Newsroom** — Intel's 2023 perspective on the future of Moore's Law
 - **lmax-exchange.github.io** — The LMAX Disruptor technical paper (Thompson et al., 2011)
 
+
 # Module 1: Core Foundations of Software Engineering & Design Philosophy
 
 <div class="page-break"></div>
@@ -409,7 +410,7 @@ Object oriented techniques, and C++ in particular, seem to be taking the softwar
 
  The second important need for auxiliary documentation is to document those aspects of the design that are difficult to extract directly from the design itself. These can include both high level and low level aspects. Many of these aspects are best depicted graphically. This makes them hard to include as comments in the source code. This is *not* an argument for a graphical software design notation instead of a programming language. This is no different from the need for textual descriptions to accompany the graphical design documents of hardware disciplines. Never forget that the source code determines what the actual design really is, not the auxiliary documentation. Ideally, software tools would be available that post processed a source code design and generated the auxiliary documentation. That may be too much to expect. The next best thing might be some tools that let programmers (or technical writers) extract specific information from the source code that can then be documented in some other way. Undoubtedly, keeping such documentation up to date manually is difficult. This is another argument for the need for more expressive programming languages. It is also an argument for keeping such auxiliary documentation to a minimum and keeping it as informal as possible until as late in the project as possible. Again, we could use some better tools, otherwise we end up falling back on pencil, paper, and chalk boards.
 
- To summarize: 
+ #### To summarize: 
 
   - Real software runs on computers. It is a sequence of ones and zeros that is stored on some magnetic media. It is not a program listing in C++ (or any other programming language).
  - A program listing is a document that represents a software design. Compilers and linkers actually build software designs.
@@ -1723,6 +1724,350 @@ Many of the issues raised in this paper have been discussed on a mailing list de
 ---
 
 
+#### 2 Memory Models
+
+Almost all of the work in the area of memory models has been done on processor memory models. Programming language memory models differ in some important ways.
+
+First, most programming languages offer some safety guarantees. An example of this sort of guarantee is type safety. These guarantees must be absolute: there must not be a way for a programmer to circumvent them.
+
+Second, the run-time environment for a high level language contains many hidden data structures and fields that are not directly visible to a programmer (for example, the pointer to a virtual method table). A data race resulting in the reading of an unexpected value for one of these hidden fields could be impossible to debug and lead to substantial violations of the semantics of the high level language.
+
+Third, some processors have special instructions for performing synchronization and memory barriers. In a programming language, some variables have special properties (e.g., volatile or final), but there is usually no way to indicate that a particular write should have special memory semantics.
+
+Finally, it is impossible to ignore the impact of compilers and the transformations they perform. Many standard compiler transformations violate the rules of existing processor memory models [Pug00b].
+
+##### 2.1 Terms and Definitions
+
+In this paper, we concern ourselves with the semantics of the Java virtual machine [LY99]. While defining a semantics for Java source programs is important, there are many issues that arise only in the JVM that also need to be resolved. Informally, the semantics of Java source programs is understood to be defined by their straightforward translation into classfiles, and then by interpreting the classfiles using the JVM semantics.
+
+A variable refers to a static variable of a loaded class, a field of an allocated object, or element of an allocated array. The system must maintain the following properties with regards to variables and the memory manager:
+
+- It must be impossible for any thread to see a variable before it has been initialized to the default value for the type of the variable.
+- The fact that a garbage collection may relocate a variable to a new memory location is immaterial and invisible to the semantics.
+- The fact that two variables may be stored in adjacent bytes (e.g., in a byte array) is immaterial. Two variables can be simultaneously updated by different threads without needing to use synchronization to account for the fact that they are "adjacent". Any word-tearing must be invisible to the programmer.
+
+#### 3 Proposed Informal Semantics
+
+The proposed informal semantics are very similar to lazy release consistency [CZ92, GLL +90]. A formal operational semantics is provided in Section 8. All Java objects act as monitors that support reentrant locks. For simplicity, we treat the monitor associated with each Java object as a separate variable. The only actions that can be performed on the monitor are Lock and Unlock actions. A Lock action by a thread blocks until the thread can obtain an exclusive lock on the monitor.
+
+The actions on individual monitors and volatile fields are executed in a sequentially consistent manner (i.e., there must exist a single, global, total execution order over these actions that is consistent with the order in which the actions occur in their original threads). Actions on volatile fields are always immediately visible to other threads, and do not need to be guarded by synchronization.
+
+If two threads access a normal variable, and one of those accesses is a write, then the program should be synchronized so that the first access is visible to the second access. When a thread T1 acquires a lock on/enters a monitor m that was previously held by another thread T2, all actions that were visible to T2 at the time it released the lock on m become visible to T1.
+
+If thread T1 starts thread T2, then all actions visible to T1 at the time it starts T2 become visible to T2 before T2 starts. Similarly, if T1 joins with T2 (waits for T2 to terminate), then all accesses visible to T2 when T2 terminates are visible to T1 after the join completes.
+
+When a thread T1 reads a volatile field v that was previously written by a thread T2, all actions that were visible to T2 at the time T2 wrote to v become visible to T1. This is a strengthening of volatile over the existing semantics. The existing semantics make it very difficult to use volatile fields to communicate between threads, because you cannot use a signal received via a read of a volatile field to guarantee that writes to non-volatile fields are visible. With this change, many broken synchronization idioms (e.g., double-checked locking [Pug00a]) can be fixed by declaring a single field volatile.
+
+There are two reasons that a value written to a variable might not be available to be read after it becomes visible to a thread. First, another write to that variable in the same thread can overwrite the first value. Second, additional synchronization can provide a new value for the variable in the ways described above. Between the time the write becomes visible and the time the thread no longer can read that value from that variable, the write is said to be eligible to be read.
+
+When programs are not properly synchronized, very surprising behaviors are allowed. There are additional rules associated with final fields (Section 5) and finalizers (Section 6).
+
+#### 4 Safety guarantees
+
+Java allows untrusted code to be executed in a sandbox with limited access rights. The set of actions allowed in a sandbox can be customized and depends upon interaction with a security manager, but the ability to execute code in this manner is essential. In a language that allows casts between pointers and integers, or in a language without garbage collection, any such guarantee is impossible. Even for code that is written by someone you trust not to act maliciously, safety guarantees are important: they limit the possible effects of an error. Safety guarantees need to be enforced regardless of whether a program contains a synchronization error or data race. In this section, we go over the implementation issues involved in enforcing certain virtual machine safety guarantees, and in the issues in writing libraries that promise higher level safety guarantees.
+
+##### 4.1 VM Safety guarantees
+
+Consider execution of the code on the left of Figure 1a on a multiprocessor with a weak memory model (all of the ri variables are intended to be registers that do not require memory references). Can this result in r2 = -1? For this to happen, the write to p must precede the read of p, and the read of *r1 must precede the write to y. It is easy to see how this could happen if the MemBar (Memory Barrier) instruction were not present. A MemBar instruction usually requires that actions that have been initiated are completed before any further actions can be taken.
+
+If a compiler or the processor tries to reorder the statements in Thread 1 (leading to r2 = -1), then a MemBar would prevent that reordering. Given that the instructions in thread 1 cannot be reordered, you might think that the data dependence in thread 2 would prohibit seeing r2 = -1. You'd be wrong. The Alpha memory model allows the result r2 = -1. Existing implementations of the Alpha do not actually reorder the instructions. However, some Alpha processors can fulfill the r2 = *r1 instruction out of a stale cache line, which has the same effect. Future implementations may use value prediction to allow the instructions to be executed out of order.
+
+Stronger memory orders, such as TSO (Total Store Order), PSO (Partial Store Order) and RMO (Relaxed Memory Order) would not allow this reordering. Sun's SPARC chip typically runs in TSO mode, and Sun's new MAJC chip implements RMO. Intel's IA-64 memory model does not allow r2 = -1; the IA-32 has no memory barrier instructions or formal memory model (the implementation changes from chip to chip), but many knowledgeable experts have claimed that no IA-32 implementation would allow the result r2 = -1 (assuming an appropriate ordering instruction was used instead of the memory barrier).
+
+Now consider Figure 1b. This is very similar to Figure 1a, except that y is replaced by heap allocated memory for a new instance of Point. What happens if, when Thread 2 reads Foo.p, it sees the address written by Thread 1, but it doesn't see the writes performed by Thread 1 to initialize the instance? When thread 2 reads r2.x, it could see whatever was in that memory location before it was allocated from the heap. If that memory was uninitialized before allocation, an arbitrary value could be read. This would obviously be a violation of Java semantics. If r2.x were a reference/pointer, then seeing a garbage value would violate type safety and make any kind of security/safety guarantee impossible.
+
+One solution to this problem is allocate objects out of memory that all threads know to have been zeroed (perhaps at GC time). This would mean that if we see an early/stale value for r2.x, we see a zero or null value. This is type safe, and happens to be the default value the field is initialized with before the constructor is executed.
+
+Now consider Figure 1c. When thread 2 dispatches hashCode(), it needs to read the virtual method table of the object referenced by r2. If we use the idea suggested previously of allocating objects out of prezeroed memory, then the repercussions of seeing a stale value for the vptr are limited to a segmentation fault when attempting to load a method address out of the virtual method table. Other operations such as arraylength, instanceOf and checkCast could also load header fields and behave anomalously.
+
+But consider what happens if the creation of the Bar object by Thread 1 is the very first time Bar has been referenced. This forces the loading and initialization of class Bar. Then not only might thread 2 see a stale value in the instance of Bar, it could also see a stale value in any of the data structures or code loaded for class Bar. What makes this particularly tricky is that thread 2 has no indication that it might be about to execute code of a class that has just been loaded.
+
+##### 4.1.1 Proposed VM Safety Guarantees
+
+Synchronization errors can only cause surprising or unexpected values to be returned from a read action (i.e., a read of a field or array element). Other actions, such as getting the length of an array, performing a checked cast or invoking a virtual method behave normally. They cannot throw any exceptions or errors because of a data race, cause the VM to crash or be corrupted, or behave in any other way not allowed by the semantics.
+
+Values returned by read actions must be both typesafe and "not out of thin air". To say that a value must be "not out of thin air" means that it must be a value written previously to that variable by some thread. For example, Figure 9 must not be able to produce any result other than i == j == 0; for example, the value 42 cannot be assigned to i and j as if by "magic". The exception to this is that incorrectly synchronized reads of non-volatile longs and doubles are not required to respect the "not out of thin air" rule (see Section 8.8 for details).
+
+**Figure 1: Surprising results from weak memory models**
+
+**(a)**
+```
+Initially p=&x; x=1; y=-1;
+
+Thread 1         Thread 2
+y = 2            r1 = p
+MemBar           r2 = *r1
+p = &y
+```
+*Could result in r2 = -1*
+
+**(b)**
+```
+Initially Foo.p = new Point(1,2);
+
+Thread 1                     Thread 2
+r1 = new Point(3,4)          r2 = Foo.p
+MemBar                       r3 = r2.x
+Foo.p = r1
+```
+*Could result in r3 = 0 or garbage*
+
+**(c)**
+```
+Initially Foo.o = "Hello";
+
+Thread 1                     Thread 2
+r1 = new Bar(3,4)            r2 = Foo.o
+MemBar                       r3 = r2.hashCode()
+Foo.o = r1
+```
+*Could result in almost anything*
+
+##### 4.2 Library Safety guarantees
+
+Many programmers assume that immutable objects (objects that do not change once they are constructed) do not need to be synchronized. This is only true for programs that are otherwise correctly synchronized. However, if a reference to an immutable object is passed between threads without correct synchronization, then synchronization within the methods of the object is needed to ensure that the object actually appears to be immutable.
+
+The motivating example is the `java.lang.String` class. This class is typically implemented using a length, offset, and reference to an array of characters. All of these are immutable (including the contents of the array), although in existing implementations are not declared final. The problem occurs if thread 1 creates a String object S, and then passes a reference to S to thread 2 without using synchronization. When thread 2 reads the fields of S, those reads are improperly synchronized and can see the default values for the fields of S. Later reads by thread 2 can then see the values set by thread 1.
+
+As an example of how this can affect a program, it is possible to show that a String that is supposed to be immutable can appear to change from "/tmp" to "/usr". Consider an implementation of StringBuffer whose substring method creates a string using the StringBuffer's character array. It only creates a new array for the new String if the StringBuffer is changed. We create a String using `new StringBuffer("/usr/tmp").substring(4);`. This will produce a string with an offset field of 4 and a length of 4. If thread 2 incorrectly sees an offset with the default value of 0, it will think the string represents "/usr" rather than "/tmp".
+
+This behavior can only occur on systems with weak memory models, such as an Alpha SMP. Under the existing semantics, the only way to prohibit this behavior is to make all of the methods and constructors of the String class synchronized. This solution would incur a substantial performance penalty. The impact of this is compounded by the fact that the synchronization is not necessary on all platforms, and even then is only required when the code contains a data race. If an object contains mutable data fields, then synchronization is required to protect the class against attack via data race. For objects with immutable data fields, we propose allowing the class to be defended by use of final fields.
+
+#### 5 Guarantees for Final fields
+
+Final fields must be assigned exactly once in the constructor for the class that defines them. The existing Java memory model contains no discussion of final fields. In fact, at each synchronization point, final fields need to be reloaded from memory just like normal fields. We propose additional semantics for final fields. These semantics will allow more aggressive optimizations of 
+
+```java
+class ReloadFinal extends Thread {
+    final int x;
+    ReloadFinal() {
+        synchronized(this) {
+            start();
+            sleep(10);
+            x = 42;
+        }
+    }
+    public void run() {
+        int i, j;
+        i = x;
+        synchronized(this) {
+            j = x;
+        }
+        System.out.println(i + ", " + j); // j must be 42, even if i is 0
+    }
+}
+```
+
+**Figure 2: Final fields must be reloaded under existing semantics**
+
+data races, defensive programming may require considering that a user of your code may deliberately introduce a data race, and that there is little or nothing you can do to prevent it.
+
+##### 5.2 Final fields of objects that escape their constructors
+
+Figure 2 shows an example of where the existing specification requires final fields to be reloaded. In this example, the object being constructed is made visible to another thread before the final field is assigned. That thread reads the final field, waits to be signaled that the constructor has assigned the final field, and then reads the final field again. The current specification guarantees that even if the first read of tmp1.x in foo sees 0, the second read will see 42.
+
+The (informal) rule for final fields is that you must ensure that the constructor for a object has completed before another thread is allowed to load a reference to that object. These are called "properly constructed" final fields. We will deal with the semantics of properly constructed final fields first, and then come to the semantics of improperly constructed final fields.
+
+##### 5.3 Informal semantics of final fields
+
+The formal detailed semantics for final fields are given in Section 8.7. For now, we just describe the informal semantics of final fields that are constructed properly. The first part of the semantics of final fields is:
+
+**F1** When a final field is read, the value read is the value assigned in the constructor.
+
+Consider the scenario postulated at the bottom of Figure 3. The question is: which of the variables i1 - i7 are guaranteed to see the value 42? F1 alone guarantees that i1 is 42. However, that rule isn't sufficient to make Strings absolutely immutable. Strings contain a reference to an array of characters; the contents of that array must be seen to be immutable in order for the String to be immutable. Unfortunately, there is no way to declare the contents of an array as final in Java. Even if you could, it would mean that you couldn't reuse the mutable character buffer from a StringBuffer in constructing a String. To use final fields to make Strings immutable requires that when we read a final reference to an array, we see both the correct reference to the array and the correct contents of the array. Enforcing this should guarantee that i2 is 42.
+
+For i3, the relevant question is: do the contents of the array need to be set before the final field is set (i.e, i3 might not be 42), or merely before the constructor completes (i3 must be 42)? Although this point is debatable, we believe that a requirement for objects to be completely initialized before they are assigned to final fields would often be ignored or incorrectly performed. Thus, we recommend that the semantics only require that such objects be initialized before the constructor completes.
+
+Since i4 is very similar to i2, it should clearly be 42. What about i5? It is reading the same location as i4. However, simple compiler optimizations would simply reuse the value loaded for j as the value of i5. Similarly, a processor using the Sparc RMO memory model would only require a memory barrier at the end of the constructor to guarantee that i4 is 42. However, ensuring that i5 is 42 under RMO would require a memory barrier by the reading thread. For these reasons, we recommend that the semantics not require that i5 be 42.
+
+All of the examples to this point have dealt with references to arrays. However, it would be very confusing if these semantics applied only to array elements and not to object fields. Thus, the semantics should require that i6 is 42. We need to decide if these special semantics apply only to the fields/elements of the object/array directly referenced, or if it applies to those referenced indirectly. If the semantics apply to indirectly referenced fields/elements, then i7 must be 42. We believe making the semantics apply only to directly referenced fields would be difficult to program correctly, so we recommend that i7 be required to be 42.
+
+```java
+class FinalTest {
+    public static FinalTest ft;
+    public static int[] x = new int[1];
+    public final int a;
+    public final int[] b, c, d;
+    public final Point p;
+    public final int[][] e;
+
+    public FinalTest(int i) {
+        a = i;
+        int[] tmp = new int[1];
+        tmp[0] = i;
+        b = tmp;
+        c = new int[1];
+        c[0] = i;
+        FinalTest.x[0] = i;
+        d = FinalTest.x;
+        p = new Point();
+        p.x = i;
+        e = new int[1][1];
+        e[0][0] = i;
+    }
+
+    static void foo() {
+        int[] myX = FinalTest.x;
+        int j = myX[0];
+        FinalTest f1 = ft;
+        if (f1 == null) return;
+
+        // Guaranteed to see value set in constructor?
+        int i1 = f1.a;       // yes
+        int i2 = f1.b[0];    // yes
+        int i3 = f1.c[0];    // yes
+        int i4 = f1.d[0];    // yes
+        int i5 = myX[0];     // no
+        int i6 = f1.p.x;     // yes
+        int i7 = f1.e[0][0]; // yes
+
+        // use j, i1 ... i7
+    }
+}
+
+// Thread 1:
+// FinalTest.ft = new FinalTest(42);
+
+// Thread 2:
+// FinalTest.foo();
+```
+
+**Figure 3: Subtle points of the revised semantics of final 6**
+
+To formalize this idea, we say that a read r2 is derived from a read r1 if:
+- r2 is a read of a field or element of an address that was returned by r1, or
+- there exists a read r3 such that r3 is derived from r1 and r2 is derived from r3.
+
+Thus, the additional semantics for final fields are:
+
+**F2** Assume thread T1 assigns a value to a final field f of object X defined in class C. Assume that T1 does not allow any other thread to load a reference to X until after the C constructor for X has terminated. Thread T2 then reads field f of X. Any writes done by T1 before the class C constructor for object X terminates are guaranteed to be ordered before and visible to any reads done by T2 that are derived from the read of f.
+
+##### 5.4 Improperly Constructed Final Fields
+
+Conditions [F1] and [F2] suffice if the object which contains the final field is not made visible to another thread before its constructor ends. Additional semantics are needed to describe the behavior of a program that allows references to objects to escape their constructor.
+
+The basic question of what should be read from a final field which is improperly constructed is a simple one. In order to maintain not-out-of-thin-air safety, it is necessary that the value read out of such a final field is either the default value for its type, or the value written to it in its constructor.
+
+Figure 4 demonstrates some of the issues with improperly synchronized final fields. The variables proper and improper refer to the same object. proper points to the correctly constructed version of the object, because the reference was written to it after the constructor completed. improper is not guaranteed to point to the correctly constructed version of the object, because it was set before the object was fully constructed.
+
+When thread 1 reads the improperly constructed reference into i, and tries to reference i.x through that reference, we cannot make the guarantee that the constructor has finished. The resulting value of i1 may be either a reference to the point or the default value for that field (which is null). If i1 is not null, and we then try to read i1.x, should we be forced to see the correctly constructed value of 42? After all, the write to improper occurred after the write of 42; one line of reasoning would suggest that if you can see the write to improper, you should be able to see the write to improper.x. This is not the case, however. The write to improper can be reordered to before the write to improper.x. Therefore, i2 can have either the value 42 or the value 0.
+
+Because we have guaranteed that p will not be null, the reads from p should return the correctly constructed values for the fields. This is discussed in section 5.3. Now we come to i3 and i4. It is not unreasonable, initially, to believe that i3 and i4 should have the correct values in them. After all, we have just ensured that the thread has seen that object; it has been referenced through p. However, the compiler could reuse the values of i1 and i2 for i3 and i4 through common subexpression elimination. The values for i3 and i4 must therefore remain the same as those of i1 and i2.
+
+##### 5.5 Final Static Fields
+
+Final static fields must be initialized by the class initializer for the class in which they are defined. The semantics for class initialization guarantee that any thread that reads a static field sees all the results of the execution of the class initialization. Note that final static fields do not have to be reloaded at synchronization points.
+
+Under certain complicated circumstances involving circularities in class initialization, it is possible for a thread to access the static variables of a class before the static initializer for that class has started. Under such situations, a thread which accesses a final static field before it has been set sees the default value for the field. This does not otherwise affect the nature or property of the field (any other threads that read the static field will see the final value set in the class initializer). No special semantics or memory barriers are required to observe this behavior; the standard memory barriers required for class initialization ensure it.
+
+##### 5.6 Native code changing final fields
+
+JNI allows native code to change final fields. To allow optimization (and sane understanding) of final fields, that ability will be prohibited. Attempting to use JNI to change a final field should throw an immediate exception.
+
+```java
+class Improper {
+    public final Point p;
+    public static Improper proper;
+    public static Improper improper;
+
+    public Improper(int i) {
+        p = new Point();
+        p.x = i;
+        improper = this;
+    }
+
+    static void foo() {
+        Improper p = proper;
+        Improper i = improper;
+        if (p == null) return;
+
+        // Possible Results
+        Improper i1 = i; // reference to point or null
+        int i2 = i.x;    // 42 or 0
+        Improper p1 = p; // reference to point
+        int p2 = p.x;    // 42
+        Improper i3 = i; // reference to point or null
+        int i4 = i.x;    // 42 or 0
+    }
+}
+
+// Thread 1:
+// Improper.proper = new Improper(42);
+
+// Thread 2:
+// Improper.foo();
+```
+
+**Figure 4: Improperly Constructed Final Fields 8**
+
+##### 5.6.1 Write Protected Fields
+
+System.in, System.out, and System.err are final static fields that are changed by the methods System.setIn, System.setOut and System.setErr. This is done by having the methods call native code that modifies the final fields. We need to create a special rule to handle this situation.
+
+These fields should have been accessed via getter methods (e.g., System.getIn()). However, it would be impossible to make that change now. If we simply made the fields non-final, then untrusted code could change the fields, which would also be a serious problem (functions such as System.setIn have to get permission from the security manager).
+
+The (ugly) solution for this is to create a new kind of field, write protected, and declare these three fields (and only these fields) as write protected. They would be treated as normal variables, except that the JVM would reject any bytecode that attempts to modify them. In particular, they need to be reloaded at synchronization points.
+
+#### 6 Guarantees for Finalizers
+
+When an object is no longer reachable, the finalize() method (i.e., the finalizer) for the object may be invoked. The finalizer is typically run in a separate finalizer thread, although there may be more than one such thread. The loss of the last reference to an object acts as an asynchronous signal to another thread to invoke the finalizer.
+
+In many cases, finalizers should be synchronized, because the finalizers of an unreachable but connected set of objects can be invoked simultaneously by different threads. However, in practice finalizers are often not synchronized. To naive users, it seems counter-intuitive to synchronize finalizers.
+
+Why is it hard to make guarantees? Consider the code in Figure 5. If foo() is invoked, an object is created and then made unreachable. What is guaranteed about the reads in the finalizer? An aggressive compiler and garbage collector may realize that after the assignment to ft.y, all references to the object are dead and thus the object is unreachable. If garbage collection and finalization were performed immediately, the write to FinalizerTest.z would not have been performed and would not be visible. But if the compiler reorders the assignments to FinalizerTest.x and ft.y, the same would hold for FinalizerTest.x. However, the object referenced
+
+```java
+class FinalizerTest {
+    static int x = 0;
+    int y = 0;
+    static int z = 0;
+
+    protected void finalize() {
+        int i = FinalizerTest.x;
+        int j = y;
+        int k = FinalizerTest.z;
+        // use i, j and k
+    }
+
+    public static void foo() {
+        FinalizerTest ft = new FinalizerTest();
+        FinalizerTest.x = 1;
+        ft.y = 1;
+        FinalizerTest.z = 1;
+        ft = null;
+    }
+}
+```
+
+**Figure 5: Subtle issues involving finalization**
+
+by ft is clearly reachable at least until the assignment to ft.y is performed. So the guarantee that can be reasonably made is that all memory accesses to the fields of an object X during normal execution are ordered before all memory accesses to the fields of X performed during the invocation of the finalizer for X. Furthermore, all memory accesses visible to the constructing thread at the time it completes the construction of X are visible to the finalizer for X.
+
+For a uniprocessor garbage collector, or a multiprocessor garbage collector that performs a global memory barrier (a memory barrier on all processors) as part of garbage collection, this guarantee should be free. For a garbage collector that doesn't "stop the world", things are a little trickier. When an object with a finalizer becomes unreachable, it must be put into special queue of unreachable objects. The next time a global memory barrier is performed, all of the objects in the unreachable queue get moved to a finalizable queue, and it now becomes safe to run their finalizer. There are a number of situations that will cause global memory barriers (such as class initialization), and they can also be performed periodically or when the queue of unreachable objects grows too large.
+
+```java
+// Thread 1:
+while (true) {
+    synchronized (o) {
+        // does not call Thread.yield() or Thread.sleep()
+    }
+}
+
+// Thread 2:
+synchronized (o) {
+    // does nothing.
+}
+```
+
+**Figure 6: Fairness**
+
+#### 7 Fairness Guarantees
+
+Without a fairness guarantee for virtual machines, it is possible for a running thread to be capable of making progress and never do so. Java currently has no official fairness guarantee, although, in practice, most JVMs do provide it to some extent. An example of a potential weak fairness guarantee would be one that states that if a thread is infinitely often allowed to make progress, it would eventually do so.
+
+An example of how this issue can impact a program can be seen in Figure 6. Without a fairness guarantee, it is perfectly legal for a compiler to move the while loop inside the synchronized block; Thread 2 will be blocked forever. Any potential fairness guarantee would be inextricably linked to the threading model for a given virtual machine.
+
+A threading model that only switches threads when Thread.yield() is called will never allow Thread 2 to execute. A fairness guarantee would make this sort of implementation, which is used in a number of JVMs, illegal; it would force Thread 2 to be scheduled. Because this kind of implementation is often desirable, our proposed specification does not include a fairness guarantee. The flip side of this issue is the fact that library calls like Thread.yield() and Thread.sleep() are given no meaningful semantics by the Java API. The question of whether they should have one is outside the scope of this discussion, which centers on VM issues, not API changes.
 
 <div class="page-break"></div>
 
@@ -2481,754 +2826,243 @@ The conclusion they came to was that to get the best caching behavior, you need 
   <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
 </div>
 
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 1 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-LMAX Disruptor: High performance alternative to
-bounded queues for exchanging data between
-concurrent threads
+
 Martin Thompson ⋅ Dave Farley ⋅ Michael Barker ⋅ Patricia Gee ⋅ Andrew Stewart
  – Version 4.0.0-SNAPSHOT, May 2011
-Table of Contents
-1. Overview
-2. The Complexities of Concurrency
-2.1. The Cost of Locks
-2.2. The Costs of “CAS”
-2.3. Memory Barriers
-2.4. Cache Lines
-2.5. The Problems of Queues
-2.6. Pipelines and Graphs
-3. Design of the LMAX Disruptor
-3.1. Memory Allocation
-3.2. Teasing Apart the Concerns
-3.3. Sequencing
-3.4. Batching E!ect
-3.5. Dependency Graphs
-3.6. Disruptor Class Diagram
-3.7. Code Example
-4. Throughput Performance Testing
-5. Latency Performance Testing
-6. Conclusion
-https://github.com/LMAX-Exchange/disruptor
-Abstract
-LMAX was established to create a very high performance financial exchange. As part of our work to
-accomplish this goal we have evaluated several approaches to the design of such a system, but as we
-began to measure these we ran into some fundamental limits with conventional approaches.
-Many applications depend on queues to exchange data between processing stages. Our performance
-testing showed that the latency costs, when using queues in this way, were in the same order of
-magnitude as the cost of IO operations to disk (RAID or SSD based disk system) – dramatically slow. If
-there are multiple queues in an end-to-end operation, this will add hundreds of microseconds to the
-overall latency. There is clearly room for optimisation.
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 2 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-Further investigation and a focus on the computer science made us realise that the conflation of concerns
-inherent in conventional approaches, (e.g. queues and processing nodes) leads to contention in multi-
-threaded implementations, suggesting that there may be a better approach.
-Thinking about how modern CPUs work, something we like to call “mechanical sympathy”, using good
-design practices with a strong focus on teasing apart the concerns, we came up with a data structure and
-a pattern of use that we have called the Disruptor.
-Testing has shown that the mean latency using the Disruptor for a three-stage pipeline is 3 orders of
-magnitude lower than an equivalent queue-based approach. In addition, the Disruptor handles
-approximately 8 times more throughput for the same configuration.
-These performance improvements represent a step change in the thinking around concurrent
-programming. This new pattern is an ideal foundation for any asynchronous event processing
-architecture where high-throughput and low-latency is required.
-At LMAX we have built an order matching engine, real-time risk management, and a highly available in-
-memory transaction processing system all on this pattern to great success. Each of these systems has set
-new performance standards that, as far as we can tell, are unsurpassed.
-However this is not a specialist solution that is only of relevance in the Finance industry. The Disruptor is
-a general-purpose mechanism that solves a complex problem in concurrent programming in a way that
-maximizes performance, and that is simple to implement. Although some of the concepts may seem
-unusual it has been our experience that systems built to this pattern are significantly simpler to
-implement than comparable mechanisms.
-The Disruptor has significantly less write contention, a lower concurrency overhead and is more cache
-friendly than comparable approaches, all of which results in greater throughput with less jitter at lower
-latency. On processors at moderate clock rates we have seen over 25 million messages per second and
-latencies lower than 50 nanoseconds. This performance is a significant improvement compared to any
-other implementation that we have seen. This is very close to the theoretical limit of a modern processor
-to exchange data between cores.
-1. Overview
-The Disruptor is the result of our efforts to build the world’s highest performance financial exchange at LMAX.
-Early designs focused on architectures derived from SEDA [1] and Actors [2] using pipelines for throughput.
-After profiling various implementations it became evident that the queuing of events between stages in the
-pipeline was dominating the costs. We found that queues also introduced latency and high levels of jitter. We
-expended significant effort on developing new queue implementations with better performance. However it
-became evident that queues as a fundamental data structure are limited due to the conflation of design
-concerns for the producers, consumers, and their data storage. The Disruptor is the result of our work to build
-a concurrent structure that cleanly separates these concerns.
-2. The Complexities of Concurrency
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 3 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-In the context of this document, and computer science in general, concurrency means not only that two or
-more tasks happen in parallel, but also that they contend on access to resources. The contended resource may
-be a database, file, socket or even a location in memory.
-Concurrent execution of code is about two things, mutual exclusion and visibility of change. Mutual exclusion
-is about managing contended updates to some resource. Visibility of change is about controlling when such
-changes are made visible to other threads. It is possible to avoid the need for mutual exclusion if you can
-eliminate the need for contended updates. If your algorithm can guarantee that any given resource is modified
-by only one thread, then mutual exclusion is unnecessary. Read and write operations require that all changes
-are made visible to other threads. However only contended write operations require the mutual exclusion of
-the changes.
-The most costly operation in any concurrent environment is a contended write access. To have multiple
-threads write to the same resource requires complex and expensive coordination. Typically this is achieved by
-employing a locking strategy of some kind.
-2.1. The Cost of Locks
-Locks provide mutual exclusion and ensure that the visibility of change occurs in an ordered manner. Locks
-are incredibly expensive because they require arbitration when contended. This arbitration is achieved by a
-context switch to the operating system kernel which will suspend threads waiting on a lock until it is released.
-During such a context switch, as well as releasing control to the operating system which may decide to do other
-house-keeping tasks while it has control, execution context can lose previously cached data and instructions.
-This can have a serious performance impact on modern processors. Fast user mode locks can be employed but
-these are only of any real benefit when not contended.
-We will illustrate the cost of locks with a simple demonstration. The focus of this experiment is to call a
-function which increments a 64-bit counter in a loop 500 million times. This can be executed by a single thread
-on a 2.4Ghz Intel Westmere EP in just 300ms if written in Java. The language is unimportant to this experiment
-and results will be similar across all languages with the same basic primitives.
-Once a lock is introduced to provide mutual exclusion, even when the lock is as yet un-contended, the cost goes
-up significantly. The cost increases again, by orders of magnitude, when two or more threads begin to contend.
-The results of this simple experiment are shown in the table below:
-Table 1. Comparative costs of contention
-Method
-Time (ms)
-Single thread
-300
-Single thread with lock
-10,000
-Two threads with lock
-224,000
-Single thread with CAS
-5,700
-Two threads with CAS
-30,000
-Single thread with volatile write
-4,700
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 4 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-2.2. The Costs of “CAS”
-A more efficient alternative to the use of locks can be employed for updating memory when the target of the
-update is a single word. These alternatives are based upon the atomic, or interlocked, instructions
-implemented in modern processors. These are commonly known as CAS (Compare And Swap) operations, e.g.
-“lock cmpxchg” on x86. A CAS operation is a special machine-code instruction that allows a word in memory to
-be conditionally set as an atomic operation. For the “increment a counter experiment” each thread can spin in
-a loop reading the counter then try to atomically set it to its new incremented value. The old and new values
-are provided as parameters to this instruction. If, when the operation is executed, the value of the counter
-matches the supplied expected value, the counter is updated with the new value. If, on the other hand, the
-value is not as expected, the CAS operation will fail. It is then up to the thread attempting to perform the change
-to retry, re-reading the counter incrementing from that value and so on until the change succeeds. This CAS
-approach is significantly more efficient than locks because it does not require a context switch to the kernel for
-arbitration. However CAS operations are not free of cost. The processor must lock its instruction pipeline to
-ensure atomicity and employ a memory barrier to make the changes visible to other threads. CAS operations
-are available in Java by using the java.util.concurrent.Atomic* classes.
-If the critical section of the program is more complex than a simple increment of a counter it may take a
-complex state machine using multiple CAS operations to orchestrate the contention. Developing concurrent
-programs using locks is difficult; developing lock-free algorithms using CAS operations and memory barriers is
-many times more complex and it is very difficult to prove that they are correct.
-The ideal algorithm would be one with only a single thread owning all writes to a single resource with other
-threads reading the results. To read the results in a multi-processor environment requires memory barriers to
-make the changes visible to threads running on other processors.
-2.3. Memory Barriers
-Modern processors perform out-of-order execution of instructions and out-of-order loads and stores of data
-between memory and execution units for performance reasons. The processors need only guarantee that
-program logic produces the same results regardless of execution order. This is not an issue for single-threaded
-programs. However, when threads share state it is important that all memory changes appear in order, at the
-point required, for the data exchange to be successful. Memory barriers are used by processors to indicate
-sections of code where the ordering of memory updates is important. They are the means by which hardware
-ordering and visibility of change is achieved between threads. Compilers can put in place complimentary
-software barriers to ensure the ordering of compiled code, such software memory barriers are in addition to
-the hardware barriers used by the processors themselves.
-Modern CPUs are now much faster than the current generation of memory systems. To bridge this divide CPUs
-use complex cache systems which are effectively fast hardware hash tables without chaining. These caches are
-kept coherent with other processor cache systems via message passing protocols. In addition, processors have
-“store buffers” to offload writes to these caches, and “invalidate queues” so that the cache coherency protocols
-can acknowledge invalidation messages quickly for efficiency when a write is about to happen.
-What this means for data is that the latest version of any value could, at any stage after being written, be in a
-register, a store buffer, one of many layers of cache, or in main memory. If threads are to share this value, it
-needs to be made visible in an ordered fashion and this is achieved through the coordinated exchange of cache
-coherency messages. The timely generation of these messages can be controlled by memory barriers.
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 5 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-A read memory barrier orders load instructions on the CPU that executes it by marking a point in the
-invalidate queue for changes coming into its cache. This gives it a consistent view of the world for write
-operations ordered before the read barrier.
-A write barrier orders store instructions on the CPU that executes it by marking a point in the store buffer, thus
-flushing writes out via its cache. This barrier gives an ordered view to the world of what store operations
-happen before the write barrier.
+#### Abstract
+
+LMAX was established to create a very high performance financial exchange. As part of our work to accomplish this goal we have evaluated several approaches to the design of such a system, but as we began to measure these we ran into some fundamental limits with conventional approaches.
+
+Many applications depend on queues to exchange data between processing stages. Our performance testing showed that the latency costs, when using queues in this way, were in the same order of magnitude as the cost of IO operations to disk (RAID or SSD based disk system) – dramatically slow. If there are multiple queues in an end-to-end operation, this will add hundreds of microseconds to the overall latency. There is clearly room for optimisation.
+
+Further investigation and a focus on the computer science made us realise that the conflation of concerns inherent in conventional approaches, (e.g. queues and processing nodes) leads to contention in multithreaded implementations, suggesting that there may be a better approach.
+
+Thinking about how modern CPUs work, something we like to call “mechanical sympathy”, using good design practices with a strong focus on teasing apart the concerns, we came up with a data structure and a pattern of use that we have called the Disruptor.
+
+Testing has shown that the mean latency using the Disruptor for a three-stage pipeline is 3 orders of magnitude lower than an equivalent queue-based approach. In addition, the Disruptor handles approximately 8 times more throughput for the same configuration.
+
+These performance improvements represent a step change in the thinking around concurrent programming. This new pattern is an ideal foundation for any asynchronous event processing architecture where high-throughput and low-latency is required.
+
+At LMAX we have built an order matching engine, real-time risk management, and a highly available inmemory transaction processing system all on this pattern to great success. Each of these systems has set new performance standards that, as far as we can tell, are unsurpassed.
+
+However this is not a specialist solution that is only of relevance in the Finance industry. The Disruptor is a general-purpose mechanism that solves a complex problem in concurrent programming in a way that maximizes performance, and that is simple to implement. Although some of the concepts may seem unusual it has been our experience that systems built to this pattern are significantly simpler to implement than comparable mechanisms.
+
+The Disruptor has significantly less write contention, a lower concurrency overhead and is more cache friendly than comparable approaches, all of which results in greater throughput with less jitter at lower latency. On processors at moderate clock rates we have seen over 25 million messages per second and latencies lower than 50 nanoseconds. This performance is a significant improvement compared to any other implementation that we have seen. This is very close to the theoretical limit of a modern processor to exchange data between cores.
+
+#### 1. Overview
+
+The Disruptor is the result of our efforts to build the world’s highest performance financial exchange at LMAX. Early designs focused on architectures derived from SEDA [1] and Actors [2] using pipelines for throughput. After profiling various implementations it became evident that the queuing of events between stages in the pipeline was dominating the costs. We found that queues also introduced latency and high levels of jitter. We expended significant effort on developing new queue implementations with better performance. However it became evident that queues as a fundamental data structure are limited due to the conflation of design concerns for the producers, consumers, and their data storage. The Disruptor is the result of our work to build a concurrent structure that cleanly separates these concerns.
+
+#### 2. The Complexities of Concurrency
+
+In the context of this document, and computer science in general, concurrency means not only that two or more tasks happen in parallel, but also that they contend on access to resources. The contended resource may be a database, file, socket or even a location in memory.
+
+Concurrent execution of code is about two things, mutual exclusion and visibility of change. Mutual exclusion is about managing contended updates to some resource. Visibility of change is about controlling when such changes are made visible to other threads. It is possible to avoid the need for mutual exclusion if you can eliminate the need for contended updates. If your algorithm can guarantee that any given resource is modified by only one thread, then mutual exclusion is unnecessary. Read and write operations require that all changes are made visible to other threads. However only contended write operations require the mutual exclusion of the changes.
+
+The most costly operation in any concurrent environment is a contended write access. To have multiple threads write to the same resource requires complex and expensive coordination. Typically this is achieved by employing a locking strategy of some kind.
+
+2.1. The Cost of Locks Locks provide mutual exclusion and ensure that the visibility of change occurs in an ordered manner. Locks are incredibly expensive because they require arbitration when contended. This arbitration is achieved by a context switch to the operating system kernel which will suspend threads waiting on a lock until it is released. During such a context switch, as well as releasing control to the operating system which may decide to do other house-keeping tasks while it has control, execution context can lose previously cached data and instructions. This can have a serious performance impact on modern processors. Fast user mode locks can be employed but these are only of any real benefit when not contended.
+
+We will illustrate the cost of locks with a simple demonstration. The focus of this experiment is to call a function which increments a 64-bit counter in a loop 500 million times. This can be executed by a single thread on a 2.4Ghz Intel Westmere EP in just 300ms if written in Java. The language is unimportant to this experiment and results will be similar across all languages with the same basic primitives.
+
+Once a lock is introduced to provide mutual exclusion, even when the lock is as yet un-contended, the cost goes up significantly. The cost increases again, by orders of magnitude, when two or more threads begin to contend. The results of this simple experiment are shown in the table below:
+
+Table 1. Comparative costs of contention Method Time (ms) Single thread 300 Single thread with lock 10,000 Two threads with lock 224,000 Single thread with CAS 5,700 Two threads with CAS 30,000 Single thread with volatile write 4,700 2.2. The Costs of “CAS” A more efficient alternative to the use of locks can be employed for updating memory when the target of the update is a single word. These alternatives are based upon the atomic, or interlocked, instructions implemented in modern processors. These are commonly known as CAS (Compare And Swap) operations, e.g. “lock cmpxchg” on x86. A CAS operation is a special machine-code instruction that allows a word in memory to be conditionally set as an atomic operation. For the “increment a counter experiment” each thread can spin in a loop reading the counter then try to atomically set it to its new incremented value. The old and new values are provided as parameters to this instruction. If, when the operation is executed, the value of the counter matches the supplied expected value, the counter is updated with the new value. If, on the other hand, the value is not as expected, the CAS operation will fail. It is then up to the thread attempting to perform the change to retry, re-reading the counter incrementing from that value and so on until the change succeeds. This CAS approach is significantly more efficient than locks because it does not require a context switch to the kernel for arbitration. However CAS operations are not free of cost. The processor must lock its instruction pipeline to ensure atomicity and employ a memory barrier to make the changes visible to other threads. CAS operations are available in Java by using the java.util.concurrent.Atomic* classes.
+
+If the critical section of the program is more complex than a simple increment of a counter it may take a complex state machine using multiple CAS operations to orchestrate the contention. Developing concurrent programs using locks is difficult; developing lock-free algorithms using CAS operations and memory barriers is many times more complex and it is very difficult to prove that they are correct.
+
+The ideal algorithm would be one with only a single thread owning all writes to a single resource with other threads reading the results. To read the results in a multi-processor environment requires memory barriers to make the changes visible to threads running on other processors.
+
+2.3. Memory Barriers Modern processors perform out-of-order execution of instructions and out-of-order loads and stores of data between memory and execution units for performance reasons. The processors need only guarantee that program logic produces the same results regardless of execution order. This is not an issue for single-threaded programs. However, when threads share state it is important that all memory changes appear in order, at the point required, for the data exchange to be successful. Memory barriers are used by processors to indicate sections of code where the ordering of memory updates is important. They are the means by which hardware ordering and visibility of change is achieved between threads. Compilers can put in place complimentary software barriers to ensure the ordering of compiled code, such software memory barriers are in addition to the hardware barriers used by the processors themselves.
+
+Modern CPUs are now much faster than the current generation of memory systems. To bridge this divide CPUs use complex cache systems which are effectively fast hardware hash tables without chaining. These caches are kept coherent with other processor cache systems via message passing protocols. In addition, processors have “store buffers” to offload writes to these caches, and “invalidate queues” so that the cache coherency protocols can acknowledge invalidation messages quickly for efficiency when a write is about to happen.
+
+What this means for data is that the latest version of any value could, at any stage after being written, be in a register, a store buffer, one of many layers of cache, or in main memory. If threads are to share this value, it needs to be made visible in an ordered fashion and this is achieved through the coordinated exchange of cache coherency messages. The timely generation of these messages can be controlled by memory barriers. A read memory barrier orders load instructions on the CPU that executes it by marking a point in the invalidate queue for changes coming into its cache. This gives it a consistent view of the world for write operations ordered before the read barrier.
+
+A write barrier orders store instructions on the CPU that executes it by marking a point in the store buffer, thus flushing writes out via its cache. This barrier gives an ordered view to the world of what store operations happen before the write barrier.
+
 A full memory barrier orders both loads and stores but only on the CPU that executes it.
-Some CPUs have more variants in addition to these three primitives but these three are sufficient to
-understand the complexities of what is involved. In the Java memory model the read and write of a volatile
-field implements the read and write barriers respectively. This was made explicit in the Java Memory Model [3]
-as defined with the release of Java 5.
-2.4. Cache Lines
-The way in which caching is used in modern processors is of immense importance to successful high
-performance operation. Such processors are enormously efficient at churning through data and instructions
-held in cache and yet, comparatively, are massively inefficient when a cache miss occurs.
-Our hardware does not move memory around in bytes or words. For efficiency, caches are organised into
-cache-lines that are typically 32-256 bytes in size, the most common cache-line being 64 bytes. This is the level
-of granularity at which cache coherency protocols operate. This means that if two variables are in the same
-cache line, and they are written to by different threads, then they present the same problems of write
-contention as if they were a single variable. This is a concept know as “false sharing”. For high performance
-then, it is important to ensure that independent, but concurrently written, variables do not share the same
-cache-line if contention is to be minimised.
-When accessing memory in a predictable manner CPUs are able to hide the latency cost of accessing main
-memory by predicting which memory is likely to be accessed next and pre-fetching it into the cache in the
-background. This only works if the processors can detect a pattern of access such as walking memory with a
-predictable “stride”. When iterating over the contents of an array the stride is predictable and so memory will
-be pre-fetched in cache lines, maximizing the efficiency of the access. Strides typically have to be less than 2048
-bytes in either direction to be noticed by the processor. However, data structures like linked lists and trees tend
-to have nodes that are more widely distributed in memory with no predictable stride of access. The lack of a
-consistent pattern in memory constrains the ability of the system to pre-fetch cache-lines, resulting in main
-memory accesses which can be more than 2 orders of magnitude less efficient.
-2.5. The Problems of Queues
-Queues typically use either linked-lists or arrays for the underlying storage of elements. If an in-memory queue
-is allowed to be unbounded then for many classes of problem it can grow unchecked until it reaches the point
-of catastrophic failure by exhausting memory. This happens when producers outpace the consumers.
-Unbounded queues can be useful in systems where the producers are guaranteed not to outpace the consumers
-and memory is a precious resource, but there is always a risk if this assumption doesn’t hold and queue grows
-without limit. To avoid this catastrophic outcome, queues are commonly constrained in size (bounded).
-Keeping a queue bounded requires that it is either array-backed or that the size is actively tracked.
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 6 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-Queue implementations tend to have write contention on the head, tail, and size variables. When in use,
-queues are typically always close to full or close to empty due to the differences in pace between consumers
-and producers. They very rarely operate in a balanced middle ground where the rate of production and
-consumption is evenly matched. This propensity to be always full or always empty results in high levels of
-contention and/or expensive cache coherence. The problem is that even when the head and tail mechanisms
-are separated using different concurrent objects such as locks or CAS variables, they generally occupy the same
-cache-line.
-The concerns of managing producers claiming the head of a queue, consumers claiming the tail, and the
-storage of nodes in between make the designs of concurrent implementations very complex to manage beyond
-using a single large-grain lock on the queue. Large grain locks on the whole queue for put and take operations
-are simple to implement but represent a significant bottleneck to throughput. If the concurrent concerns are
-teased apart within the semantics of a queue then the implementations become very complex for anything
-other than a single producer – single consumer implementation.
-In Java there is a further problem with the use of queues, as they are significant sources of garbage. Firstly,
-objects have to be allocated and placed in the queue. Secondly, if linked-list backed, objects have to be allocated
-representing the nodes of the list. When no longer referenced, all these objects allocated to support the queue
-implementation need to be re-claimed.
-2.6. Pipelines and Graphs
-For many classes of problem it makes sense to wire together several processing stages into pipelines. Such
-pipelines often have parallel paths, being organised into graph-like topologies. The links between each stage are
-often implemented by queues with each stage having its own thread.
-This approach is not cheap - at each stage we have to incur the cost of en-queuing and de-queuing units of
-work. The number of targets multiplies this cost when the path must fork, and incurs an inevitable cost of
-contention when it must re-join after such a fork.
-It would be ideal if the graph of dependencies could be expressed without incurring the cost of putting the
-queues between stages.
-3. Design of the LMAX Disruptor
-While trying to address the problems described above, a design emerged through a rigorous separation of the
-concerns that we saw as being conflated in queues. This approach was combined with a focus on ensuring that
-any data should be owned by only one thread for write access, therefore eliminating write contention. That
-design became known as the “Disruptor”. It was so named because it had elements of similarity for dealing
-with graphs of dependencies to the concept of “Phasers” [4] in Java 7, introduced to support Fork-Join.
-The LMAX disruptor is designed to address all of the issues outlined above in an attempt to maximize the
-efficiency of memory allocation, and operate in a cache-friendly manner so that it will perform optimally on
-modern hardware.
-At the heart of the disruptor mechanism sits a pre-allocated bounded data structure in the form of a ring-
-buffer. Data is added to the ring buffer through one or more producers and processed by one or more
-consumers.
-3.1. Memory Allocation
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 7 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-All memory for the ring buffer is pre-allocated on start up. A ring-buffer can store either an array of pointers to
-entries or an array of structures representing the entries. The limitations of the Java language mean that
-entries are associated with the ring-buffer as pointers to objects. Each of these entries is typically not the data
-being passed itself, but a container for it. This pre-allocation of entries eliminates issues in languages that
-support garbage collection, since the entries will be re-used and live for the duration of the Disruptor instance.
-The memory for these entries is allocated at the same time and it is highly likely that it will be laid out
-contiguously in main memory and so support cache striding. There is a proposal by John Rose to introduce
-“value types” [5] to the Java language which would allow arrays of tuples, like other languages such as C, and so
-ensure that memory would be allocated contiguously and avoid the pointer indirection.
-Garbage collection can be problematic when developing low-latency systems in a managed runtime
-environment like Java. The more memory that is allocated the greater the burden this puts on the garbage
-collector. Garbage collectors work at their best when objects are either very short-lived or effectively immortal.
-The pre-allocation of entries in the ring buffer means that it is immortal as far as garbage collector is
-concerned and so represents little burden.
-Under heavy load queue-based systems can back up, which can lead to a reduction in the rate of processing,
-and results in the allocated objects surviving longer than they should, thus being promoted beyond the young
-generation with generational garbage collectors. This has two implications: first, the objects have to be copied
-between generations which cause latency jitter; second, these objects have to be collected from the old
-generation which is typically a much more expensive operation and increases the likelihood of “stop the world”
-pauses that result when the fragmented memory space requires compaction. In large memory heaps this can
-cause pauses of seconds per GB in duration.
-3.2. Teasing Apart the Concerns
-We saw the following concerns as being conflated in all queue implementations, to the extent that this
-collection of distinct behaviours tend to define the interfaces that queues implement:
-1. Storage of items being exchanged
-2. Coordination of producers claiming the next sequence for exchange
-3. Coordination of consumers being notified that a new item is available
-When designing a financial exchange in a language that uses garbage collection, too much memory allocation
-can be problematic. So, as we have described linked-list backed queues are a not a good approach. Garbage
-collection is minimized if the entire storage for the exchange of data between processing stages can be pre-
-allocated. Further, if this allocation can be performed in a uniform chunk, then traversal of that data will be
-done in a manner that is very friendly to the caching strategies employed by modern processors. A data-
-structure that meets this requirement is an array with all the slots pre-filled. On creation of the ring buffer the
-Disruptor utilises the abstract factory pattern to pre-allocate the entries. When an entry is claimed, a producer
-can copy its data into the pre-allocated structure.
-On most processors there is a very high cost for the remainder calculation on the sequence number, which
-determines the slot in the ring. This cost can be greatly reduced by making the ring size a power of 2. A bit
-mask of size minus one can be used to perform the remainder operation efficiently.
-As we described earlier bounded queues suffer from contention at the head and tail of the queue. The ring
-buffer data structure is free from this contention and concurrency primitives because these concerns have
-been teased out into producer and consumer barriers through which the ring buffer must be accessed. The
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 8 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-logic for these barriers is described below.
-In most common usages of the Disruptor there is usually only one producer. Typical producers are file readers
-or network listeners. In cases where there is a single producer there is no contention on sequence/entry
-allocation. In more unusual usages where there are multiple producers, producers will race one another to
-claim the next entry in the ring-buffer. Contention on claiming the next available entry can be managed with a
-simple CAS operation on the sequence number for that slot.
-Once a producer has copied the relevant data to the claimed entry it can make it public to consumers by
-committing the sequence. This can be done without CAS by a simple busy spin until the other producers have
-reached this sequence in their own commit. Then this producer can advance the cursor signifying the next
-available entry for consumption. Producers can avoid wrapping the ring by tracking the sequence of
-consumers as a simple read operation before they write to the ring buffer.
-Consumers wait for a sequence to become available in the ring buffer before they read the entry. Various
-strategies can be employed while waiting. If CPU resource is precious they can wait on a condition variable
-within a lock that gets signalled by the producers. This obviously is a point of contention and only to be used
-when CPU resource is more important than latency or throughput. The consumers can also loop checking the
-cursor which represents the currently available sequence in the ring buffer. This could be done with or without
-a thread yield by trading CPU resource against latency. This scales very well as we have broken the contended
-dependency between the producers and consumers if we do not use a lock and condition variable. Lock free
-multi-producer – multi-consumer queues do exist but they require multiple CAS operations on the head, tail,
-size counters. The Disruptor does not suffer this CAS contention.
-3.3. Sequencing
-Sequencing is the core concept to how the concurrency is managed in the Disruptor. Each producer and
-consumer works off a strict sequencing concept for how it interacts with the ring buffer. Producers claim the
-next slot in sequence when claiming an entry in the ring. This sequence of the next available slot can be a
-simple counter in the case of only one producer or an atomic counter updated using CAS operations in the case
-of multiple producers. Once a sequence value is claimed, this entry in the ring buffer is now available to be
-written to by the claiming producer. When the producer has finished updating the entry it can commit the
-changes by updating a separate counter which represents the cursor on the ring buffer for the latest entry
-available to consumers. The ring buffer cursor can be read and written in a busy spin by the producers using
-memory barrier without requiring a CAS operation as below.
-Consumers wait for a given sequence to become available by using a memory barrier to read the cursor. Once
-the cursor has been updated the memory barriers ensure the changes to the entries in the ring buffer are
-visible to the consumers who have waited on the cursor advancing.
-long
-long
-long
-long expectedSequence = claimedSequence – 1;
-while
-while
-while
-while (cursor !=
-!=
-!=
-!= expectedSequence)
+
+Some CPUs have more variants in addition to these three primitives but these three are sufficient to understand the complexities of what is involved. In the Java memory model the read and write of a volatile field implements the read and write barriers respectively. This was made explicit in the Java Memory Model [3] as defined with the release of Java 5.
+
+2.4. Cache Lines The way in which caching is used in modern processors is of immense importance to successful high performance operation. Such processors are enormously efficient at churning through data and instructions held in cache and yet, comparatively, are massively inefficient when a cache miss occurs.
+
+Our hardware does not move memory around in bytes or words. For efficiency, caches are organised into cache-lines that are typically 32-256 bytes in size, the most common cache-line being 64 bytes. This is the level of granularity at which cache coherency protocols operate. This means that if two variables are in the same cache line, and they are written to by different threads, then they present the same problems of write contention as if they were a single variable. This is a concept know as “false sharing”. For high performance then, it is important to ensure that independent, but concurrently written, variables do not share the same cache-line if contention is to be minimised.
+
+When accessing memory in a predictable manner CPUs are able to hide the latency cost of accessing main memory by predicting which memory is likely to be accessed next and pre-fetching it into the cache in the background. This only works if the processors can detect a pattern of access such as walking memory with a predictable “stride”. When iterating over the contents of an array the stride is predictable and so memory will be pre-fetched in cache lines, maximizing the efficiency of the access. Strides typically have to be less than 2048 bytes in either direction to be noticed by the processor. However, data structures like linked lists and trees tend to have nodes that are more widely distributed in memory with no predictable stride of access. The lack of a consistent pattern in memory constrains the ability of the system to pre-fetch cache-lines, resulting in main memory accesses which can be more than 2 orders of magnitude less efficient.
+
+2.5. The Problems of Queues Queues typically use either linked-lists or arrays for the underlying storage of elements. If an in-memory queue is allowed to be unbounded then for many classes of problem it can grow unchecked until it reaches the point of catastrophic failure by exhausting memory. This happens when producers outpace the consumers. Unbounded queues can be useful in systems where the producers are guaranteed not to outpace the consumers and memory is a precious resource, but there is always a risk if this assumption doesn’t hold and queue grows without limit. To avoid this catastrophic outcome, queues are commonly constrained in size (bounded). Keeping a queue bounded requires that it is either array-backed or that the size is actively tracked. Queue implementations tend to have write contention on the head, tail, and size variables. When in use, queues are typically always close to full or close to empty due to the differences in pace between consumers and producers. They very rarely operate in a balanced middle ground where the rate of production and consumption is evenly matched. This propensity to be always full or always empty results in high levels of contention and/or expensive cache coherence. The problem is that even when the head and tail mechanisms are separated using different concurrent objects such as locks or CAS variables, they generally occupy the same cache-line.
+
+The concerns of managing producers claiming the head of a queue, consumers claiming the tail, and the storage of nodes in between make the designs of concurrent implementations very complex to manage beyond using a single large-grain lock on the queue. Large grain locks on the whole queue for put and take operations are simple to implement but represent a significant bottleneck to throughput. If the concurrent concerns are teased apart within the semantics of a queue then the implementations become very complex for anything other than a single producer – single consumer implementation.
+
+In Java there is a further problem with the use of queues, as they are significant sources of garbage. Firstly, objects have to be allocated and placed in the queue. Secondly, if linked-list backed, objects have to be allocated representing the nodes of the list. When no longer referenced, all these objects allocated to support the queue implementation need to be re-claimed.
+
+2.6. Pipelines and Graphs For many classes of problem it makes sense to wire together several processing stages into pipelines. Such pipelines often have parallel paths, being organised into graph-like topologies. The links between each stage are often implemented by queues with each stage having its own thread.
+
+This approach is not cheap - at each stage we have to incur the cost of en-queuing and de-queuing units of work. The number of targets multiplies this cost when the path must fork, and incurs an inevitable cost of contention when it must re-join after such a fork.
+
+It would be ideal if the graph of dependencies could be expressed without incurring the cost of putting the queues between stages.
+
+#### 3. Design of the LMAX Disruptor
+
+While trying to address the problems described above, a design emerged through a rigorous separation of the concerns that we saw as being conflated in queues. This approach was combined with a focus on ensuring that any data should be owned by only one thread for write access, therefore eliminating write contention. That design became known as the “Disruptor”. It was so named because it had elements of similarity for dealing with graphs of dependencies to the concept of “Phasers” [4] in Java 7, introduced to support Fork-Join. The LMAX disruptor is designed to address all of the issues outlined above in an attempt to maximize the efficiency of memory allocation, and operate in a cache-friendly manner so that it will perform optimally on modern hardware.
+
+At the heart of the disruptor mechanism sits a pre-allocated bounded data structure in the form of a ringbuffer. Data is added to the ring buffer through one or more producers and processed by one or more consumers.
+
+3.1. Memory Allocation All memory for the ring buffer is pre-allocated on start up. A ring-buffer can store either an array of pointers to entries or an array of structures representing the entries. The limitations of the Java language mean that entries are associated with the ring-buffer as pointers to objects. Each of these entries is typically not the data being passed itself, but a container for it. This pre-allocation of entries eliminates issues in languages that support garbage collection, since the entries will be re-used and live for the duration of the Disruptor instance. The memory for these entries is allocated at the same time and it is highly likely that it will be laid out contiguously in main memory and so support cache striding. There is a proposal by John Rose to introduce “value types” [5] to the Java language which would allow arrays of tuples, like other languages such as C, and so ensure that memory would be allocated contiguously and avoid the pointer indirection.
+
+Garbage collection can be problematic when developing low-latency systems in a managed runtime environment like Java. The more memory that is allocated the greater the burden this puts on the garbage collector. Garbage collectors work at their best when objects are either very short-lived or effectively immortal. The pre-allocation of entries in the ring buffer means that it is immortal as far as garbage collector is concerned and so represents little burden.
+
+Under heavy load queue-based systems can back up, which can lead to a reduction in the rate of processing, and results in the allocated objects surviving longer than they should, thus being promoted beyond the young generation with generational garbage collectors. This has two implications: first, the objects have to be copied between generations which cause latency jitter; second, these objects have to be collected from the old generation which is typically a much more expensive operation and increases the likelihood of “stop the world” pauses that result when the fragmented memory space requires compaction. In large memory heaps this can cause pauses of seconds per GB in duration.
+
+3.2. Teasing Apart the Concerns We saw the following concerns as being conflated in all queue implementations, to the extent that this collection of distinct behaviours tend to define the interfaces that queues implement:
+
+#### 1. Storage of items being exchanged
+
+2. Coordination of producers claiming the next sequence for exchange 3. Coordination of consumers being notified that a new item is available When designing a financial exchange in a language that uses garbage collection, too much memory allocation can be problematic. So, as we have described linked-list backed queues are a not a good approach. Garbage collection is minimized if the entire storage for the exchange of data between processing stages can be preallocated. Further, if this allocation can be performed in a uniform chunk, then traversal of that data will be done in a manner that is very friendly to the caching strategies employed by modern processors. A datastructure that meets this requirement is an array with all the slots pre-filled. On creation of the ring buffer the Disruptor utilises the abstract factory pattern to pre-allocate the entries. When an entry is claimed, a producer can copy its data into the pre-allocated structure.
+
+On most processors there is a very high cost for the remainder calculation on the sequence number, which determines the slot in the ring. This cost can be greatly reduced by making the ring size a power of 2. A bit mask of size minus one can be used to perform the remainder operation efficiently.
+
+As we described earlier bounded queues suffer from contention at the head and tail of the queue. The ring buffer data structure is free from this contention and concurrency primitives because these concerns have been teased out into producer and consumer barriers through which the ring buffer must be accessed. The logic for these barriers is described below.
+
+In most common usages of the Disruptor there is usually only one producer. Typical producers are file readers or network listeners. In cases where there is a single producer there is no contention on sequence/entry allocation. In more unusual usages where there are multiple producers, producers will race one another to claim the next entry in the ring-buffer. Contention on claiming the next available entry can be managed with a simple CAS operation on the sequence number for that slot.
+
+Once a producer has copied the relevant data to the claimed entry it can make it public to consumers by committing the sequence. This can be done without CAS by a simple busy spin until the other producers have reached this sequence in their own commit. Then this producer can advance the cursor signifying the next available entry for consumption. Producers can avoid wrapping the ring by tracking the sequence of consumers as a simple read operation before they write to the ring buffer.
+
+Consumers wait for a sequence to become available in the ring buffer before they read the entry. Various strategies can be employed while waiting. If CPU resource is precious they can wait on a condition variable within a lock that gets signalled by the producers. This obviously is a point of contention and only to be used when CPU resource is more important than latency or throughput. The consumers can also loop checking the cursor which represents the currently available sequence in the ring buffer. This could be done with or without a thread yield by trading CPU resource against latency. This scales very well as we have broken the contended dependency between the producers and consumers if we do not use a lock and condition variable. Lock free multi-producer – multi-consumer queues do exist but they require multiple CAS operations on the head, tail, size counters. The Disruptor does not suffer this CAS contention.
+
+3.3. Sequencing Sequencing is the core concept to how the concurrency is managed in the Disruptor. Each producer and consumer works off a strict sequencing concept for how it interacts with the ring buffer. Producers claim the next slot in sequence when claiming an entry in the ring. This sequence of the next available slot can be a simple counter in the case of only one producer or an atomic counter updated using CAS operations in the case of multiple producers. Once a sequence value is claimed, this entry in the ring buffer is now available to be written to by the claiming producer. When the producer has finished updating the entry it can commit the changes by updating a separate counter which represents the cursor on the ring buffer for the latest entry available to consumers. The ring buffer cursor can be read and written in a busy spin by the producers using memory barrier without requiring a CAS operation as below.
+
+Consumers wait for a given sequence to become available by using a memory barrier to read the cursor. Once the cursor has been updated the memory barriers ensure the changes to the entries in the ring buffer are visible to the consumers who have waited on the cursor advancing.
+
+```java
+long expectedSequence = claimedSequence - 1;
+while (cursor != expectedSequence)
 {
   // busy spin
 }
 cursor = claimedSequence;
-JAVA
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 9 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-Consumers each contain their own sequence which they update as they process entries from the ring buffer.
-These consumer sequences allow the producers to track consumers to prevent the ring from wrapping.
-Consumer sequences also allow consumers to coordinate work on the same entry in an ordered manner
-In the case of having only one producer, and regardless of the complexity of the consumer graph, no locks or
-CAS operations are required. The whole concurrency coordination can be achieved with just memory barriers
-on the discussed sequences.
-3.4. Batching E!ect
-When consumers are waiting on an advancing cursor sequence in the ring buffer an interesting opportunity
-arises that is not possible with queues. If the consumer finds the ring buffer cursor has advanced a number of
-steps since it last checked it can process up to that sequence without getting involved in the concurrency
-mechanisms. This results in the lagging consumer quickly regaining pace with the producers when the
-producers burst ahead thus balancing the system. This type of batching increases throughput while reducing
-and smoothing latency at the same time. Based on our observations, this effect results in a close to constant
-time for latency regardless of load, up until the memory sub-system is saturated, and then the profile is linear
-following Little’s Law [6]. This is very different to the “J” curve effect on latency we have observed with queues
-as load increases.
-3.5. Dependency Graphs
-A queue represents the simple one step pipeline dependency between producers and consumers. If the
-consumers form a chain or graph-like structure of dependencies then queues are required between each stage
-of the graph. This incurs the fixed costs of queues many times within the graph of dependent stages. When
-designing the LMAX financial exchange our profiling showed that taking a queue based approach resulted in
-queuing costs dominating the total execution costs for processing a transaction.
-Because the producer and consumer concerns are separated with the Disruptor pattern, it is possible to
-represent a complex graph of dependencies between consumers while only using a single ring buffer at the
-core. This results in greatly reduced fixed costs of execution thus increasing throughput while reducing latency.
-A single ring buffer can be used to store entries with a complex structure representing the whole workflow in a
-cohesive place. Care must be taken in the design of such a structure so that the state written by independent
-consumers does not result in false sharing of cache lines.
-3.6. Disruptor Class Diagram
-The core relationships in the Disruptor framework are depicted in the class diagram below. This diagram
-leaves out the convenience classes which can be used to simplify the programming model. After the
-dependency graph is constructed the programming model is simple. Producers claim entries in sequence via a
-ProducerBarrier , write their changes into the claimed entry, then commit that entry back via the
-ProducerBarrier making them available for consumption. As a consumer all one needs do is provide a
-BatchHandler implementation that receives call backs when a new entry is available. This resulting
-programming model is event based having a lot of similarities to the Actor Model.
-Separating the concerns normally conflated in queue implementations allows for a more flexible design. A
-RingBuffer exists at the core of the Disruptor pattern providing storage for data exchange without
-contention. The concurrency concerns are separated out for the producers and consumers interacting with the
-RingBuffer . The ProducerBarrier manages any concurrency concerns associated with claiming slots in the
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 10 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-ring buffer, while tracking dependant consumers to prevent the ring from wrapping. The ConsumerBarrier
-notifies consumers when new entries are available, and Consumers can be constructed into a graph of
-dependencies representing multiple stages in a processing pipeline.
-3.7. Code Example
-The code below is an example of a single producer and single consumer using the convenience interface
-BatchHandler for implementing a consumer. The consumer runs on a separate thread receiving entries as
-they become available.
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 11 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-4. Throughput Performance Testing
-As a reference we choose Doug Lea’s excellent java.util.concurrent.ArrayBlockingQueue [7] which has the
-highest performance of any bounded queue based on our testing. The tests are conducted in a blocking
-programming style to match that of the Disruptor. The tests cases detailed below are available in the Disruptor
-open source project.
-
-running the tests requires a system capable of executing at least 4 threads in parallel.
-Figure 1. Unicast: 1P – 1C
+```
+Consumers each contain their own sequence which they update as they process entries from the ring buffer. These consumer sequences allow the producers to track consumers to prevent the ring from wrapping. Consumer sequences also allow consumers to coordinate work on the same entry in an ordered manner In the case of having only one producer, and regardless of the complexity of the consumer graph, no locks or CAS operations are required. The whole concurrency coordination can be achieved with just memory barriers on the discussed sequences.
+
+3.4. Batching E!ect When consumers are waiting on an advancing cursor sequence in the ring buffer an interesting opportunity arises that is not possible with queues. If the consumer finds the ring buffer cursor has advanced a number of steps since it last checked it can process up to that sequence without getting involved in the concurrency mechanisms. This results in the lagging consumer quickly regaining pace with the producers when the producers burst ahead thus balancing the system. This type of batching increases throughput while reducing and smoothing latency at the same time. Based on our observations, this effect results in a close to constant time for latency regardless of load, up until the memory sub-system is saturated, and then the profile is linear following Little’s Law [6]. This is very different to the “J” curve effect on latency we have observed with queues as load increases.
+
+3.5. Dependency Graphs A queue represents the simple one step pipeline dependency between producers and consumers. If the consumers form a chain or graph-like structure of dependencies then queues are required between each stage of the graph. This incurs the fixed costs of queues many times within the graph of dependent stages. When designing the LMAX financial exchange our profiling showed that taking a queue based approach resulted in queuing costs dominating the total execution costs for processing a transaction.
+
+Because the producer and consumer concerns are separated with the Disruptor pattern, it is possible to represent a complex graph of dependencies between consumers while only using a single ring buffer at the core. This results in greatly reduced fixed costs of execution thus increasing throughput while reducing latency. A single ring buffer can be used to store entries with a complex structure representing the whole workflow in a cohesive place. Care must be taken in the design of such a structure so that the state written by independent consumers does not result in false sharing of cache lines.
+
+3.6. Disruptor Class Diagram The core relationships in the Disruptor framework are depicted in the class diagram below. This diagram leaves out the convenience classes which can be used to simplify the programming model. After the dependency graph is constructed the programming model is simple. Producers claim entries in sequence via a ProducerBarrier , write their changes into the claimed entry, then commit that entry back via the ProducerBarrier making them available for consumption. As a consumer all one needs do is provide a BatchHandler implementation that receives call backs when a new entry is available. This resulting programming model is event based having a lot of similarities to the Actor Model.
+
+Separating the concerns normally conflated in queue implementations allows for a more flexible design. A RingBuffer exists at the core of the Disruptor pattern providing storage for data exchange without contention. The concurrency concerns are separated out for the producers and consumers interacting with the RingBuffer . The ProducerBarrier manages any concurrency concerns associated with claiming slots in the ring buffer, while tracking dependant consumers to prevent the ring from wrapping. The ConsumerBarrier notifies consumers when new entries are available, and Consumers can be constructed into a graph of dependencies representing multiple stages in a processing pipeline.
+
+3.7. Code Example The code below is an example of a single producer and single consumer using the convenience interface BatchHandler for implementing a consumer. The consumer runs on a separate thread receiving entries as they become available.
+
+#### 4. Throughput Performance Testing
+
+As a reference we choose Doug Lea’s excellent java.util.concurrent.ArrayBlockingQueue [7] which has the highest performance of any bounded queue based on our testing. The tests are conducted in a blocking programming style to match that of the Disruptor. The tests cases detailed below are available in the Disruptor open source project.
+
+ running the tests requires a system capable of executing at least 4 threads in parallel.
+
+#### Figure 1. Unicast: 1P – 1C
+
+```java
 // Callback handler which can be implemented by consumers
-final
-final
-final
-final BatchHandler
-BatchHandler
-BatchHandler
-BatchHandler<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry> batchHandler = new
-new
-new
-new BatchHandler
-BatchHandler
-BatchHandler
-BatchHandler<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry>()
->()
->()
->()
+final BatchHandler<ValueEntry> batchHandler = new BatchHandler<ValueEntry>()
 {
-public
-public
-public
-public void
-void
-void
-void onAvailable
-onAvailable
-onAvailable
-onAvailable(final
-final
-final
-final ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry entry) throws
-throws
-throws
-throws Exception
-Exception
-Exception
-Exception
-{
-// process a new entry as it becomes available.
-}
-    public
-public
-public
-public void
-void
-void
-void onEndOfBatch
-onEndOfBatch
-onEndOfBatch
-onEndOfBatch()
-()
-()
-() throws
-throws
-throws
-throws Exception
-Exception
-Exception
-Exception
+    public void onAvailable(final ValueEntry entry) throws Exception
+    {
+        // process a new entry as it becomes available.
+    }
+    public void onEndOfBatch() throws Exception
     {
         // useful for flushing results to an IO device if necessary.
     }
-    public
-public
-public
-public void
-void
-void
-void onCompletion
-onCompletion
-onCompletion
-onCompletion()
-()
-()
-()
+    public void onCompletion()
     {
         // do any necessary clean up before shutdown
     }
 };
-};
-};
-};
-RingBuffer
-RingBuffer
-RingBuffer
-RingBuffer<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry> ringBuffer =
-    new
-new
-new
-new RingBuffer
-RingBuffer
-RingBuffer
-RingBuffer<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry>(
->(
->(
->(ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry.ENTRY_FACTORY, SIZE,
-                               ClaimStrategy
-ClaimStrategy
-ClaimStrategy
-ClaimStrategy.Option.SINGLE_THREADED,
-                               WaitStrategy
-WaitStrategy
-WaitStrategy
-WaitStrategy.Option.YIELDING);
-);
-);
-);
-ConsumerBarrier
-ConsumerBarrier
-ConsumerBarrier
-ConsumerBarrier<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry> consumerBarrier = ringBuffer.createConsumerBarrier();
-();
-();
-();
-BatchConsumer
-BatchConsumer
-BatchConsumer
-BatchConsumer<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry> batchConsumer =
-    new
-new
-new
-new BatchConsumer
-BatchConsumer
-BatchConsumer
-BatchConsumer<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry>(
->(
->(
->(consumerBarrier, batchHandler);
-);
-);
-);
-ProducerBarrier
-ProducerBarrier
-ProducerBarrier
-ProducerBarrier<ValueEntry
-ValueEntry
-ValueEntry
-ValueEntry> producerBarrier = ringBuffer.createProducerBarrier(batchConsumer);
-);
-);
-);
+
+RingBuffer<ValueEntry> ringBuffer =
+    new RingBuffer<ValueEntry>(ValueEntry.ENTRY_FACTORY, SIZE,
+                               ClaimStrategy.Option.SINGLE_THREADED,
+                               WaitStrategy.Option.YIELDING);
+
+ConsumerBarrier<ValueEntry> consumerBarrier = ringBuffer.createConsumerBarrier();
+BatchConsumer<ValueEntry> batchConsumer =
+    new BatchConsumer<ValueEntry>(consumerBarrier, batchHandler);
+ProducerBarrier<ValueEntry> producerBarrier = ringBuffer.createProducerBarrier(batchConsumer);
+
 // Each consumer can run on a separate thread
 EXECUTOR.submit(batchConsumer);
-);
-);
-);
+
 // Producers claim entries in sequence
-ValueEntry
-ValueEntry
-ValueEntry
 ValueEntry entry = producerBarrier.nextEntry();
-();
-();
-();
+
 // copy data into the entry container
 // make the entry available to consumers
 producerBarrier.commit(entry);
-);
-);
-);
-JAVA
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 12 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-Figure 2. Three Step Pipeline: 1P – 3C
-Figure 3. Sequencer: 3P – 1C
-Figure 4. Multicast: 1P – 3C
-Figure 5. Diamond: 1P – 3C
-For the above configurations an ArrayBlockingQueue was applied for each arc of data flow compared to
-barrier configuration with the Disruptor. The following table shows the performance results in operations per
-second using a Java 1.6.0_25 64-bit Sun JVM, Windows 7, Intel Core i7 860 @ 2.8 GHz without HT and Intel Core
-i7-2720QM, Ubuntu 11.04, and taking the best of 3 runs when processing 500 million messages. Results can vary
-substantially across different JVM executions and the figures below are not the highest we have observed.
-Table 2. Comparative throughput (in ops per sec)
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 13 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-Nehalem 2.8Ghz – Windows 7 SP1 64-
-bit
-Sandy Bridge 2.2Ghz – Linux 2.6.38 64-
-bit
-ABQ
-Disruptor
-ABQ
-Disruptor
-Unicast: 1P – 1C
-5,339,256
-25,998,336
-4,057,453
-22,381,378
-Pipeline: 1P – 3C
-2,128,918
-16,806,157
-2,006,903
-15,857,913
-Sequencer: 3P – 1C
-5,539,531
-13,403,268
-2,056,118
-14,540,519
-Multicast: 1P – 3C
-1,077,384
-9,377,871
-260,733
-10,860,121
-Diamond: 1P – 3C
-2,113,941
-16,143,613
-2,082,725
-15,295,197
-Table 3. Comparative throughput updated for modern hardware (in ops per sec)
-AMD EPYC 9374F – Linux 5.4.277 – OpenJDK 11.0.24
-ABQ
-Disruptor 3
-Disruptor 4
-Unicast: 1P – 1C
-20,895,148
-134,553,283
-160,359,204
-Pipeline: 1P – 3C
-5,216,647
-76,068,766
-101,317,122
-Sequencer: 3P – 1C
-18,791,340
-16,010,759
-29,726,516
-Multicast: 1P – 3C
-2,355,379
-68,157,033
-70,018,204
-Diamond: 1P – 3C
-3,433,665
-61,229,488
-63,123,343
-5. Latency Performance Testing
-To measure latency we take the three stage pipeline and generate events at less than saturation. This is
-achieved by waiting 1 microsecond after injecting an event before injecting the next and repeating 50 million
-times. To time at this level of precision it is necessary to use time stamp counters from the CPU. We chose CPUs
-with an invariant TSC because older processors suffer from changing frequency due to power saving and sleep
-states. Intel Nehalem and later processors use an invariant TSC which can be accessed by the latest Oracle JVMs
-running on Ubuntu 11.04. No CPU binding has been employed for this test. For comparison we use the
-ArrayBlockingQueue once again. We could have used ConcurrentLinkedQueue [8] which is likely to give better
-results but we want to use a bounded queue implementation to ensure producers do not outpace consumers by
-creating back pressure. The results below are for 2.2Ghz Core i7-2720QM running Java 1.6.0_25 64-bit on
-Ubuntu 11.04. Mean latency per hop for the Disruptor comes out at 52 nanoseconds compared to 32,757
-nanoseconds for ArrayBlockingQueue. Profiling shows the use of locks and signalling via a condition variable
-are the main cause of latency for the ArrayBlockingQueue.
-Table 4. Comparative Latency in three stage pipeline
-Array Blocking Queue (ns)
-Disruptor (ns)
-Min Latency
-145
-29
-5/8/2026, 2:06 pm
-LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
-Page 14 of 14
-https://lmax-exchange.github.io/disruptor/disruptor.html
-Mean Latency
-32,757
-52
-99% observations less than
-2,097,152
-128
-99.99% observations less than
-4,194,304
-8,192
-Max Latency
-5,069,086
-175,567
-6. Conclusion
-The Disruptor is a major step forward for increasing throughput, reducing latency between concurrent
-execution contexts and ensuring predictable latency, an important consideration in many applications. Our
-testing shows that it out-performs comparable approaches for exchanging data between threads. We believe
-that this is the highest performance mechanism for such data exchange. By concentrating on a clean separation
-of the concerns involved in cross-thread data exchange, by eliminating write contention, minimizing read
-contention and ensuring that the code worked well with the caching employed by modern processors, we have
-created a highly efficient mechanism for exchanging data between threads in any application.
-The batching effect that allows consumers to process entries up to a given threshold, without any contention,
-introduces a new characteristic in high performance systems. For most systems, as load and contention
-increase there is an exponential increase in latency, the characteristic “J” curve. As load increases on the
-Disruptor, latency remains almost flat until saturation occurs of the memory sub-system.
-We believe that the Disruptor establishes a new benchmark for high-performance computing and is very well
-placed to continue to take advantage of current trends in processor and computer design.
-View the original PDF of this paper here.
+```
+#### Figure 2. Three Step Pipeline: 1P – 3C
+
+#### Figure 3. Sequencer: 3P – 1C
+
+#### Figure 4. Multicast: 1P – 3C
+
+#### Figure 5. Diamond: 1P – 3C
+
+For the above configurations an ArrayBlockingQueue was applied for each arc of data flow compared to barrier configuration with the Disruptor. The following table shows the performance results in operations per second using a Java 1.6.0_25 64-bit Sun JVM, Windows 7, Intel Core i7 860 @ 2.8 GHz without HT and Intel Core i7-2720QM, Ubuntu 11.04, and taking the best of 3 runs when processing 500 million messages. Results can vary substantially across different JVM executions and the figures below are not the highest we have observed.
+
+#### Table 2. Comparative throughput (in ops per sec)
+| Configuration | ABQ (Nehalem) | Disruptor (Nehalem) | ABQ (Sandy Bridge) | Disruptor (Sandy Bridge) |
+|---|---|---|---|---|
+| Unicast: 1P – 1C | 5,339,256 | 25,998,336 | 4,057,453 | 22,381,378 |
+| Pipeline: 1P – 3C | 2,128,918 | 16,806,157 | 2,006,903 | 15,857,913 |
+| Sequencer: 3P – 1C | 5,539,531 | 13,403,268 | 2,056,118 | 14,540,519 |
+| Multicast: 1P – 3C | 1,077,384 | 9,377,871 | 260,733 | 10,860,121 |
+| Diamond: 1P – 3C | 2,113,941 | 16,143,613 | 2,082,725 | 15,295,197 |
+
+#### Table 3. Comparative throughput updated for modern hardware (in ops per sec)
+| Configuration | ABQ | Disruptor 3 | Disruptor 4 |
+|---|---|---|---|
+| Unicast: 1P – 1C | 20,895,148 | 134,553,283 | 160,359,204 |
+| Pipeline: 1P – 3C | 5,216,647 | 76,068,766 | 101,317,122 |
+| Sequencer: 3P – 1C | 18,791,340 | 16,010,759 | 29,726,516 |
+| Multicast: 1P – 3C | 2,355,379 | 68,157,033 | 70,018,204 |
+| Diamond: 1P – 3C | 3,433,665 | 61,229,488 | 63,123,343 |
+
+#### 5. Latency Performance Testing
+
+To measure latency we take the three stage pipeline and generate events at less than saturation. This is achieved by waiting 1 microsecond after injecting an event before injecting the next and repeating 50 million times. To time at this level of precision it is necessary to use time stamp counters from the CPU. We chose CPUs with an invariant TSC because older processors suffer from changing frequency due to power saving and sleep states. Intel Nehalem and later processors use an invariant TSC which can be accessed by the latest Oracle JVMs running on Ubuntu 11.04. No CPU binding has been employed for this test. For comparison we use the ArrayBlockingQueue once again. We could have used ConcurrentLinkedQueue [8] which is likely to give better results but we want to use a bounded queue implementation to ensure producers do not outpace consumers by creating back pressure. The results below are for 2.2Ghz Core i7-2720QM running Java 1.6.0_25 64-bit on Ubuntu 11.04. Mean latency per hop for the Disruptor comes out at 52 nanoseconds compared to 32,757 nanoseconds for ArrayBlockingQueue. Profiling shows the use of locks and signalling via a condition variable are the main cause of latency for the ArrayBlockingQueue.
+
+#### Table 4. Comparative Latency in three stage pipeline
+| Metric | Array Blocking Queue (ns) | Disruptor (ns) |
+|---|---|---|
+| Min Latency | 145 | 29 |
+| Mean Latency | 32,757 | 52 |
+| 99% observations less than | 2,097,152 | 128 |
+| 99.99% observations less than | 4,194,304 | 8,192 |
+| Max Latency | 5,069,086 | 175,567 |
+
+#### 6. Conclusion
+
+The Disruptor is a major step forward for increasing throughput, reducing latency between concurrent execution contexts and ensuring predictable latency, an important consideration in many applications. Our testing shows that it out-performs comparable approaches for exchanging data between threads. We believe that this is the highest performance mechanism for such data exchange. By concentrating on a clean separation of the concerns involved in cross-thread data exchange, by eliminating write contention, minimizing read contention and ensuring that the code worked well with the caching employed by modern processors, we have created a highly efficient mechanism for exchanging data between threads in any application.
+
+The batching effect that allows consumers to process entries up to a given threshold, without any contention, introduces a new characteristic in high performance systems. For most systems, as load and contention increase there is an exponential increase in latency, the characteristic “J” curve. As load increases on the Disruptor, latency remains almost flat until saturation occurs of the memory sub-system.
+
+We believe that the Disruptor establishes a new benchmark for high-performance computing and is very well placed to continue to take advantage of current trends in processor and computer design.
+
+[View the original PDF of this paper here](https://lmax-exchange.github.io/disruptor/disruptor.html).
+
+#### References
 1. Staged Event-Driven Architecture – https://en.wikipedia.org/wiki/Staged_event-driven_architecture
 2. Actor model – http://dspace.mit.edu/handle/1721.1/6952
 3. Java Memory Model - https://jcp.org/en/jsr/detail?id=133
 4. Phasers - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/Phaser.html
 5. Value Types - https://blogs.oracle.com/jrose/tuples-in-the-vm
 6. Little’s Law - https://en.wikipedia.org/wiki/Little%27s_law
-7. ArrayBlockingQueue -
-https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
-8. ConcurrentLinkedQueue -
-http://download.oracle.com/javase/1.5.0/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html
-Version 1.0
-Last updated 2025-04-02 13:02:59 UTC
+7. ArrayBlockingQueue - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
+8. ConcurrentLinkedQueue - http://download.oracle.com/javase/1.5.0/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html
 
 
 ---
@@ -3249,11 +3083,8 @@ Last updated 2025-04-02 13:02:59 UTC
 - **Padding Solution in Java/C++**:
 
 ```java
-// Java Cache-Line Padding to Prevent False Sharing
-public class PaddedAtomicLong {
-    public volatile long value = 0L;
-    public long p1, p2, p3, p4, p5, p6, p7; // 56 bytes of padding + 8 byte long = 64 bytes
-}
+// Java Cache-Line Padding to Prevent False Sharing public class PaddedAtomicLong {     public volatile long value = 0L;     public long p1, p2, p3, p4, p5, p6, p7; // 56 bytes of padding + 8 byte long = 64 bytes }
+
 ```
 
 #### Reference 3.2.C: Single-Writer Principle & Lock-Free Data Structures
@@ -3438,314 +3269,152 @@ When using TDD we’re only supposed to write code in response to a failing test
   <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
 </div>
 
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 1 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-The Impossible
-NullPointerException
- 2022-06-15
- 13 min read
-Our new production exchange recently produced an
-impossible looking NullPointerException .
-At the same time, we saw another application in the same
-deployment throw an OutOfMemoryError .
-Both problems turned out to have the same root cause.
-This post tells the story of how we found that out.
-The Problem
-Or problems, plural, in this case. We’ve added a new
-exchange. To bring it into service, it needs to join an
-upstream ‘global’ service that maintains data that’s shared
-across multiple exchanges. To do so, that global service
-needs to send our new exchange quite a lot of data. One of
-the larger datasets that we need to synchronise is
-customer .
-Our ﬁrst attempt to do this did not go well. Here’s the ﬁrst
-few elements of a stack trace that we thought was, well,
-exceptional.
-Why is that so impossible? We’ll need a crash course in how
-our messaging system works to see why. First though - let’s
-have a look at that line, and work our way up…
-Here’s CustomerDao.java:345
-From which we guess that changedBy is null. That
-particular object has type Identity and gets passed down
-from CustomerManager::upsert .
-Now. How did this function call get here? Well, it was
-proxied over from another (remote) service via multicast.
-CustomerManager implements a messaging interface
-that contains that method signature. With a bit of magic,
+Our new production exchange recently produced an impossible looking `NullPointerException`. At the same time, we saw another application in the same deployment throw an `OutOfMemoryError`. Both problems turned out to have the same root cause. This post tells the story of how we found that out.
+
+### The Problem
+
+Or problems, plural, in this case. We’ve added a new exchange. To bring it into service, it needs to join an upstream ‘global’ service that maintains data that’s shared across multiple exchanges. To do so, that global service needs to send our new exchange quite a lot of data. One of the larger datasets that we need to synchronise is `customer`.
+
+Our ﬁrst attempt to do this did not go well. Here’s the ﬁrst few elements of a stack trace that we thought was, well, exceptional.
+
+```java
 Caused by: java.lang.NullPointerException
-       at CustomerDao.upsert(CustomerDao.java:34
-       at CustomerManager.upsertCustomer(Custome
-       at CustomerManager.upsert(CustomerManager
-customerParams.addValue("principalRealm", writeAl
+       at CustomerDao.upsert(CustomerDao.java:345)
+       at CustomerManager.upsertCustomer(CustomerManager.java:123)
+       at CustomerManager.upsert(CustomerManager.java:100)
+```
+
+Why is that so impossible? We’ll need a crash course in how our messaging system works to see why. First though - let’s have a look at that line, and work our way up…
+
+Here’s `CustomerDao.java:345`:
+
+```java
+customerParams.addValue("principalRealm", changedBy.getRealm());
+```
+
+From which we guess that `changedBy` is null. That particular object has type `Identity` and gets passed down from `CustomerManager::upsert`.
+
+```java
 public void upsert(
        final String requestId,
        final Customer customer,
        final Identity changedBy,
        final @Milliseconds long changeTimestamp,
-       final long bookingCustomerId)
-The
-Problem
-The
-other
-problem
-Oh,
-ByteBuffer,
-we have
-not
-missed
-you
-An
-Example
-In
-Staging
-We’re in
-control of
-the
-trafﬁc
-now
-Back in
-the Wan
-Tunnel
-The
-missing
-ﬂip
-What
-about the
-OOM,
-though?
-How did
-it take us
-so long to
-work this
-out?
-On This
-Page
-Posts
-About
-Authors
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 2 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-for a topic like that, we generate an implementation that
-transforms the method call into a multicast packet, and
-another piece of code that can ‘invoke’ that packet on an
-instance of that interface in another application entirely.
-This is very handy, because we can see who calls that
-method on that interface via intelliJ’s “ﬁnd usages”, and
-quickly ﬁnd the culprit who has passed in a null Identity .
-There are six callers, but we know that only one of them is
-called by our sync process, so we trace where the
-Identity instance is constructed by that caller, and
-suddenly, we’re very confused, because in the database
-reading code, we ﬁnd this:
-We double and triple check our work, but no. The caller’s
-got no way of passing null in. And yet…
-NullPointerException . What have we missed? Well, we
-guess there must be something wrong in the magic that
-marshals those objects across the network. Unfortunately,
-that magic, in this case, is a slightly larger area than usual…
-The other problem
-We haven’t been entirely honest.
-The vast majority of the messaging at LMAX happens as
-described - a method call transported across a multicast
-bus between two applications. In this particular case
-though, the story is more complicated, because global and
-the new exchange do not live in the same multicast
-network.
-How do we get around this? We use a bridge. The bridge
-application has two parts - a process in the exchange, and
-one in global. Each process proxies a subset of the
-multicast trafﬁc from its end down a single, shared TCP
-link to the other end, which then faithfully copies that
-trafﬁc back out onto the multicast bus at the other end
-unchanged. The global end is slightly more special because
-it maintains a connection per exchange (it sends anything
-it hears to every exchange), but otherwise the processes
-are very similar. We call these processes wan-tunnel-local
-(deployed in the exchange) and wan-tunnel-global
+       final long bookingCustomerId) {
+```
+
+Now. How did this function call get here? Well, it was proxied over from another (remote) service via multicast. `CustomerManager` implements a messaging interface that contains that method signature. With a bit of magic, for a topic like that, we generate an implementation that transforms the method call into a multicast packet, and another piece of code that can ‘invoke’ that packet on an instance of that interface in another application entirely.
+
+This is very handy, because we can see who calls that method on that interface via IntelliJ’s “ﬁnd usages”, and quickly ﬁnd the culprit who has passed in a null `Identity`. There are six callers, but we know that only one of them is called by our sync process, so we trace where the `Identity` instance is constructed by that caller, and suddenly, we’re very confused, because in the database reading code, we ﬁnd this:
+
+```java
 return new Identity(
-       getByAlphaChar(rs.getString("principal_re
+       getByAlphaChar(rs.getString("principal_realm")),
        rs.getString("principal_domain"), 
        rs.getString("principal_username"));
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 3 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-(deployed in global).
+```
+
+We double and triple check our work, but no. The caller’s got no way of passing null in. And yet… `NullPointerException`. What have we missed? Well, we guess there must be something wrong in the magic that marshals those objects across the network. Unfortunately, that magic, in this case, is a slightly larger area than usual…
+
+### The other problem
+
+We haven’t been entirely honest. The vast majority of the messaging at LMAX happens as described - a method call transported across a multicast bus between two applications. In this particular case though, the story is more complicated, because global and the new exchange do not live in the same multicast network.
+
+How do we get around this? We use a bridge. The bridge application has two parts - a process in the exchange, and one in global. Each process proxies a subset of the multicast trafﬁc from its end down a single, shared TCP link to the other end, which then faithfully copies that trafﬁc back out onto the multicast bus at the other end unchanged. The global end is slightly more special because it maintains a connection per exchange (it sends anything it hears to every exchange), but otherwise the processes are very similar. We call these processes `wan-tunnel-local` (deployed in the exchange) and `wan-tunnel-global` (deployed in global).
+
 Our real message path is actually more like:
-global-admin-svc -> multicast -> wan-tunnel-global -> tcp
-link -> wan-tunnel-local -> multicast -> account-svc
-With this extra knowledge, we can reveal part two of the
-issue: at around the same time we see the
-NullPointerException in account-svc , wan-tunnel-
-local OutOfMemoryError s.
-Even more notably, only one wan-tunnel-local (out of
-ﬁve) OOMed, and only one account-svc NPE d. And yes,
-they were in the same exchange.
-Where should we go next? There are some big clues in
-there. Not least the presence of our old enemyfriend,
-ByteBuffer .
-Oh, ByteBuffer, we have not missed
-you
-We look very closely at wan-tunnel-global , and work out
-that it is deﬁnitely copying the same multicast packets to
-each TCP connection handler’s work queue. This means
-we’ve either got a bug in the code to copy the work queue
-to the TCP socket in this process, or a bug in the code that
-reads and translates the other end of the connection in
-wan-tunnel-local .
-Unfortunately, that code is full of ByteBuffer s. It also
-seems unnecessarily convoluted to our eyes. That’s an easy
-criticism to make when looking at code for the ﬁrst time
-when you know a bug lives in it, so we should reserve
-judgement. Walking through it and running the unit tests
-doesn’t immediately ﬁnd a problem at either end.
-Unsurprising, we suppose - if the tests exercised the bug,
-they’d be failing, and this bit of software has worked
-without error for several years. We write more unit tests,
-and they continue to tell us everything is ﬁne.
-We’re at that funny sort of impasse where it’s tempting to
-start blaming cosmic rays for corrupting a packet. That
-usually means it’s time to try a reproduction at a different
-scale; we’ve been going small - can we go large? Handily,
+`global-admin-svc -> multicast -> wan-tunnel-global -> tcp link -> wan-tunnel-local -> multicast -> account-svc`
+
+With this extra knowledge, we can reveal part two of the issue: at around the same time we see the `NullPointerException` in `account-svc`, `wan-tunnel-local` `OutOfMemoryError`s.
+
+Even more notably, only one `wan-tunnel-local` (out of ﬁve) OOMed, and only one `account-svc` NPE'd. And yes, they were in the same exchange.
+
+Where should we go next? There are some big clues in there. Not least the presence of our old enemyfriend, `ByteBuffer`.
+
+### Oh, ByteBuffer, we have not missed you
+
+```java
 java.lang.OutOfMemoryError: Direct buffer memory 
- at java.base/java.nio.Bits.reserveMemory(Bits.j
- at java.base/java.nio.DirectByteBuffer.<init>(D
- at java.base/java.nio.ByteBuffer.allocateDirect
- at TunnelInbound.readNext(TunnelInbound.java:11
- at TunnelNetworkLoop.onRead(TunnelNetworkLoop.j
- at TunnelNetworkLoop.doSelect(TunnelNetworkLoop
- at TunnelNetworkLoop.doSelect(TunnelNetworkLoop
+ at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+ at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+ at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+ at TunnelInbound.readNext(TunnelInbound.java:110)
+ at TunnelNetworkLoop.onRead(TunnelNetworkLoop.java:85)
+ at TunnelNetworkLoop.doSelect(TunnelNetworkLoop.java:70)
+ at TunnelNetworkLoop.doSelect(TunnelNetworkLoop.java:55)
  at TunnelAcceptor.run(TunnelAcceptor.java:139)
- at java.base/java.lang.Thread.run(Thread.java:8
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 4 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-yes.
-An Example In Staging
-We handily have virtualized versions of our exchanges
-available, using a subset of cleansed production data. In the
-case of our bug we have the whole (cleansed) data set, so
-we should be able to invoke absolute the same code path
-that triggered this in live.
-We get staging into an appropriate state to do this, push
-the sync button, and…it works. The data syncs correctly.
-Ok, so, it’s intermittent. We work out how to easily repeat
-the experiment and run it few tens of times across lunch. It
-works correctly every time. That’s odd - we tried this once
-in live, and it failed the ﬁrst time. This is either a
-spectacularly unlikely coincidence, or our reproduction is
-insufﬁciently accurate. We reassure ourselves that
-computers are deterministic and non-malicious, and
-wonder if we need to simulate the exact network
-conditions too; the TCP link between global and the
-exchange often goes over a VPN, and sometimes over a
-long enough distance to generate 100ms+ of RTT.
-Do we ﬁnally have an excuse to get tc/netem out? Yes we
-do.
-We’re in control of the trafﬁc now
-We make our way to a wan-tunnel-local host in staging,
-and crack our ﬁngers in preparation for typing arcane
-demands into the black screen of tiny letters.
-We could spend time explaining what’s going on there, but
-having blindly copied those commands from one of these
-two excellent resources, we suspect a link might be a
-better idea. We believe we’re adding 150ms of delay (with a
-20ms standard deviation) and rate limiting (32kbit/s with
-bursts up to 1mbit/s) to all trafﬁc on eth55 .
-Whether our understanding is correct or not swiftly
-becomes irrelevant - the very ﬁrst time we attempt this
-with both the rate limit and the delay, we see our wan-
-tunnel-local happily throw our OOME with the stack we’re
-after. We visit the logs for the local account-svc and ﬁnd a
-familiar NPE , too. Aha. Not cosmic rays after all. The
-reproducer seems pretty reliable, too - our ﬁrst three tries
-all generate the desired result.
-Now we’re back on the science train, we can gather some
-more data. Attaching a debugger to account-svc gets us a
-step further - we’re trying to deserialize an Identity (in
-fact probably most of the objects in the second half of an
-RPC) out of a giant array of zeroed bytes.
-We take some packet captures at the wan-tunnel-local . I
-forget how to use wireshark ﬁlters and instead get it to
+ at java.base/java.lang.Thread.run(Thread.java:829)
+```
+
+We look very closely at `wan-tunnel-global`, and work out that it is deﬁnitely copying the same multicast packets to each TCP connection handler’s work queue. This means we’ve either got a bug in the code to copy the work queue to the TCP socket in this process, or a bug in the code that reads and translates the other end of the connection in `wan-tunnel-local`.
+
+Unfortunately, that code is full of `ByteBuffer`s. It also seems unnecessarily convoluted to our eyes. That’s an easy criticism to make when looking at code for the ﬁrst time when you know a bug lives in it, so we should reserve judgement. Walking through it and running the unit tests doesn’t immediately ﬁnd a problem at either end. Unsurprising, we suppose - if the tests exercised the bug, they’d be failing, and this bit of software has worked without error for several years. We write more unit tests, and they continue to tell us everything is ﬁne.
+
+We’re at that funny sort of impasse where it’s tempting to start blaming cosmic rays for corrupting a packet. That usually means it’s time to try a reproduction at a different scale; we’ve been going small - can we go large? Handily, yes.
+
+### An Example In Staging
+
+We handily have virtualized versions of our exchanges available, using a subset of cleansed production data. In the case of our bug we have the whole (cleansed) data set, so we should be able to invoke absolute the same code path that triggered this in live.
+
+We get staging into an appropriate state to do this, push the sync button, and…it works. The data syncs correctly.
+
+Ok, so, it’s intermittent. We work out how to easily repeat the experiment and run it few tens of times across lunch. It works correctly every time. That’s odd - we tried this once in live, and it failed the ﬁrst time. This is either a spectacularly unlikely coincidence, or our reproduction is insufﬁciently accurate. We reassure ourselves that computers are deterministic and non-malicious, and wonder if we need to simulate the exact network conditions too; the TCP link between global and the exchange often goes over a VPN, and sometimes over a long enough distance to generate 100ms+ of RTT.
+
+Do we ﬁnally have an excuse to get `tc`/`netem` out? Yes we do.
+
+### We’re in control of the trafﬁc now
+
+We make our way to a `wan-tunnel-local` host in staging, and crack our ﬁngers in preparation for typing arcane demands into the black screen of tiny letters. We believe we’re adding 150ms of delay (with a 20ms standard deviation) and rate limiting (32kbit/s with bursts up to 1mbit/s) to all trafﬁc on `eth55`.
+
+```bash
 # throttle bandwidth:
-sudo tc qdisc add dev eth55 root handle 1: tbf ra
-# and delay packets (both commands need to be use
-sudo tc qdisc add dev eth55 parent 1:1 handle 10:
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 5 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-export the socket’s data as a ﬁle, then search for
-contiguous zeroes in it. Oh. Yes. There they are.
-We take a hop upstream - we assume the wan-tunnel-
-global must have sent a packet with zeroes in, but did it
-receive any? Our packet captures suggest it did not receive
-any big arrays of 0 , and it deﬁnitely sent one.
-We already looked at this code once and didn’t ﬁnd
-anything, but perhaps, armed with this new knowledge,
-something else might jump out?
-Back in the Wan Tunnel
-No, no it doesn’t. But it does change which bits of the code
-we look at. We’re only hitting a problem when we try to
-send a reasonably sized chunk of data down a constricted
-pipe. How does this code cope with that? Does it block, or
-drop, or what?
-Reminder: we’re still in the global end of the wan-tunnel,
-doing a send to each downstream local tunnel. The
-channel is a standard
-java.nio.channels.GatheringByteChannel representing
-the socket with a local tunnel at the other end.
-This method sends some data messages (there are also
-‘command’ messages like acknowledgements and
-heartbeats) to a given channel. It is full of comments. That’s
-not usually a good sign…
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 6 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-What is all this? Well. This implementation tries really hard
-to keep data and command messages apart (separate
-dataBacklog and commandBacklog ﬁelds) - why? It also
-refuses to store partial messages in its internal buffers
-(trust us on this one) - this feels sensible. It appears to
-make a token attempt to resize its internal buffer should it
-see a large enough message, but…only if there’s no data
-already pending? We just don’t get that at all.
-What we’re looking for in here is buffer fullness, probably
-in either of those two backlog ﬁelds. How does
-addToBacklog work?
-OK - so here’s the answer - if we get a full buffer, we throw
-a well named DataLossException , and we just drop the
-data on the ﬂoor. That’s probably sensible - when the
-underlying bytes are retranslated into application level
-messages, they have sequence numbers on them, and if
+sudo tc qdisc add dev eth55 root handle 1: tbf rate 32kbit burst 1mbit
+# and delay packets (both commands need to be used)
+sudo tc qdisc add dev eth55 parent 1:1 handle 10: netem delay 150ms 20ms
+```
+
+Whether our understanding is correct or not swiftly becomes irrelevant - the very ﬁrst time we attempt this with both the rate limit and the delay, we see our `wan-tunnel-local` happily throw our `OOME` with the stack we’re after. We visit the logs for the local `account-svc` and ﬁnd a familiar `NPE`, too. Aha. Not cosmic rays after all. The reproducer seems pretty reliable, too - our ﬁrst three tries all generate the desired result.
+
+Now we’re back on the science train, we can gather some more data. Attaching a debugger to `account-svc` gets us a step further - we’re trying to deserialize an `Identity` (in fact probably most of the objects in the second half of an RPC) out of a giant array of zeroed bytes.
+
+We take some packet captures at the `wan-tunnel-local`. I forget how to use wireshark ﬁlters and instead get it to export the socket’s data as a ﬁle, then search for contiguous zeroes in it. Oh. Yes. There they are.
+
+We take a hop upstream - we assume the `wan-tunnel-global` must have sent a packet with zeroes in, but did it receive any? Our packet captures suggest it did not receive any big arrays of `0`, and it deﬁnitely sent one.
+
+We already looked at this code once and didn’t ﬁnd anything, but perhaps, armed with this new knowledge, something else might jump out?
+
+### Back in the Wan Tunnel
+
+No, no it doesn’t. But it does change which bits of the code we look at. We’re only hitting a problem when we try to send a reasonably sized chunk of data down a constricted pipe. How does this code cope with that? Does it block, or drop, or what?
+
+Reminder: we’re still in the global end of the wan-tunnel, doing a send to each downstream local tunnel. The channel is a standard `java.nio.channels.GatheringByteChannel` representing the socket with a local tunnel at the other end.
+
+This method sends some data messages (there are also ‘command’ messages like acknowledgements and heartbeats) to a given channel. It is full of comments. That’s not usually a good sign…
+
+```java
    private final GatheringByteChannel channel; 
-   private ByteBuffer dataBackLog = ByteBuffer.a
-   private final ByteBuffer commandBacklog = Byt
+   private ByteBuffer dataBackLog = ByteBuffer.allocateDirect(1024);
+   private final ByteBuffer commandBacklog = ByteBuffer.allocateDirect(1024);
+
    public void writeMessages(ByteBuffer buffer) 
    {
-       int messageCount = validateCompleteMessag
+       int messageCount = validateCompleteMessages(buffer);
        drain();
-       if (!hasPendingMessages() && !hasPendingC
+       if (!hasPendingMessages() && !hasPendingCommands())
        {
            // nothing pending anywhere; just try
            channel.write(buffer);
            // Only if we get a partial write do 
-           // the remain message data fits in th
-           // Give this only happens when the ba
-           // the total buffer length should not
-           // message seen + a little bit to rou
-           resizeDataBacklogToFitPartialWrite(bu
+           // the remain message data fits in the backlog.
+           // Give this only happens when the backlog is empty,
+           // the total buffer length should not exceed the
+           // message seen + a little bit to round up.
+           resizeDataBacklogToFitPartialWrite(buffer);
        }
-       if (buffer.hasRemaining()) // partial wri
+       if (buffer.hasRemaining()) // partial write
        {
-           // this copies this buffer into the b
-           addToBacklog(dataBackLog, buffer, mes
+           // this copies this buffer into the backlog
+           addToBacklog(dataBackLog, buffer, messageCount);
            // and then we stick it in the queue.
            appendToDrainQueue(dataBackLog);
        }
@@ -3754,144 +3423,84 @@ messages, they have sequence numbers on them, and if
            appendToDrainQueue(commandBacklog);
            drain();
        }
-       outboundCounters.increment(TunnelMessageT
+       outboundCounters.increment(TunnelMessageTypes.DATA, messageCount);
    }
-   private static void addToBacklog(final ByteBu
+
+   private static void addToBacklog(final ByteBuffer backlog, final ByteBuffer buffer, int messageCount)
    {
        backlog.compact();
-       if (backlog.remaining() < buffer.remainin
+       if (backlog.remaining() < buffer.remaining())
        {
-           throw new DataLossException(backlog.r
+           throw new DataLossException(backlog.remaining(), buffer.remaining());
        }
        backlog.put(buffer);
        backlog.flip();
    }
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 7 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-there’s a gap, the receiver can request a resend of what is
-missing (this is one of the usages of the commands in the
-tunnel protocol).
-We check how the DataLossException gets propagated
-and that looks alright.
-So this method is ﬁne then. Right? We thought so - there’s
-even a test that checks for the DataLossException , and it
-passes, and a quick bit of debugging shows its passing for
-the right reason.
-ByteBuffer veterans may be crying into their coffee at
-this point, because NO, that method is NOT alright.
-The missing ﬂip
-Let’s look at that code once more, but slower. We’ll add
-some comments inline, to help.
-Can you see it now? It took the CTO sitting down next to
-me and pointing at it questioningly for my temporary
-ByteBuffer blindness to wear off, so don’t feel bad if you
-didn’t.
-In the case of data loss, we omit the call to flip and leave
-the backlog in a state where it’s ready to be written. What
-happens if you attempt to read from it in that state? Well,
-what you read is a freshly zeroed out remainder of the
-buffer - buffer length - content length of 0 s.
-We add a test that triggers data loss, and then tries to
-continue sending data afterwards. Straight away we are
-greeted with giant arrays of 0 s in the test output. Quite a
-simple error in the end; it turns out that this is the ﬁrst
-time that we’ve ever suffered data loss in a real
-environment, and this component fundamentally doesn’t
-handle that scenario!
-What about the OOM, though?
-That’s a bit ﬁddlier to explain. Let’s imagine our buffer was
-small, say 1024 bytes. The following sequence of events
-then occurs.
-1. Send message one - it’s 900 bytes long This buffers the
-message in one of the backlogs
-   private static void addToBacklog(final ByteBu
+```
+
+What is all this? Well. This implementation tries really hard to keep data and command messages apart (separate `dataBacklog` and `commandBacklog` ﬁelds) - why? It also refuses to store partial messages in its internal buffers (trust us on this one) - this feels sensible. It appears to make a token attempt to resize its internal buffer should it see a large enough message, but…only if there’s no data already pending? We just don’t get that at all.
+
+What we’re looking for in here is buffer fullness, probably in either of those two backlog ﬁelds. How does `addToBacklog` work?
+
+OK - so here’s the answer - if we get a full buffer, we throw a well named `DataLossException`, and we just drop the data on the ﬂoor. That’s probably sensible - when the underlying bytes are retranslated into application level messages, they have sequence numbers on them, and if there’s a gap, the receiver can request a resend of what is missing (this is one of the usages of the commands in the tunnel protocol).
+
+We check how the `DataLossException` gets propagated and that looks alright.
+
+So this method is ﬁne then. Right? We thought so - there’s even a test that checks for the `DataLossException`, and it passes, and a quick bit of debugging shows its passing for the right reason.
+
+`ByteBuffer` veterans may be crying into their coffee at this point, because NO, that method is NOT alright.
+
+### The missing ﬂip
+
+Let’s look at that code once more, but slower. We’ll add some comments inline, to help.
+
+```java
+   private static void addToBacklog(final ByteBuffer backlog, final ByteBuffer buffer, int messageCount)
    {
-       // move the content of backlog to the fro
+       // move the content of backlog to the front
        // the position is set to the first byte 
-       // after a compact, this buffer is in _wr
+       // after a compact, this buffer is in _write_ mode
        backlog.compact();
-       if (backlog.remaining() < buffer.remainin
+       if (backlog.remaining() < buffer.remaining())
        {             
-           throw new DataLossException(backlog.r
+           throw new DataLossException(backlog.remaining(), buffer.remaining());
        }
-       // Given we're in write mode, add the buf
+       // Given we're in write mode, add the buffer
        backlog.put(buffer);
-       // Flip the buffer back into read mode so
-       // copied into `channel` by the next invo
+       // Flip the buffer back into read mode so it can be
+       // copied into `channel` by the next invocation
        backlog.flip();
    }
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 8 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-2. Attempt to drain the backlogs to the underlying
-channel This succeeds with a partial write of, say, 300
-bytes
-3. Send message two - it’s 600 bytes long This triggers
-data loss, and, critically, leaves the buffer in a state
-where it will now send 0s in the place of the last 600
-bytes of message one
+```
+
+Can you see it now? It took the CTO sitting down next to me and pointing at it questioningly for my temporary `ByteBuffer` blindness to wear off, so don’t feel bad if you didn’t.
+
+In the case of data loss, we omit the call to `flip` and leave the backlog in a state where it’s ready to be written. What happens if you attempt to read from it in that state? Well, what you read is a freshly zeroed out remainder of the buffer - `buffer length - content length` of `0`s.
+
+We add a test that triggers data loss, and then tries to continue sending data afterwards. Straight away we are greeted with giant arrays of `0`s in the test output. Quite a simple error in the end; it turns out that this is the ﬁrst time that we’ve ever suffered data loss in a real environment, and this component fundamentally doesn’t handle that scenario!
+
+### What about the OOM, though?
+
+That’s a bit ﬁddlier to explain. Let’s imagine our buffer was small, say 1024 bytes. The following sequence of events then occurs.
+
+1. Send message one - it’s 900 bytes long. This buffers the message in one of the backlogs.
+2. Attempt to drain the backlogs to the underlying channel. This succeeds with a partial write of, say, 300 bytes.
+3. Send message two - it’s 600 bytes long. This triggers data loss, and, critically, leaves the buffer in a state where it will now send 0s in the place of the last 600 bytes of message one.
 4. Send more messages - it doesn’t matter what, really.
-At the other end, the reader manages to discard most of
-the 0 s by interpreting them as empty packets - an
-accident, we think, rather than an explicit bit of design.
-Unfortunately, when the real messages turn up again, those
-’empty’ packets aren’t really a valid packet length, so the
-ﬁrst actual packet does not start where the reader thinks it
-should, and we read a message length from somewhere
-totally inappropriate. We then try to allocate a buffer of
-that size. Boom. Or, rather, OOM .
-How did it take us so long to work this
-out?
-This bug made it to a blog post. Many of our other bugs do
-not. Their errors are often just as trivial, but identifying
-them requires less work.
-It would be easy to blame the original author, but in fact,
-much of the blame lay with us.
-1. We gave too much weight to the fact that the code had
-worked ﬂawlessly for too long. We look straight past
-the gaps in the test coverage because of this, I think.
-2. Despite all the evidence pointing at a congestion
-problem, we still needed a full fat reproducer to force
-us to look properly at the buffer full case. Even once
-we were looking at it, my ByteBuffer bug blindness
-struggled to see the light!
-3. At some point in the past, we noticed that code was
-complicated, and tried to compensate with comments.
-We could have worked out why it was complicated,
-and documented that with tests. Alternatively, the
-tests could have shown us what we could delete (the
-true utility of coverage). After writing a round-trip fuzz
-test of the sender code, we found we could hugely
-simplify it - down to less than half the size it was
-originally, and requiring none of the comments.
-4. Some absolute idiot (you’re ﬁred -Ed) at the beginning
-called it an impossible NullPointerException , and so
-we went looking for zebras when in fact the usual
-ByteBuffer::flip was what we needed to ﬁnd…
-#code
-James Byatt
-I was a mathematician but then I sold out
- 
-5/8/2026, 2:05 pm
-The Impossible NullPointerException | LMAX Technology Blog
-Page 9 of 9
-https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
-Next
-Adventures with bpftrace
-Previous
-Executor: Executed
-See Also
-Executor: Executed
-The Regression
-Round trip fuzz tests
-You might not need to make your serialization layer
-generic
-Monitoring without polling
-Looking for heap distress
-© 2025 LMAX Group · Powered by the Eureka theme for Hugo
+
+At the other end, the reader manages to discard most of the `0`s by interpreting them as empty packets - an accident, we think, rather than an explicit bit of design. Unfortunately, when the real messages turn up again, those ’empty’ packets aren’t really a valid packet length, so the ﬁrst actual packet does not start where the reader thinks it should, and we read a message length from somewhere totally inappropriate. We then try to allocate a buffer of that size. Boom. Or, rather, `OOM`.
+
+### How did it take us so long to work this out?
+
+This bug made it to a blog post. Many of our other bugs do not. Their errors are often just as trivial, but identifying them requires less work.
+
+It would be easy to blame the original author, but in fact, much of the blame lay with us.
+
+1. We gave too much weight to the fact that the code had worked ﬂawlessly for too long. We look straight past the gaps in the test coverage because of this, I think.
+2. Despite all the evidence pointing at a congestion problem, we still needed a full fat reproducer to force us to look properly at the buffer full case. Even once we were looking at it, my `ByteBuffer` bug blindness struggled to see the light!
+3. At some point in the past, we noticed that code was complicated, and tried to compensate with comments. We could have worked out why it was complicated, and documented that with tests. Alternatively, the tests could have shown us what we could delete (the true utility of coverage). After writing a round-trip fuzz test of the sender code, we found we could hugely simplify it - down to less than half the size it was originally, and requiring none of the comments.
+4. Some absolute idiot (you’re ﬁred -Ed) at the beginning called it an impossible `NullPointerException`, and so we went looking for zebras when in fact the usual `ByteBuffer::flip` was what we needed to ﬁnd…
+
 
 
 ---
@@ -3968,311 +3577,119 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
   <strong>Source type:</strong> Engineering Blog<br>
   <strong>Original URL:</strong> https://bad-concurrency.blogspot.com/<br>
   <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+</div>#### I Heard a Rumour...
+**Saturday, 11 April 2020**
 
-5/8/2026, 2:05 pm
-Bad Concurrency
-Page 1 of 5
-https://bad-concurrency.blogspot.com/
-Misadventures in Concurrent and Parallel programming, plus random comments on software performance and various OSS
-contributions.
-Bad Concurrency
-Saturday, 11 April 2020
-I Heard a Rumour...
 Where Aeron catches up on the goss.
-A few months ago a pull request appeared on Aeron's Github site that added the ability to request Aeron to resolve
-or re-resolve host names to IP addresses.  In cloud environments, especially when using Kubernetes, when nodes
-fail and restart it is not uncommon for a node with the same host name to restart with a different IP address. 
-Unfortunately for Aeron this could make life difficult as it would resolve IP addresses up front and stick with it for the
-life time of the media driver.  This is particularly bad when we consider nodes that are part of Aeron Cluster, where
-we expect nodes to come and go from the cluster over time.
-It became very clear that we needed a plan that would allow Aeron to use logical names instead of IP addresses as
-endpoint identifiers and re-resolve those addresses appropriately.  We didn't end up using the supplied pull request
-and came with an alternative solution that was a better fit with some of Aeron's longer term goals (I say we, it was
-mostly Todd Montgomery - I just did the C port).
-As DNS can often be a source odd network latency issues, we didn't want a name resolution solution that was
-entirely reliant on default system name resolution.  So we have also included a mechanism for resolving names that
-works entirely within Aeron.
-The first thing we needed to tackle was re-resolving IP addresses when peer nodes went away and came back with
-a different address.  Fortunately we already have a indicators within the existing protocol that allows the media driver
-to detect when nodes have died.  Aeron continually sends data frames or heartbeats (sender to receiver) and status
-messages (receiver to sender) during normal running.  We can use the absence of these messages as a
-mechanism to detect that a node (that is identified by name rather than IP address) needs to be re-resolved.
-Periodically the sender and receiver will scan their endpoints to see if any having been missing regular updates and
-if those endpoints were identified by a name, trigger a re-resolution.  The simple solution here would be to in-place
-re-resolve the name to an address, e.g. using getaddrinfo.  However, one of the reasons that Aeron is incredibly
-fast (did I mention that already) is that it has a very principle based approach to its design.  One of the principles is
-"Non-blocking IO in the message path".  This is to avoid any unusual stalls caused by the processing of blocking IO
-operations.  The call to resolve a host name can block for extended periods of time (BTW, if you are ever using an
-app on an other fast machine and it stalls for weird periods of time, it is worth asking the question, is it DNS causing
-the problem).  Therefore we want to offload name resolution from our sender and receiver threads (the message
-path) onto the conductor where we can perform the slower blocking operations.
-It was apparent very early on that we could could make the resolution of names an abstract concept.  Obviously
-using DNS and host names is the most obvious solutions, but it would be interesting to allow for names to come
-from other sources.  E.g. we could name individual media drivers and use those names with our channel
-configuration.  This allows a couple of neat behaviours.  All of the configuration for naming can be self contained
-within Aeron itself independent of DNS, which may require configuration of a separate system and we could also
-allow names to resolve to more that just IP addresses, e.g. host and port pairs or maybe direct to MAC addresses*
-in the future.
-* Bonus points if you can figure out why this might be useful.
-To support this in both the Java and C media drivers have the concept of a name resolver, with 2 production
-implementations, default (host name based) and driver where the media drivers are responsible to managing the list
-of names.  With the driver based name resolution we need a mechanism to communicate the names between the
-instances of the media driver across the network.
-To allow driver names to propagate across the network, Aeron supports a gossip-style protocol, where we have an
-additional frame type (resolution frame) that contains mappings of names to addresses.  Currently, only IPv4 and
-IPv6 addresses are supported, but there is scope for adding others later.
-The Need For Naming
-Re-Resolution
-Name Resolvers
-Enter the Gossip Protocol
-Michael Barker
-View my complete profile
-About Me
-Java Code Geeks
-▼  2020 (3)
-▼  April (1)
-I Heard a Rumour...
-►  March (2)
-►  2014 (4)
-►  2013 (3)
-►  2012 (9)
-►  2011 (12)
-►  2010 (5)
-►  2009 (6)
-►  2008 (4)
-►  2007 (1)
-Blog Archive
-More
-Create Blog Sign In
-5/8/2026, 2:05 pm
-Bad Concurrency
-Page 2 of 5
-https://bad-concurrency.blogspot.com/
-Posted by Michael Barker at 21:01 
-No comments: 
-To make this work, for each media driver we specify 3 things.  The name for the media driver (this will default to the
-host name when not specified), a bootstrap neighbour to send initial name resolutions to and a resolver interface. 
-The most important option is the resolver interface as specifying this will enable the driver name resolution.  It also
-determines which network interface to use to send and receive resolution frames and is the address reported to the
-neighbors for self-resolutions.  This can also be a wildcard address (e.g. 0.0.0.0), in which case the neighbors will
-use the source address of the received resolution frames to identify that node.
-On start each of the nodes will have an empty set of neighbour nodes and a bootstrap neighbour.  Every 1s the
-driver name resolver will send out a self resolution, i.e. tell all the nodes that it knows about, what its own name and
-address are.  This will be sent (via UDP) to all of its known neighbour nodes and the bootstrap node (if not already in
-the neighbour list).  Because the neighbour list is initially empty, then messages will only be sent to bootstrap
-neighbours on the first pass.  The bootstrap neighbour can be specified using a host name and the driver name
-resolver will ensure that it is re-resolved periodically in case it too has died and come back with a different IP
-address.
-As a result of this the driver name resolvers will start to receive resolution frames.  The name/address entries from
-these frames will be added to a cache and the neighbor list.  If the resolution frame has come through as a
-notification of a self resolution we update a last activity timestamp for that node.
-Every 2s, the media driver will send its cache of name/address pairs to all of its neighbours, so eventually all of the
-nodes will know about all of the other as the name/address entries are shared around the cluster.  At the higher
-layer the conductor when trying to resolve a name to a supplied address on a channel URI will call the driver name
-resolver first, which can resolve the name from its cache, handing off to the default resolver if not found.
-Periodically the cache and the neighbor list will be checked to see if we are still receiving self resolutions for a
-particular node.  If the last activity timestamp hasn't been been updated recently enough then the entries are evicted
-from the cache and neighbour list under the assumption that the neighbour has died.
-All of this is happening on the conductor thread so that it will not impact the performance of the sender and the
-receiver.  This is primarily designed for small clusters of nodes as all nodes will be gossiping to all other nodes once
-the resolutions have propagated across the network.  It is not designed for large scale system wide name
-resolution.  However, it is a very new feature and we will expect to evolve over time as users experiment with it.
-With a lot of the algorithms within Aeron it is often not possible to pick a single implementation, so we offer the ability
-to provide your own implementation (e.g. flow control, congestion control).  Name resolution fits into that model as
-well.  There is an interface for the Java Driver and a function pointer based struct on the C driver that can be
-implemented by a user.  So if there is a custom name resolution strategy that you would prefer to use, it can be
-plugged in quite easily.
-If you look carefully, you notice that there is a 2-phase approach to resolving a name.  There is lookup method and a
-resolve method.  The lookup method takes a name and returns a host name, UDP port pair, e.g.
-'example.com:2020', where as the resolve function takes in the host name portion of that pair and returns an internet
-address.  The additional param name is so the resolver can distinguish between an endpoint and a control address.
-While perhaps not a ground-breaking feature, it is a useful one.  It manages to provide the convenience of support
-name-based resolution without compromising on the latency goals of Aeron.   It is supported in both the Java
-(1.26.0) and C (1.27.0) media drivers.  Feedback is always welcome and check out the wiki for more information.
-Write your own
-Conclusion
-Thursday, 19 March 2020
-Flow Control in Aeron
-One of my more recent projects has led me to become more involved in the Aeron project.  If you are unaware of
-Aeron, then head over to the Github site and check it out.  At its core is an reliable messaging system that works
-over UDP, Multicast UDP and IPC.  It also contains an archiving feature for recording and replay and (still under
-active development) an implementation of the Raft protocol for clustering.  Did I mention that it was fast too.
-I've spent the last few weeks buried in the various strategies the Aeron has for flow control.  Specifically modifying
-the existing flow control strategies and adding more flexible configuration on a per channel basis.  Before I jump into
-that it would be useful to cover a little background first.
-Within a distributed system the purpose of flow control is to limit the rate of a sender so that is does not overrun it's
-associated receiver.  UDP does not come with any form of flow control, therefore it is easy to create a sender that
-will out pace the receiver, leading to message loss.  There are a number of different forms of flow control, but I'm
-going to focus on the sliding window flow control protocol used by TCP and Aeron. The sliding window protocol
-requires that the sender maintain a buffer of data (referred to as a window).  The size of this window will typically
-communicated from the receiver to the sender as part of the protocol.  With a bi-directional protocol like TCP the
-size of the window is communicated in each TCP segment header.  This is the amount of data that the sender can
-transmit to the receiver before having to wait until an acknowledgement is received.  If the application thread on the
-receiver side is busy and does not read the data from the socket and the sender continues to transmit, the window
-What is flow control?
-5/8/2026, 2:05 pm
-Bad Concurrency
-Page 3 of 5
-https://bad-concurrency.blogspot.com/
-view raw
-size value will decrease until it reaches 0, at which time the sender must stop and wait for an acknowledgement with
-a non-zero window size before sending again.  There is a lot more networking theory around sizing the flow control
-window in order to get full utilisation of the network.  But I will leave that as an exercise for the reader.
-With Aeron and UDP unicast it is very similar to TCP, however Aeron is a unidirectional protocol where the receivers
-send status messages to indicate to the sender that it is ready to receive data and how much.  The status message
-indicates where the subscriber is up to using the consumption term id and consumption term offset for a specific
-channel/stream/session triple.  The receiver window value is the amount of data that can be sent from that position
-before the sender needs to stop and wait for a new status message indicating the the receiver is able to consume
-more data.  The size of the receiver window is at most of ½ of the term size and at least the size of the MTU
-(maximum transfer unit).
-However, one of the neat features of Aeron is that it supports multicast (and multi-destination-cast, for which the
-same rules will apply), where there are multiple receivers for the same publication.  In this situation how do we
-determine what values should be used for the flow control window?  This is a question that has no one right answer,
-so Aeron provides a number of configuration options and it is also possible to plug in your own strategy.
+
+A few months ago a pull request appeared on Aeron's Github site that added the ability to request Aeron to resolve or re-resolve host names to IP addresses. In cloud environments, especially when using Kubernetes, when nodes fail and restart it is not uncommon for a node with the same host name to restart with a different IP address. Unfortunately for Aeron this could make life difficult as it would resolve IP addresses up front and stick with it for the life time of the media driver. This is particularly bad when we consider nodes that are part of Aeron Cluster, where we expect nodes to come and go from the cluster over time.
+
+It became very clear that we needed a plan that would allow Aeron to use logical names instead of IP addresses as endpoint identifiers and re-resolve those addresses appropriately. We didn't end up using the supplied pull request and came with an alternative solution that was a better fit with some of Aeron's longer term goals (I say we, it was mostly Todd Montgomery - I just did the C port).
+
+As DNS can often be a source odd network latency issues, we didn't want a name resolution solution that was entirely reliant on default system name resolution. So we have also included a mechanism for resolving names that works entirely within Aeron.
+
+##### The Need For Naming
+The first thing we needed to tackle was re-resolving IP addresses when peer nodes went away and came back with a different address. Fortunately we already have a indicators within the existing protocol that allows the media driver to detect when nodes have died. Aeron continually sends data frames or heartbeats (sender to receiver) and status messages (receiver to sender) during normal running. We can use the absence of these messages as a mechanism to detect that a node (that is identified by name rather than IP address) needs to be re-resolved.
+
+##### Re-Resolution
+Periodically the sender and receiver will scan their endpoints to see if any having been missing regular updates and if those endpoints were identified by a name, trigger a re-resolution. The simple solution here would be to in-place re-resolve the name to an address, e.g. using getaddrinfo. However, one of the reasons that Aeron is incredibly fast (did I mention that already) is that it has a very principle based approach to its design. One of the principles is "Non-blocking IO in the message path". This is to avoid any unusual stalls caused by the processing of blocking IO operations. The call to resolve a host name can block for extended periods of time (BTW, if you are ever using an app on an other fast machine and it stalls for weird periods of time, it is worth asking the question, is it DNS causing the problem). Therefore we want to offload name resolution from our sender and receiver threads (the message path) onto the conductor where we can perform the slower blocking operations.
+
+##### Name Resolvers
+It was apparent very early on that we could could make the resolution of names an abstract concept. Obviously using DNS and host names is the most obvious solutions, but it would be interesting to allow for names to come from other sources. E.g. we could name individual media drivers and use those names with our channel configuration. This allows a couple of neat behaviours. All of the configuration for naming can be self contained within Aeron itself independent of DNS, which may require configuration of a separate system and we could also allow names to resolve to more that just IP addresses, e.g. host and port pairs or maybe direct to MAC addresses* in the future.
+
+*\* Bonus points if you can figure out why this might be useful.*
+
+To support this in both the Java and C media drivers have the concept of a name resolver, with 2 production implementations, default (host name based) and driver where the media drivers are responsible to managing the list of names. With the driver based name resolution we need a mechanism to communicate the names between the instances of the media driver across the network.
+
+##### Enter the Gossip Protocol
+To allow driver names to propagate across the network, Aeron supports a gossip-style protocol, where we have an additional frame type (resolution frame) that contains mappings of names to addresses. Currently, only IPv4 and IPv6 addresses are supported, but there is scope for adding others later.
+
+To make this work, for each media driver we specify 3 things. The name for the media driver (this will default to the host name when not specified), a bootstrap neighbour to send initial name resolutions to and a resolver interface. The most important option is the resolver interface as specifying this will enable the driver name resolution. It also determines which network interface to use to send and receive resolution frames and is the address reported to the neighbors for self-resolutions. This can also be a wildcard address (e.g. 0.0.0.0), in which case the neighbors will use the source address of the received resolution frames to identify that node.
+
+On start each of the nodes will have an empty set of neighbour nodes and a bootstrap neighbour. Every 1s the driver name resolver will send out a self resolution, i.e. tell all the nodes that it knows about, what its own name and address are. This will be sent (via UDP) to all of its known neighbour nodes and the bootstrap node (if not already in the neighbour list). Because the neighbour list is initially empty, then messages will only be sent to bootstrap neighbours on the first pass. The bootstrap neighbour can be specified using a host name and the driver name resolver will ensure that it is re-resolved periodically in case it too has died and come back with a different IP address.
+
+As a result of this the driver name resolvers will start to receive resolution frames. The name/address entries from these frames will be added to a cache and the neighbor list. If the resolution frame has come through as a notification of a self resolution we update a last activity timestamp for that node.
+
+Every 2s, the media driver will send its cache of name/address pairs to all of its neighbours, so eventually all of the nodes will know about all of the other as the name/address entries are shared around the cluster. At the higher layer the conductor when trying to resolve a name to a supplied address on a channel URI will call the driver name resolver first, which can resolve the name from its cache, handing off to the default resolver if not found.
+
+Periodically the cache and the neighbor list will be checked to see if we are still receiving self resolutions for a particular node. If the last activity timestamp hasn't been been updated recently enough then the entries are evicted from the cache and neighbour list under the assumption that the neighbour has died.
+
+All of this is happening on the conductor thread so that it will not impact the performance of the sender and the receiver. This is primarily designed for small clusters of nodes as all nodes will be gossiping to all other nodes once the resolutions have propagated across the network. It is not designed for large scale system wide name resolution. However, it is a very new feature and we will expect to evolve over time as users experiment with it.
+
+##### Write your own
+With a lot of the algorithms within Aeron it is often not possible to pick a single implementation, so we offer the ability to provide your own implementation (e.g. flow control, congestion control). Name resolution fits into that model as well. There is an interface for the Java Driver and a function pointer based struct on the C driver that can be implemented by a user. So if there is a custom name resolution strategy that you would prefer to use, it can be plugged in quite easily.
+
+If you look carefully, you notice that there is a 2-phase approach to resolving a name. There is lookup method and a resolve method. The lookup method takes a name and returns a host name, UDP port pair, e.g. 'example.com:2020', where as the resolve function takes in the host name portion of that pair and returns an internet address. The additional param name is so the resolver can distinguish between an endpoint and a control address.
+
+##### Conclusion
+While perhaps not a ground-breaking feature, it is a useful one. It manages to provide the convenience of support name-based resolution without compromising on the latency goals of Aeron. It is supported in both the Java (1.26.0) and C (1.27.0) media drivers. Feedback is always welcome and check out the wiki for more information.
+
+***
+
+#### Flow Control in Aeron
+**Thursday, 19 March 2020**
+
+One of my more recent projects has led me to become more involved in the Aeron project. If you are unaware of Aeron, then head over to the Github site and check it out. At its core is an reliable messaging system that works over UDP, Multicast UDP and IPC. It also contains an archiving feature for recording and replay and (still under active development) an implementation of the Raft protocol for clustering. Did I mention that it was fast too.
+
+I've spent the last few weeks buried in the various strategies the Aeron has for flow control. Specifically modifying the existing flow control strategies and adding more flexible configuration on a per channel basis. Before I jump into that it would be useful to cover a little background first.
+
+##### What is flow control?
+Within a distributed system the purpose of flow control is to limit the rate of a sender so that is does not overrun it's associated receiver. UDP does not come with any form of flow control, therefore it is easy to create a sender that will out pace the receiver, leading to message loss. There are a number of different forms of flow control, but I'm going to focus on the sliding window flow control protocol used by TCP and Aeron. The sliding window protocol requires that the sender maintain a buffer of data (referred to as a window). The size of this window will typically communicated from the receiver to the sender as part of the protocol. With a bi-directional protocol like TCP the size of the window is communicated in each TCP segment header. This is the amount of data that the sender can transmit to the receiver before having to wait until an acknowledgement is received. If the application thread on the receiver side is busy and does not read the data from the socket and the sender continues to transmit, the window size value will decrease until it reaches 0, at which time the sender must stop and wait for an acknowledgement with a non-zero window size before sending again. There is a lot more networking theory around sizing the flow control window in order to get full utilisation of the network. But I will leave that as an exercise for the reader.
+
+With Aeron and UDP unicast it is very similar to TCP, however Aeron is a unidirectional protocol where the receivers send status messages to indicate to the sender that it is ready to receive data and how much. The status message indicates where the subscriber is up to using the consumption term id and consumption term offset for a specific channel/stream/session triple. The receiver window value is the amount of data that can be sent from that position before the sender needs to stop and wait for a new status message indicating the the receiver is able to consume more data. The size of the receiver window is at most of ½ of the term size and at least the size of the MTU (maximum transfer unit).
+
+However, one of the neat features of Aeron is that it supports multicast (and multi-destination-cast, for which the same rules will apply), where there are multiple receivers for the same publication. In this situation how do we determine what values should be used for the flow control window? This is a question that has no one right answer, so Aeron provides a number of configuration options and it is also possible to plug in your own strategy.
+
 In fact Aeron is the only tool that supports UDP multicast messaging with dynamic flow control (that we're aware of).
-The simplest and fastest form of multicast flow control is a strategy where we take the maximum position of all of the
-receivers and use that value to derive limit that the sender can use for publication.  This means any receivers that
-are not keeping up with the fastest one may fall behind and experience packet loss.
-This is the inverse of the max flow control strategy, where instead we take minimum of all of the available receivers. 
-This will prevent slower nodes (as long as they are still sending status messages) from falling behind.  However this
-strategy does run the risk that the slower nodes can hold up the rest of the receivers by causing back pressure
-slowing the publisher.  Because this strategy needs to track all of the individual receivers and their positions, it also
-must handle the case that a node has disappeared altogether.  E.g. it has been shutdown or crashed.  This is
-handled via a timeout (default 2s, but configurable).  If status messages for a receiver have not been seen that
-period of time, that receiver is ejected from the flow control strategy and the publisher is allowed to move forward.
-Tagged flow control is a strategy that attempts to mitigate some of the short comings of the min flow control
-strategy.  It works by using a min flow control approach, but only for a subset of receivers that are tagged to be
-included in the flow control group.  The min flow control strategy is a special case of this strategy where are all
-receivers are considered to be in the group.
-One of the new features that came with Aeron 1.26.0 was the ability to control the flow control strategy directly from
-the channel URI allowing for fine grained control over each publication and subscription.  Defaults can also be
-specified on the media driver context.  On the publication side the channel can be specified as:
-flow control params hosted with ❤ by GitHub
-The min and max flow control settings for the publication are the simplest, but the tagged one starts to get a little bit
-interesting.  The ,g:1001 specifies that the group tag is 1001 and any receiver that want to be involved in flow
-control for this publication will need to specify that group tag.  The subscription channel URI show how to ensure
-that the receiver sends the appropriate group tag so that it will be included in the publishers flow control group.
-The tagged flow control strategy is really useful for receiving from a channel where there are a number of different
-types of subscribers that have different reliability requirements.  A good example is where there is a flow of events
-that needs to go to a gateway service to be sent out to users, perhaps via HTTP and also needs to go to a couple of
-archiving services to store the data redundantly in a database.   It may be possible for the gateway nodes to easily
-deal with message loss, either by reporting an error to the user or re-requesting the data.  However it may not be
-possible for the archiving service nodes to do so.  In this case the publication would specify the tagged flow control
-strategy and the subscriptions on the archiving services would use gtag parameter to ensure that they are included
-in the flow control group.  The gateway services could leave the gtag value unset and not impact the flow control on
-the publisher.
-While being able to include just the important subscribers into a flow control group so that they aren't overrun by the
-publisher is useful, there would still be an issue.  If both of our archiving services happened to be down eventually
-their receivers would be timed out and removed from the group.  Wouldn't it be great if we could require that a group
-contain a certain number of tagged receivers before the publication can report that it is connected.  That way we
-could ensure that our archiving service nodes were up before we started publishing data.
-Max Flow Control
-Min Flow Control
-Tagged Flow Control (previously known as Preferred Flow Control)
-Configuring Flow Control
-1
+
+##### Max Flow Control
+The simplest and fastest form of multicast flow control is a strategy where we take the maximum position of all of the receivers and use that value to derive limit that the sender can use for publication. This means any receivers that are not keeping up with the fastest one may fall behind and experience packet loss.
+
+##### Min Flow Control
+This is the inverse of the max flow control strategy, where instead we take minimum of all of the available receivers. This will prevent slower nodes (as long as they are still sending status messages) from falling behind. However this strategy does run the risk that the slower nodes can hold up the rest of the receivers by causing back pressure slowing the publisher. Because this strategy needs to track all of the individual receivers and their positions, it also must handle the case that a node has disappeared altogether. E.g. it has been shutdown or crashed. This is handled via a timeout (default 2s, but configurable). If status messages for a receiver have not been seen that period of time, that receiver is ejected from the flow control strategy and the publisher is allowed to move forward.
+
+##### Tagged Flow Control (previously known as Preferred Flow Control)
+Tagged flow control is a strategy that attempts to mitigate some of the short comings of the min flow control strategy. It works by using a min flow control approach, but only for a subset of receivers that are tagged to be included in the flow control group. The min flow control strategy is a special case of this strategy where are all receivers are considered to be in the group.
+
+##### Configuring Flow Control
+One of the new features that came with Aeron 1.26.0 was the ability to control the flow control strategy directly from the channel URI allowing for fine grained control over each publication and subscription. Defaults can also be specified on the media driver context. On the publication side the channel can be specified as:
+
+```java
 // Publisher
-2
 aeron:udp?endpoint=224.20.30.39:24326|fc=max            // max strategy
-3
 aeron:udp?endpoint=224.20.30.39:24326|fc=min            // min strategy
-4
 aeron:udp?endpoint=224.20.30.39:24326|fc=tagged,g:1001  // tagged strategy, group 1001
-5
-6
+
 // Subscriber
-7
 aeron:udp?endpoint=224.20.30.39:24326|gtag=1001         // tagged subscription
-5/8/2026, 2:05 pm
-Bad Concurrency
-Page 4 of 5
-https://bad-concurrency.blogspot.com/
-Posted by Michael Barker at 22:20 
-No comments: 
-view raw
-view raw
-Turns that this is also now possible with the release of 1.26.0.  For both the tagged flow control and the min flow
-control strategies we can specify a group minimum size that must be met before a publication can be considered
-connected.  This is independent of to the requirement that there needs to be one connected subscriber.  Therefore
-the default value for this group minimum size is 0.  Like the strategy and the flow control group, the group minimum
-size can be specified on the channel URI.
-flow control params 2 hosted with ❤ by GitHub
-In both of these cases the group minimum size is set to 3.  For the min flow control strategy we would need at least
-3 connected receivers, for the tagged flow control strategy we would need at least 3 connected receivers with tag
-1001 and any receivers without the tag are disregarded.
-One last new feature available on the channel URI configuration is the ability to specify the length of the timeout for
-the min and tagged flow control strategies.  As mentioned the earlier this will default to 2s, but can be set to any
-value.  Some care should be taken in specifying this value, if it is too short then receivers may frequently timeout
-during normal running.  Status messages are emitted at least once every 200 ms (more if necessary), so any shorter
-than that would not be useful.  Too long and a failed receiver could result in a significant back pressure stall on the
-publisher.  Setting this for min and tagged flow control strategies:
-flow control params 3 hosted with ❤ by GitHub
-As mentioned earlier the idea of using flow control to provide dynamic back pressure for a multicast messaging bus
-is a unique and powerful feature of Aeron.  Being able to configure these settings on a per publication provides a an
-extra level of flexibility that to help our users to build the system that they need.
-Flow Control Based Connectivity
-1
+```
+
+The min and max flow control settings for the publication are the simplest, but the tagged one starts to get a little bit interesting. The `,g:1001` specifies that the group tag is 1001 and any receiver that want to be involved in flow control for this publication will need to specify that group tag. The subscription channel URI show how to ensure that the receiver sends the appropriate group tag so that it will be included in the publishers flow control group.
+
+The tagged flow control strategy is really useful for receiving from a channel where there are a number of different types of subscribers that have different reliability requirements. A good example is where there is a flow of events that needs to go to a gateway service to be sent out to users, perhaps via HTTP and also needs to go to a couple of archiving services to store the data redundantly in a database. It may be possible for the gateway nodes to easily deal with message loss, either by reporting an error to the user or re-requesting the data. However it may not be possible for the archiving service nodes to do so. In this case the publication would specify the tagged flow control strategy and the subscriptions on the archiving services would use gtag parameter to ensure that they are included in the flow control group. The gateway services could leave the gtag value unset and not impact the flow control on the publisher.
+
+While being able to include just the important subscribers into a flow control group so that they aren't overrun by the publisher is useful, there would still be an issue. If both of our archiving services happened to be down eventually their receivers would be timed out and removed from the group. Wouldn't it be great if we could require that a group contain a certain number of tagged receivers before the publication can report that it is connected. That way we could ensure that our archiving service nodes were up before we started publishing data.
+
+##### Flow Control Based Connectivity
+Turns out that this is also now possible with the release of 1.26.0. For both the tagged flow control and the min flow control strategies we can specify a group minimum size that must be met before a publication can be considered connected. This is independent of to the requirement that there needs to be one connected subscriber. Therefore the default value for this group minimum size is 0. Like the strategy and the flow control group, the group minimum size can be specified on the channel URI.
+
+```java
 aeron:udp?endpoint=224.20.30.39:24326|fc=min,g:/3         // group min size 3
-2
 aeron:udp?endpoint=224.20.30.39:24326|fc=tagged,g:1001/3  // group min size 3
-Time Outs
-1
+```
+
+In both of these cases the group minimum size is set to 3. For the min flow control strategy we would need at least 3 connected receivers, for the tagged flow control strategy we would need at least 3 connected receivers with tag 1001 and any receivers without the tag are disregarded.
+
+##### Time Outs
+One last new feature available on the channel URI configuration is the ability to specify the length of the timeout for the min and tagged flow control strategies. As mentioned earlier this will default to 2s, but can be set to any value. Some care should be taken in specifying this value, if it is too short then receivers may frequently timeout during normal running. Status messages are emitted at least once every 200 ms (more if necessary), so any shorter than that would not be useful. Too long and a failed receiver could result in a significant back pressure stall on the publisher. Setting this for min and tagged flow control strategies:
+
+```java
 aeron:udp?endpoint=224.20.30.39:24326|fc=min,g:/3,t:5000ms     // timeout 5s
-2
 aeron:udp?endpoint=224.20.30.39:24326|fc=tagged,g:1001/3,t:5s  // timeout 5s
-Summary
-Posted by Michael Barker at 04:14 
-No comments: 
-Resurrecting my blog
-If you have been a long time follower of my blog you will have noticed that is has been a really long time since I
-posted any new content.  Since my last post six years ago at lot has changed.  I no longer work at LMAX an have
-started out as an independent consultant.  If you are part of an organisation looking for assistance in building
-software, especially if you facing challenges around performance (throughput, latency, scalability, or efficiency) then
-I might be able to help.  My services and contact details are available as http://ephemeris.tech.
-I am hoping to start posting again about some of the work I've doing more recently and good potion of it will be open
-source, so there should be plenty to share.
-Wednesday, 3 December 2014
-Read more »
-Posted by Michael Barker at 01:13 
-15 comments: 
-The "Uncanny Valley" of L3 Cache Contention
-While preparing for my talk at QCon SF 2014, I wanted to investigate a theory around how micro-benchmarks are
-not a useful reflection of how software may behave when run as part of a larger application.  Specifically due
-contention in the last-level cache (L3* in current Intel CPUs).
-Tuesday, 23 September 2014
-Speaking in October and November
-I'll be giving some talks over the next few months:
-8 Oct: Auckland Software Craftsmanship - 6 Years of test automation.
-16 Oct: Auckland JVM Group - Stuff I learned about performance.
-5 Nov: QCon San Francisco 2014 - Stuff I learned about performance.
-5/8/2026, 2:05 pm
-Bad Concurrency
-Page 5 of 5
-https://bad-concurrency.blogspot.com/
-Older Posts
-Home
-Subscribe to: Posts (Atom)
-Posted by Michael Barker at 04:38 
-No comments: 
-Wednesday, 23 April 2014
-Posted by Michael Barker at 02:07 
-No comments: 
-YOW! 2013 Video
-My talk on the Disruptor at YOW! 2013 is now available at the YOW! Eventer site.
-Wednesday, 29 January 2014
-Read more »
-Posted by Michael Barker at 19:39 
-8 comments: 
-Linux Alternatives and Oracle Java
-If, like me, you prefer to run the Oracle version of Java on your Linux machine as the default JDK, you will often find
-that the Linux distro will have other ideas.  Fedora for example has a number of Java based applications as part of
-the distribution which will include a dependency on the OpenJDK.  When the distro installs OpenJDK is will generally
-be setup as the default for executing the various Java binaries (e.g. 'java', 'javac').  However, the team at Redhat
-built a system called alternatives which maintains a set of symbolic links that allows the user to switch between
-multiple implementations of a package the supports the same functionality.  I've managed to understand enough
-about the alternatives package that I can now easily switch between the Oracle JDK and the OpenJDK.
-Simple theme. Powered by Blogger.
+```
+
+##### Summary
+As mentioned earlier the idea of using flow control to provide dynamic back pressure for a multicast messaging bus is a unique and powerful feature of Aeron. Being able to configure these settings on a per publication provides a an extra level of flexibility that to help our users to build the system that they need.
 </div>
 
 <div class="page-break"></div>
@@ -4624,64 +4041,55 @@ Parallel to the macro-architecture of micro frontends, Addy Osmani emphasizes st
 
 <div class="page-break"></div>
 
-## Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)
+# Chapter 4.3: Serverless Architectures & Feature Toggles
+
+> [!NOTE]
+> **Authors:** Mike Roberts, Pete Hodgson & Martin Fowler
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## 1. Primer on the Basics
 
-#### 1. What Is Serverless Computing?
+### 1.1 What Is Serverless Computing?
+
 **Serverless Architecture** refers to applications that significantly leverage third-party cloud services (BaaS - Backend-as-a-Service, e.g., Firebase, Auth0) or execute ephemeral, event-triggered custom code running in stateless compute containers (FaaS - Function-as-a-Service, e.g., AWS Lambda, Google Cloud Functions).
 
-```
-                      TRADITIONAL SERVERS vs. SERVERLESS FaaS
+#### Traditional Servers vs. Serverless FaaS
 
-   Traditional Server Model:
-   ┌─────────────────────────────────────────────────────────────────┐
-   │ Provisioned Virtual Machine (EC2, Dedicated Linux Server)      │
-   │ - Running 24/7 (Paying for idle CPU time)                     │
-   │ - OS patching, scaling groups, load balancers managed by team │
-   └─────────────────────────────────────────────────────────────────┘
+| Traditional Server Model | Serverless FaaS Model |
+| :--- | :--- |
+| **Provisioned Virtual Machine** (EC2, Dedicated Linux Server) | **Ephemeral Stateless Container** (AWS Lambda) |
+| Running 24/7 (Paying for idle CPU time) | Event-driven trigger (HTTP API Gateway, S3 Upload, SQS Msg) |
+| OS patching, scaling groups, load balancers managed by team | Scales automatically from 0 to 10,000 instances |
+| Fixed costs or hourly billing | Pay ONLY per millisecond of execution time |
 
-   Serverless FaaS Model:
-   ┌─────────────────────────────────────────────────────────────────┐
-   │ Ephemeral Stateless Container (AWS Lambda)                      │
-   │ - Event-driven trigger (HTTP API Gateway, S3 Upload, SQS Msg)    │
-   │ - Scales automatically from 0 to 10,000 instances                │
-   │ - Pay ONLY per millisecond of execution time                    │
-   └─────────────────────────────────────────────────────────────────┘
-```
-
-#### Key Characteristics of FaaS
-1. **Stateless Processing**: Function instances are ephemeral. Local file memory is discarded when the function exits. State must be externalized to databases (DynamoDB) or distributed caches (ElastiCache).
-2. **Cold Starts**: If a function has not been invoked recently, spawning a fresh container creates execution latency (100ms–1s).
-3. **Event-Driven Execution**: Functions are triggered by infrastructure events (e.g. S3 file upload, Kinesis stream event, DynamoDB stream change).
+> [!TIP]
+> **Key Characteristics of FaaS**
+> 1. **Stateless Processing**: Function instances are ephemeral. Local file memory is discarded when the function exits. State must be externalized to databases (DynamoDB) or distributed caches (ElastiCache).
+> 2. **Cold Starts**: If a function has not been invoked recently, spawning a fresh container creates execution latency (100ms–1s).
+> 3. **Event-Driven Execution**: Functions are triggered by infrastructure events (e.g., S3 file upload, Kinesis stream event, DynamoDB stream change).
 
 ---
 
-#### 2. What Are Feature Toggles (Feature Flags)?
+### 1.2 What Are Feature Toggles (Feature Flags)?
+
 **Feature Toggles** are a set of continuous delivery patterns that allow engineering teams to modify system behavior at runtime without changing or re-deploying code.
 
-```
-                      FEATURE TOGGLE CATEGORIZATION MATRIX
+#### Feature Toggle Categorization Matrix
 
-                      Short-Lived                    Long-Lived
-          ┌──────────────────────────────┬──────────────────────────────┐
-          │ Release Toggles              │ Ops Toggles                  │
-  Dynamic │ (In-flight feature release,  │ (Circuit breakers, degraded  │
-          │  Canary rollouts)            │  mode performance switches)  │
-          ├──────────────────────────────┼──────────────────────────────┤
-          │ Experiment Toggles           │ Permission Toggles           │
-  Static  │ (A/B testing user variants,  │ (Premium features, enterprise│
-          │  statistical measurement)    │  tier access control)        │
-          └──────────────────────────────┴──────────────────────────────┘
-```
+| | Short-Lived | Long-Lived |
+| :--- | :--- | :--- |
+| **Dynamic** | **Release Toggles** <br> (In-flight feature release, Canary rollouts) | **Ops Toggles** <br> (Circuit breakers, degraded mode performance switches) |
+| **Static** | **Experiment Toggles** <br> (A/B testing user variants, statistical measurement) | **Permission Toggles** <br> (Premium features, enterprise tier access control) |
 
-#### Code Example: Clean Feature Toggles in Code
+#### Clean Feature Toggles in Code
 
-##### Bad: Scattered If-Else Flags
+> [!WARNING]
+> **Bad Practice: Scattered If-Else Flags**
+> Feature flag logic pollutes business code directly.
+
 ```typescript
-// BAD: Feature flag logic polutes business code directly
+// BAD: Feature flag logic pollutes business code directly
 if (featureFlags.isEnabled("NEW_PRICING_ENGINE_2026", user)) {
   return calculateNewPricing(cart);
 } else {
@@ -4689,7 +4097,10 @@ if (featureFlags.isEnabled("NEW_PRICING_ENGINE_2026", user)) {
 }
 ```
 
-##### Good: Decoupled Strategy Pattern
+> [!TIP]
+> **Good Practice: Decoupled Strategy Pattern**
+> Feature Toggle decoupled behind a Polymorphic Strategy Interface.
+
 ```typescript
 // GOOD: Feature Toggle decoupled behind Polymorphic Strategy Interface
 interface PricingStrategy {
@@ -4712,19 +4123,20 @@ class PricingEngineFactory {
 
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM & RESEARCH TEXTS
+## 2. Verbatim & Research Texts
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Serverless Architectures / Feature Toggles<br>
-  <strong>Author(s):</strong> Mike Roberts, Pete Hodgson & Martin Fowler<br>
-  <strong>Published:</strong> 2017-2018, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essays<br>
-  <strong>Original URL:</strong> https://martinfowler.com/articles/serverless.html & https://martinfowler.com/articles/feature-toggles.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> [!IMPORTANT]
+> **VERBATIM SOURCE**
+> - **Title:** Serverless Architectures / Feature Toggles
+> - **Author(s):** Mike Roberts, Pete Hodgson & Martin Fowler
+> - **Published:** 2017-2018, martinfowler.com
+> - **Source type:** Architecture Essays
+> - **Original URL:** [Serverless Architectures](https://martinfowler.com/articles/serverless.html) & [Feature Toggles](https://martinfowler.com/articles/feature-toggles.html)
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
-#### Serverless Architecture & Feature Management
+### Serverless Architecture & Feature Management
+
 The transition from traditional, always-on server provisioning to ephemeral, event-driven compute models is defined by Mike Roberts and Martin Fowler as "Serverless Architecture." This paradigm fundamentally shifts operational responsibilities—such as capacity scaling, OS patching, and multi-zone redundancy—to the cloud provider. While Serverless (or Function-as-a-Service) drastically reduces idle compute costs and accelerates time-to-market, it introduces novel architectural trade-offs. Engineers must account for execution latency (cold starts), strict statelessness requiring external data persistence, and the inherent complexities of debugging and monitoring highly distributed, ephemeral systems.
 
 Complementing this agility in deployment is the architectural implementation of Feature Toggles (or Feature Flags), as detailed by Pete Hodgson. Feature Toggles enable continuous delivery (CD) directly to a main code branch by decoupling code deployment from feature release. This allows incomplete or experimental features to be merged safely without relying on long-lived feature branches, mitigating complex merge conflicts. However, Hodgson emphasizes a critical hygiene rule: release toggles inherently accrue technical debt. Once a feature is fully released, the toggle logic must be systematically removed to prevent the codebase from becoming saturated with obsolete execution paths. Best practices dictate isolating toggle routing logic behind abstraction layers (such as the Strategy Pattern) to prevent feature flags from polluting core domain logic.
@@ -4733,13 +4145,39 @@ Complementing this agility in deployment is the architectural implementation of 
 
 <div class="page-break"></div>
 
-### SECTION 3: CITATION & REFERENCE DEEP-DIVES
+## 3. Feature Toggles Deep-Dive (Research Synthesis)
 
-#### Reference 4.3.A: AWS Lambda & Ephemeral Compute Semantics
+Based on Pete Hodgson's definitive guide on MartinFowler.com, Feature Toggles (interchangeable with Feature Flags) are a powerful technique but come with inherent complexities that must be managed to prevent technical debt.
+
+### Core Concepts
+
+1. **Decoupling Deployment from Release**: The primary benefit of feature toggles is that they separate the act of deploying code to production from the act of releasing a feature to users. This is the cornerstone of Continuous Delivery, allowing developers to merge unfinished code to the `main` branch safely.
+2. **Toggle Categories**: Hodgson categorizes toggles into four distinct types (as seen in the matrix above). This categorization is crucial because different types of toggles have different life cycles and should be managed differently.
+    - **Release Toggles**: Short-lived, dynamic toggles used to hide incomplete features. They should be removed once the feature is fully rolled out.
+    - **Experiment Toggles**: Used for A/B testing. They need to generate statistically significant data and are usually removed once the experiment concludes.
+    - **Ops Toggles**: Long-lived, used to control operational aspects like degrading non-critical features under heavy load (Circuit Breakers).
+    - **Permission Toggles**: Long-lived, used to control features based on user identity (e.g., premium vs. free users).
+
+### Implementation Best Practices
+
+> [!CAUTION]
+> **Toggle Debt**
+> Toggles introduce technical debt. Left unchecked, a codebase can become riddled with complex conditional logic, making it brittle and difficult to understand.
+
+- **Categorize and Manage**: Understand the type of toggle you are implementing and manage its lifecycle accordingly. Release toggles require proactive cleanup.
+- **The Keystone Interface**: Instead of scattering toggle checks throughout backend logic, try to apply the toggle at the UI layer or entry point (the "Keystone Interface"). This keeps the core domain logic clean.
+- **Limit Toggle Scope**: Impose limits on the number of active toggles in the system. When a limit is reached, teams must remove old toggles before adding new ones.
+- **Abstract Toggle Logic**: As shown in the Primer, use patterns like Strategy or Factory to hide the toggle logic from the main application code, ensuring that the feature flag check doesn't pollute the business rules.
+
+---
+
+## 4. Citation & Reference Deep-Dives
+
+### Reference 4.3.A: AWS Lambda & Ephemeral Compute Semantics
 - **History**: Introduced by Amazon Web Services at AWS re:Invent 2014.
 - **Execution Model**: MicroVM containers (Firecracker) spin up rapidly in response to event triggers, transforming backend cloud microservice execution.
 
-#### Reference 4.3.B: Trunk-Based Development vs. GitFlow
+### Reference 4.3.B: Trunk-Based Development vs. GitFlow
 - **Trunk-Based Development**: All engineers commit code to `main` daily, using Feature Toggles to hide uncompleted features.
 - **GitFlow**: Relies on long-lived feature branches, leading to complex "Merge Hells" when integrating branches after weeks of divergence.
 
