@@ -6560,6 +6560,12 @@ Simultaneously, single-writer thread isolation ensures that a designated CPU cor
 
 # Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice
 
+A cornerstone of High-Frequency Trading (HFT) architectures is the avoidance of memory allocations in the critical path. The JVM's Garbage Collector (GC), even modern variants like ZGC, introduces non-deterministic pauses that are unacceptable when measuring latency in microseconds or nanoseconds.
+
+## The Flyweight Pattern in HFT Context
+
+In the LMAX Disruptor architecture, a single mutable event object is pre-allocated at startup and reused for every message. This eliminates the GC pressure that would result from allocating millions of new DTOs per second.
+
 ---
 
 ## SECTION 1: PRIMER ON THE BASICS
