@@ -1,14 +1,10 @@
-# Module 5: Code Evolution & Refactoring Patterns
-
-<div class="page-break"></div>
-
-## Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
+# Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. What Is Refactoring?
+### 1. What Is Refactoring?
 
 **Refactoring** is a disciplined technique for restructuring an existing body of code, altering its internal structure without changing its external observable behavior. Its heart is a series of small behavior-preserving transformations. Each transformation (called a "refactoring") does little, but a sequence of transformations can produce a significant restructuring.
 
@@ -39,7 +35,7 @@ The key constraint: **run the test suite after every single micro-step**. If a t
 
 ---
 
-#### 2. Preparatory Refactoring — "Make the Change Easy"
+### 2. Preparatory Refactoring — "Make the Change Easy"
 
 Martin Fowler captures the philosophy of **Preparatory Refactoring** with Kent Beck's maxim:
 
@@ -77,7 +73,7 @@ The metaphor from **Jessica Kerr** (quoted in Fowler's article) describes it pre
 
 ---
 
-#### 3. The Two Hats (Kent Beck)
+### 3. The Two Hats (Kent Beck)
 
 Fowler explains that when working on code you wear one of two hats at a time — and **you must never wear both simultaneously**:
 
@@ -98,7 +94,7 @@ Fowler explains that when working on code you wear one of two hats at a time —
 
 ---
 
-#### 4. Core Refactoring Catalogue (Fowler's Named Transformations)
+### 4. Core Refactoring Catalogue (Fowler's Named Transformations)
 
 | Refactoring | From | To |
 | :--- | :--- | :--- |
@@ -113,7 +109,7 @@ Fowler explains that when working on code you wear one of two hats at a time —
 
 ---
 
-#### 5. Code Smells — When to Refactor
+### 5. Code Smells — When to Refactor
 
 Martin Fowler and Kent Beck identified the key "code smells" — signals that the code needs restructuring:
 
@@ -142,9 +138,9 @@ Martin Fowler and Kent Beck identified the key "code smells" — signals that th
 
 ---
 
-#### 6. Code Examples — Extract Method Pattern
+### 6. Code Examples — Extract Method Pattern
 
-##### Java Implementation
+#### Java Implementation
 ```java
 // BEFORE: Long method, vague names, mixed responsibilities
 public String generateStatement(Customer customer) {
@@ -314,7 +310,7 @@ def statement(customer: dict, movies: dict) -> str:
 
 ---
 
-#### 7. The Notification Pattern — Replacing Exceptions for Validation
+### 7. The Notification Pattern — Replacing Exceptions for Validation
 
 When **validating user input**, throwing exceptions is the wrong tool. An exception aborts on the first error. A user submitting a form wants to know **all** validation errors at once, not just the first one.
 
@@ -358,13 +354,13 @@ When **validating user input**, throwing exceptions is the wrong tool. An except
   <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
 </div>
 
-#### 1. The Core Philosophy of Refactoring
+### 1. The Core Philosophy of Refactoring
 Fowler's foundational work on refactoring establishes it not merely as a technical chore, but as an essential practice for software sustainability. Refactoring is defined as restructuring code without changing its observable behavior. The primary goal is to improve the internal structure, making the codebase easier to understand and cheaper to modify.
 
-#### 2. The Two Hats and Preparatory Refactoring
+### 2. The Two Hats and Preparatory Refactoring
 A critical conceptual model introduced is the "Two Hats" metaphor. Developers must separate the acts of adding functionality and refactoring. By focusing on one activity at a time, cognitive load is reduced and test stability is maintained. Preparatory refactoring ("making the change easy") emphasizes that before a new feature is added, the existing structure should be adapted to seamlessly accommodate it.
 
-#### 3. Transformational Mechanics
+### 3. Transformational Mechanics
 The mechanics of refactoring rely on a catalogue of precise, behavior-preserving transformations. Each step must be small enough that the test suite continues to pass, ensuring the system remains continuously deployable.
 
 ---

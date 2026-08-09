@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh)
+# Chapter 2.3: Synchronization & The Java Memory Model (Doug Lea & William Pugh)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. Why Multithreaded Memory Models Are Necessary
+### 1. Why Multithreaded Memory Models Are Necessary
 In a single-threaded execution context, compilers and CPU hardware aggressively reorder instructions and cache variable values in registers to maximize performance. As long as execution obeys **as-if-serial semantics** (the program produces the exact same results as if executed line-by-line in source order), these optimizations are completely invisible and safe.
 
 In a multithreaded environment with shared memory, however, an optimizing compiler or CPU out-of-order pipeline can break code correctness in counter-intuitive ways:
@@ -27,7 +25,7 @@ Without a formal **Memory Model**, Thread 2 might observe `b == -1` while still 
 3. CPU L1/L2 cache flushes occurring asynchronously.
 4. Word tearing on 64-bit primitives (`long` and `double`).
 
-#### 2. The Three Pillar Guarantees of a Memory Model
+### 2. The Three Pillar Guarantees of a Memory Model
 
 ```
                     THE THREE MEMORY MODEL PILLARS
@@ -42,12 +40,12 @@ Without a formal **Memory Model**, Thread 2 might observe `b == -1` while still 
 └───────────────────────┴───────────────────────┴───────────────────────┘
 ```
 
-#### 3. Happens-Before Consistency & Memory Barriers
+### 3. Happens-Before Consistency & Memory Barriers
 A **Memory Model** specifies a formal contract between programmers and language runtimes (JVM, C++11 runtime):
 - **Locks & Synchronization**: Releasing a lock (`synchronized` block exit) forces a flush of all written variables from local working memory to main memory. Acquiring a lock forces a cache invalidation and reload from main memory.
 - **Volatile Variables**: Writing to a `volatile` variable establishes a strict **Happens-Before** edge to subsequent reads of that same variable by any thread, suppressing instruction reordering via **Memory Barriers (Fences)**.
 
-#### 4. The Double-Checked Locking (DCL) Problem
+### 4. The Double-Checked Locking (DCL) Problem
 A classic example of memory model failure is the Double-Checked Locking singleton pattern. In Java pre-1.5, developers tried to avoid the overhead of `synchronized` on every access by checking if the instance was null, then synchronizing, and checking again:
 
 ```java
@@ -110,9 +108,9 @@ class Singleton:
 
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM RESEARCH PAPER
+## SECTION 2: VERBATIM RESEARCH PAPER
 
-#### Synchronization and the Java Memory Model (1996–1999)
+### Synchronization and the Java Memory Model (1996–1999)
 *By Doug Lea (Excerpts from Concurrent Programming in Java: Design Principles and Patterns)*
 
 Consider the tiny class, defined without any synchronization:

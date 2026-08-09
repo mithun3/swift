@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 5.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)
+# Chapter 5.4: Refactoring with Loops and Collection Pipelines (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Problem with Imperative Loops
+### 1. The Problem with Imperative Loops
 
 Traditional `for` and `while` loops are powerful but **opaque**. They mix the *iteration mechanism* (how you traverse a collection) with the *transformation logic* (what you do at each step) and the *accumulation logic* (how you collect results). This mixing makes loops harder to read at a glance, harder to compose, and harder to test in isolation.
 
@@ -39,7 +37,7 @@ Collection Pipelines separate these concerns into **named, composable operations
 
 ---
 
-#### 2. The Core Pipeline Operations
+### 2. The Core Pipeline Operations
 
 | Operation | Purpose | Input → Output |
 | :--- | :--- | :--- |
@@ -53,9 +51,9 @@ Collection Pipelines separate these concerns into **named, composable operations
 
 ---
 
-#### 3. Code Examples — Replace Loop with Pipeline
+### 3. Code Examples — Replace Loop with Pipeline
 
-##### Java Implementation (Java 8+ Streams)
+#### Java Implementation (Java 8+ Streams)
 ```java
 // BEFORE: Imperative loop
 public List<String> getRegularMovieTitles(Customer customer, Map<String, Movie> movies) {
@@ -157,13 +155,13 @@ def total_amount(customer, movies):
 
 ### SECTION 2: SYNTHESIZED ACADEMIC SUMMARY
 
-#### 1. The Paradigm Shift from Imperative to Declarative
+### 1. The Paradigm Shift from Imperative to Declarative
 Refactoring loops into collection pipelines represents a fundamental shift from imperative state manipulation to declarative data processing. This approach leverages functional programming concepts (map, filter, reduce) to express the *intent* of an operation rather than the mechanics of its execution.
 
-#### 2. Enhancing Readability and Comprehension
+### 2. Enhancing Readability and Comprehension
 Traditional loop structures often obscure the core business logic beneath boilerplate iteration and state management. Pipelines streamline this by chaining pure functions, producing code that reads closer to natural language and is inherently easier to comprehend at a glance.
 
-#### 3. Immutability and Side-Effect Reduction
+### 3. Immutability and Side-Effect Reduction
 By transitioning to pipelines, developers naturally adopt immutability and reduce side-effects. Operations within a pipeline typically return new collections rather than mutating existing ones, leading to safer, more predictable code that is easier to parallelize and test.
 
 ---

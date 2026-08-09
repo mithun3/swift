@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 3.5: Citation & Reference Deep-Dives for Module 3
+# Chapter 3.7: Citation & Reference Deep-Dives for Module 3
 
 This chapter provides standalone research profiles, mathematical formalisms, hardware memory fence mechanics, and lock-free data structure implementations for all major citations across Module 3.
 
 ---
 
-### Deep-Dive 3.5.1: Carl Hewitt’s Original Actor Formalism (1973 vs 1985)
+## Deep-Dive 3.5.1: Carl Hewitt’s Original Actor Formalism (1973 vs 1985)
 
 ```
 1973: Carl Hewitt, Peter Bishop, Richard Steiger (IJCAI '73)
@@ -21,7 +19,7 @@ This chapter provides standalone research profiles, mathematical formalisms, har
       - Minimal functional actor primitives (send, create, become)
 ```
 
-#### Theoretical Distinction: Hewitt vs. Agha
+### Theoretical Distinction: Hewitt vs. Agha
 - **Hewitt & Bishop (1973)**: Conceived actors as generalized active software entities in Artificial Intelligence. Everything was an actor (numbers, functions, stack frames, environments). Communication was message-passing, but focused heavily on pattern matching and control structures.
 - **Agha (1985)**: Stripped the actor model down to its pure concurrent computational essentials:
   1. **Actors have Mail Addresses** (uniquely identifying target locations).
@@ -31,9 +29,9 @@ $$\text{Actor}(State_k) \xrightarrow{\text{Message}_m} \text{Actor}(State_{k+1})
 
 ---
 
-### Deep-Dive 3.5.2: Lock-Free Memory Barriers & Cache-Line Padding
+## Deep-Dive 3.5.2: Lock-Free Memory Barriers & Cache-Line Padding
 
-#### The False Sharing Problem
+### The False Sharing Problem
 In multi-core CPU architectures, memory is transferred between L3 cache and CPU L1/L2 caches in fixed **64-byte Cache Lines**.
 
 When two threads executing on separate CPU cores write to independent variables that happen to reside on the same 64-byte cache line:
@@ -82,7 +80,7 @@ struct alignas(hardware_destructive_interference_size) PaddedAtomicSequence {
 
 ---
 
-### Deep-Dive 3.5.3: Memory Fences (LoadLoad, StoreStore, LoadStore, StoreLoad)
+## Deep-Dive 3.5.3: Memory Fences (LoadLoad, StoreStore, LoadStore, StoreLoad)
 
 Hardware memory reordering forces low-latency lock-free data structures (like the LMAX Disruptor) to explicitly emit **Memory Barriers (Fences)**:
 
@@ -95,7 +93,7 @@ Hardware memory reordering forces low-latency lock-free data structures (like th
 
 ---
 
-### Deep-Dive 3.5.4: Summary of Cited Works for Module 3
+## Deep-Dive 3.5.4: Summary of Cited Works for Module 3
 
 [12] G. A. Agha, "AITR-844 Actors Thesis," MIT, 1985. Available: https://dspace.mit.edu/handle/1721.1/6952
 [13] M. Fowler, "The LMAX Architecture," MartinFowler.com, 2011. Available: https://martinfowler.com/articles/lmax.html

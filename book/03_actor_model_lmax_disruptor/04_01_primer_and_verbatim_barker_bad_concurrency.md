@@ -1,22 +1,20 @@
-<div class="page-break"></div>
-
-## Chapter 3.4: Bad Concurrency (Michael Barker)
+# Chapter 3.4: Bad Concurrency (Michael Barker)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. Aeron & Low-Latency Multicast
+### 1. Aeron & Low-Latency Multicast
 Aeron is an ultra-low-latency, reliable messaging system that operates over UDP, Multicast UDP, and IPC. Co-developed by Martin Thompson and Todd Montgomery, it is the transport layer that powers many high-performance trading architectures.
 
-#### 2. Flow Control in Multicast
+### 2. Flow Control in Multicast
 In unidirectional UDP, senders can easily outpace receivers, causing packet loss. TCP solves this with sliding window flow control, but how do you do flow control for *multicast* (one sender, many receivers)?
 Aeron provides several dynamic strategies:
 - **Max Flow Control**: The sender limits its rate based on the *fastest* receiver. Slow receivers will drop packets.
 - **Min Flow Control**: The sender limits its rate based on the *slowest* receiver. Slow nodes hold up the publisher.
 - **Tagged Flow Control**: Only receivers with a specific tag are included in the min flow control calculation. Non-critical subscribers (like gateways) can drop packets without slowing the critical subscribers (like archiving databases).
 
-#### 3. Aeron Flow Control Configuration Example
+### 3. Aeron Flow Control Configuration Example
 ```java
 // Setting up Aeron Channels with different flow control strategies
 
@@ -41,11 +39,11 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
 
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM RESEARCH PAPER
+## SECTION 2: VERBATIM RESEARCH PAPER
 
 <div class="scholarly-text">
 
-#### Paper 3: Bad Concurrency (March/April 2020)
+### Paper 3: Bad Concurrency (March/April 2020)
 *By Michael Barker (bad-concurrency.blogspot.com)*
 
 <div class="source-attribution">

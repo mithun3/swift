@@ -1,14 +1,11 @@
-# Module 2: Hardware Evolution, Concurrency & Memory Models
 
-<div class="page-break"></div>
-
-## Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter)
+# Chapter 2.1: Welcome to the Jungle — The Concurrency Revolution (Herb Sutter)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Era of the "Free Lunch" (1975–2005)
+### 1. The Era of the "Free Lunch" (1975–2005)
 For three decades, software engineering enjoyed an unprecedented luxury known as the **Single-Threaded Free Lunch**. Every 18 months, chip manufacturers like Intel and AMD released microprocessors with exponentially higher CPU clock speeds (going from megahertz to gigahertz).
 
 ```
@@ -27,13 +24,13 @@ For three decades, software engineering enjoyed an unprecedented luxury known as
 
 Software engineers did not need to write parallel or multithreaded code to achieve high throughput. They simply waited for next year's CPU generation.
 
-#### 2. Thermal Dissipation, Dennard Scaling, and Dark Silicon
+### 2. Thermal Dissipation, Dennard Scaling, and Dark Silicon
 By 2004–2005, CPU physical scaling hit three hard walls:
 1. **The Breakdown of Dennard Scaling (The Power Wall)**: Historically, as transistors shrank (Moore's Law), their power density remained constant, meaning newer chips ran faster without using more power (Dennard Scaling). Around 2005, this scaling law collapsed due to physical current leakage at sub-micron scales. Consequently, raising clock speeds above ~3.8 GHz caused CPUs to draw exponentially more electrical power, generating intense heat that melted the silicon. This leads to the **Dark Silicon** phenomenon, where a chip may contain billions of transistors, but large portions of them must remain unpowered ("dark") at any given time to prevent the chip from overheating.
 2. **Instruction-Level Parallelism (ILP) Wall**: Out-of-order execution, speculative execution, and branch prediction reached diminishing returns.
 3. **The Memory Wall**: CPU speed grew much faster than main memory (RAM) access speeds, leaving fast CPUs idle while waiting for data fetches across the memory bus.
 
-#### 3. The Shift to Parallelism and Heterogeneity
+### 3. The Shift to Parallelism and Heterogeneity
 Faced with physical limits on clock speed, semiconductor makers began packing multiple CPU cores onto a single silicon die (**Homogeneous Multicore** starting in 2005), followed by adding specialized compute units (**Heterogeneous Manycore** like GPUs and SPUs in 2009–2011), and ultimately scaling across compute networks (**Elastic Cloud Cores**).
 
 ```
@@ -46,7 +43,7 @@ Faced with physical limits on clock speed, semiconductor makers began packing mu
 
 Herb Sutter's core conclusion: **Software developers can no longer rely on hardware to make single-threaded code faster.** To exploit hardware advances, software must be designed with explicit, fine-grained concurrency and distributed asynchronous architectures.
 
-#### 4. Code Examples (Java / JS / Python)
+### 4. Code Examples (Java / JS / Python)
 
 #### Java Implementation
 ```java
@@ -104,7 +101,7 @@ if __name__ == '__main__':
 
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM TEXT
+## SECTION 2: VERBATIM TEXT
 
 > **VERBATIM SOURCE**
 > **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
@@ -140,7 +137,7 @@ What this means is that if you want your application to benefit from the perform
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
-#### Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket (2011)
+### Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket (2011)
 *By Herb Sutter (Published on Sutter's Mill / Dr. Dobb's)*
 
 In the twilight of Moore’s Law, the transitions to multicore processors, GPU computing, and HaaS cloud computing are not separate trends, but aspects of a single trend – mainstream computers from desktops to ‘smartphones’ are being permanently transformed into heterogeneous supercomputer clusters. Henceforth, a single compute-intensive application will need to harness different kinds of cores, in immense numbers, to get its job done.

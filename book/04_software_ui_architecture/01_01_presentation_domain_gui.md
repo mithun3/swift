@@ -8,7 +8,7 @@
 
 ### SECTION 1: PRIMER ON THE BASICS
 
-#### 1. What Is Presentation Domain Separation (PDS)?
+### 1. What Is Presentation Domain Separation (PDS)?
 **Presentation Domain Separation (PDS)** is one of the most fundamental rules of software design. It states that code responsible for **Presentation** (user interfaces, screens, CLI commands, HTTP web views) must be kept strictly distinct from code responsible for **Domain Logic** (business rules, calculations, validation logic, entity models).
 
 ```
@@ -32,7 +32,7 @@
 2. **Testability**: Domain logic can be unit-tested directly in memory without launching browser DOM instances, rendering GUI windows, or mocking UI events.
 3. **Maintainability & Tech Upgrades**: UI frameworks evolve rapidly (e.g., jQuery -> Angular -> React -> Next.js), while core business rules remain stable across decades.
 
-#### 2. Evolution of GUI Architectures: MVC, MVP, and MVVM
+### 2. Evolution of GUI Architectures: MVC, MVP, and MVVM
 
 ```
                THE EVOLUTION OF SEPARATED PRESENTATION PATTERNS
@@ -50,9 +50,9 @@
     │   - ViewModel exposes reactive state without direct UI references
 ```
 
-#### 3. Real-World Code Example: PDS in Modern TypeScript
+### 3. Real-World Code Example: PDS in Modern TypeScript
 
-##### Violating PDS (Anti-Pattern: Mixing UI and Business Rules)
+#### Violating PDS (Anti-Pattern: Mixing UI and Business Rules)
 ```typescript
 // BAD: Domain calculations mixed directly into React Component state
 export const InvoiceComponent: React.FC<{ items: Array<{ price: number; qty: number }> }> = ({ items }) => {

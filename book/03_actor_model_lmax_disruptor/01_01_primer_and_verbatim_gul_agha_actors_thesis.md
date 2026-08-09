@@ -8,7 +8,7 @@
 
 ### SECTION 1: PRIMER ON THE BASICS
 
-#### 1. What Is an Actor?
+### 1. What Is an Actor?
 The **Actor Model** is a mathematical model of concurrent computation proposed by Carl Hewitt, Henry Baker, and formalized by **Gul A. Agha** in his 1985 MIT PhD dissertation. 
 
 In the Actor model, the fundamental unit of computation is an **Actor**. An actor is an autonomous, concurrent object that encapsulates state, behavior, and a mail address.
@@ -33,14 +33,14 @@ When an actor receives a message (communication), it can execute exactly three p
 └───────────────────────┘    └───────────────────────┘    └───────────────────────┘
 ```
 
-#### 2. Key Characteristics of the Actor Paradigm
+### 2. Key Characteristics of the Actor Paradigm
 
 1. **No Shared State**: Actors do not share mutable memory. Interaction occurs purely via asynchronous message-passing.
 2. **Mail Addresses & Dynamic Topology**: Actors communicate by sending messages to a target's *Mail Address*. Mail addresses can be passed in messages, allowing the interconnection network of actors to change dynamically at runtime.
 3. **The `become` Command & State Replacement**: In traditional OOP, an object updates its internal fields via mutation (`this.x = y`). In the Actor model, an actor replaces its behavior for processing the *next* message using a `become` operation. This allows actors to represent history-sensitive objects while maintaining mathematical immutability for each processed task.
 4. **Unbounded Nondeterminism & Fair Mail Delivery**: Messages sent to an actor are placed in its *Mail Queue*. Messages arrive in arbitrary order, but the underlying mail system guarantees that every message sent will eventually be delivered (Guaranteed Mail Delivery).
 
-#### 3. Actors vs. CSP (Communicating Sequential Processes)
+### 3. Actors vs. CSP (Communicating Sequential Processes)
 - **CSP (Hoare)**: Relies on **Synchronous Communication** (Rendezvous), where both sender and receiver must block until the transfer completes. Topology is static.
 - **Actor Model (Hewitt/Agha)**: Relies on **Buffered Asynchronous Communication**. Senders never block. Actors can dynamically spawn new actors and pass mail addresses.
 
@@ -52,7 +52,7 @@ When an actor receives a message (communication), it can execute exactly three p
 
 The core of Gul Agha's thesis formalized the Actor Model as a framework for concurrent computation in distributed systems. Instead of dealing with the raw thesis, this section synthesizes its primary contributions and provides modern code examples to illustrate the foundational mechanics.
 
-#### 1. Encapsulation and Asynchronous Message Passing
+### 1. Encapsulation and Asynchronous Message Passing
 In the Actor model, an actor encapsulates its state and behavior. It cannot be accessed directly by other objects. Interaction happens exclusively via asynchronous message passing.
 
 *Example (Conceptual Akka/Java-like syntax):*
@@ -77,7 +77,7 @@ public class CounterActor extends AbstractActor {
 counterActorRef.tell(new Increment(), ActorRef.noSender());
 ```
 
-#### 2. Dynamic Creation of Actors (Topology)
+### 2. Dynamic Creation of Actors (Topology)
 Actors can create other actors dynamically. This allows the system to scale and adapt its topology on the fly based on the workload.
 
 ```java
@@ -95,7 +95,7 @@ public class SpawnerActor extends AbstractActor {
 }
 ```
 
-#### 3. Mail Addresses and Network Reconfiguration
+### 3. Mail Addresses and Network Reconfiguration
 Messages carry not only data but can also include the "mail addresses" (references) of other actors. This allows actors to learn about new peers and establish new communication pathways dynamically.
 
 ```java
@@ -113,7 +113,7 @@ public class IntroActor extends AbstractActor {
 }
 ```
 
-#### 4. The `become` Operation (State Replacement)
+### 4. The `become` Operation (State Replacement)
 One of the most profound concepts in Agha's formalization is that actors do not strictly "mutate" their state. Instead, they specify a replacement behavior for the *next* message. This elegant mechanism avoids race conditions and shared mutable memory issues.
 
 ```java
@@ -147,7 +147,7 @@ public class FlipFlopActor extends AbstractActor {
 }
 ```
 
-#### 5. Unbounded Nondeterminism
+### 5. Unbounded Nondeterminism
 Because messages are processed asynchronously and can arrive from multiple sources across a network, the order of message arrival is nondeterministic. The actor model accommodates this by guaranteeing delivery eventually, but without strict ordering unless explicitly managed (e.g., via sequence numbers).
 
 By abstracting away the low-level locking mechanisms, Agha's model paved the way for highly scalable, resilient distributed systems like those built with Erlang, Akka, and the LMAX Disruptor.

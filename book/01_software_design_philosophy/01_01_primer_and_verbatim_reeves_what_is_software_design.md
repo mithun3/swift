@@ -9,7 +9,7 @@
 
 ### SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Core Misconception in Software Engineering
+### 1. The Core Misconception in Software Engineering
 For decades, the software development industry attempted to establish legitimacy by modeling its processes directly on physical engineering disciplines—such as civil, mechanical, and electrical engineering. In traditional hardware engineering, a sharp boundary exists between **Design** and **Manufacturing**:
 
 ```
@@ -28,7 +28,7 @@ Architects write specs & UML --> Programmers type code into computers
 
 **Jack W. Reeves' radical insight in 1992** was that this analogy is fundamentally broken. Programmers are **not** assembly line workers. 
 
-#### 2. The Economics of Building Software
+### 2. The Economics of Building Software
 In hardware engineering, building a physical prototype or manufacturing 10,000 units requires massive capital investment, physical raw materials, and factory labor.
 
 In software engineering:
@@ -49,17 +49,17 @@ In software engineering:
 +-------------------------------------------------------------------+
 ```
 
-#### 3. Why Testing and Debugging Are Design Refinement
+### 3. Why Testing and Debugging Are Design Refinement
 Because building software is free, software designers refine their designs by compiling and running them rather than spending months attempting mathematical correctness proofs or rigid paper reviews.
 
 In traditional engineering, wind tunnel testing of bridge scale models is part of design validation. In software, **testing and debugging are the software engineering equivalent of wind tunnel simulations and prototype testing**.
 
-#### 4. Real-World Analogy: The Architect vs. The Builder
+### 4. Real-World Analogy: The Architect vs. The Builder
 Imagine an architect designing a skyscraper. They draw blueprints (design) and hand them to a construction crew (manufacturing). The crew pours concrete and welds steel. If a beam is too short, it's a manufacturing error.
 
 In software, imagine the architect writes the blueprint, and a magic 3D-printer instantly builds the skyscraper for free. If the 3D-printed skyscraper collapses, it's not a manufacturing error (the printer did exactly what the blueprint said). It is a **design error**. The source code *is* the blueprint. The compiler *is* the magic 3D-printer.
 
-#### 5. Code Example: Source Code as Design
+### 5. Code Example: Source Code as Design
 When we write code, we are making design decisions. Consider this simple C++ example—we are not "building" an order system, we are *designing* the relationships and invariants of the system:
 
 ```cpp
@@ -91,7 +91,7 @@ public:
 ```
 The compiler takes this design and "manufactures" the machine code. The engineering effort is entirely in crafting this logic.
 
-#### 6. Historical Impact & Influence on Agile
+### 6. Historical Impact & Influence on Agile
 When Jack Reeves published his essay in the *C++ Journal* in 1992, it was initially ignored. However, in the late 1990s, Ward Cunningham hosted the paper on the **C2 Wiki**, where figures like **Robert C. Martin (Uncle Bob)**, **Michael Feathers**, and **Kent Beck** discovered it. Reeves' essay provided the theoretical foundation for **Extreme Programming (XP)**, **Test-Driven Development (TDD)**, and the **Agile Manifesto**: if source code is design, then coding early, iterating continuously, and refactoring are essential engineering practices.
 
 ---
@@ -100,7 +100,7 @@ When Jack Reeves published his essay in the *C++ Journal* in 1992, it was initia
 
 ### SECTION 2: VERBATIM RESEARCH PAPERS
 
-#### Paper 1: What Is Software Design? (1992)
+### Paper 1: What Is Software Design? (1992)
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>

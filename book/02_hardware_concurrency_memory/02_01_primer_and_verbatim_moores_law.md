@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 2.2: Moore's Law — Past, Present, and Future (Robert R. Schaller & Gordon E. Moore)
+# Chapter 2.2: Moore's Law — Past, Present, and Future (Robert R. Schaller & Gordon E. Moore)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Origin of Moore's Law (1965 & 1975)
+### 1. The Origin of Moore's Law (1965 & 1975)
 In 1965, Gordon E. Moore (then R&D Director at Fairchild Semiconductor and later co-founder of Intel) was asked by *Electronics* magazine to predict the future of the semiconductor industry over the next decade. 
 
 Plotting component counts from just three data points on a log-linear scale, Moore observed that the number of components per integrated circuit (IC) doubled every year:
@@ -28,19 +26,19 @@ Plotting component counts from just three data points on a log-linear scale, Moo
 
 In 1975, Moore revised his estimate to a doubling every **18 to 24 months**, which accurately tracked semiconductor progress for over 40 years.
 
-#### 2. The Three Factors Driving Density Doubling
+### 2. The Three Factors Driving Density Doubling
 Gordon Moore identified three distinct engineering factors that enabled density doubling:
 1. **Finer Line Widths / Feature Sizes**: Photolithographic advances reduced transistor gate dimensions.
 2. **Larger Die Sizes**: Wafer manufacturing allowed larger silicon dice without incurring fatal defect rates.
 3. **Circuit & Device "Cleverness"**: Ingenious circuit layouts, isolation techniques, and component packing (which Moore noted reached physical limits around 1975).
 
-#### 3. Software Demand & Myhrvold's Law
+### 3. Software Demand & Myhrvold's Law
 Moore's Law was reinforced by a massive positive feedback loop from software. Nathan Myhrvold (former CTO of Microsoft) observed that **software complexity grows faster than hardware capability**. As fast CPUs emerged, software engineers expanded capabilities, bloat, and features—which in turn created an insatiable market demand for even faster processors.
 
-#### 4. The Breakdown of Dennard Scaling
+### 4. The Breakdown of Dennard Scaling
 Historically, as transistors shrank, their power density remained constant, meaning newer chips ran faster without using more power (Dennard Scaling). Around 2005, this scaling law collapsed due to physical current leakage at sub-micron scales.
 
-#### 5. Moore's Second Law (Rock's Law)
+### 5. Moore's Second Law (Rock's Law)
 While the cost per transistor decreases exponentially, the capital cost of building a state-of-the-art semiconductor fabrication plant (Fab) increases exponentially:
 ```text
           FAB CAPITAL COST OVER TIME (ROCK'S LAW)

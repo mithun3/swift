@@ -1,17 +1,15 @@
-<div class="page-break"></div>
-
-## Chapter 1.2: Code As Documentation (Martin Fowler)
+# Chapter 1.3: Code As Documentation (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Core Misconception of Agile Documentation
+### 1. The Core Misconception of Agile Documentation
 When Agile methods and Extreme Programming (XP) grew in popularity during the late 1990s and early 2000s, a major misconception emerged across software engineering teams. Critics often claimed: *"Agile developers don't write documentation; they believe code is the only documentation needed."*
 
 In his 2005 article **"Code As Documentation"**, Martin Fowler directly refutes this myth. Fowler clarifies that saying **"code is the primary source of documentation"** is not saying **"code is the ONLY documentation."** 
 
-#### 2. Precision, Clarity, and the Fallacy of Code Quality
+### 2. Precision, Clarity, and the Fallacy of Code Quality
 Fowler echoes Jack Reeves' core thesis: source code is the only software artifact that is sufficiently detailed and precise to act as the primary design documentation.
 
 However, Fowler introduces a vital nuance:
@@ -31,7 +29,7 @@ However, Fowler introduces a vital nuance:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### 3. How to Make Code Act as Documentation
+### 3. How to Make Code Act as Documentation
 Fowler highlights key practices that turn source code into clear documentation:
 1. **Refactoring**: Regularly restructuring code without changing its external behavior to enhance its readability and intention.
 2. **Pair Programming**: Having another engineer continuously read and review your code in real-time to eliminate confusing constructs.
@@ -43,7 +41,7 @@ Fowler highlights key practices that turn source code into clear documentation:
 
 ### SECTION 2: VERBATIM RESEARCH PAPER
 
-#### Paper 4: Code As Documentation (2005)
+### Paper 4: Code As Documentation (2005)
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>

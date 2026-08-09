@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team)
+# Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Low-Latency Challenge in Financial Exchanges
+### 1. The Low-Latency Challenge in Financial Exchanges
 In retail financial trading (such as LMAX Exchange), matching buyer and seller orders requires ultra-low latency (sub-millisecond response times) and high throughput (processing millions of orders per second). 
 
 Traditional enterprise architecture relies on multithreaded web application servers backed by a relational database (RDBMS) coordinating transactions via ACID locks:
@@ -25,7 +23,7 @@ Traditional enterprise architecture relies on multithreaded web application serv
 2. **Thread Contention & Lock Overhead**: Mutexes (`synchronized` locks) force expensive operating system kernel context switches, invalidating CPU caches.
 3. **Queue Write Contention**: Placing messages into multi-producer/multi-consumer queues (`ArrayBlockingQueue`) causes head/tail pointer contention on shared cache lines.
 
-#### 2. The LMAX Solution: In-Memory Event Sourcing + Single-Threaded Core
+### 2. The LMAX Solution: In-Memory Event Sourcing + Single-Threaded Core
 The LMAX team discovered a counter-intuitive principle: **A single CPU core executing code on a single thread sequentially can process millions of transactions per second—IF it never blocks for I/O, never acquires locks, and keeps all business domain data in memory.**
 
 ```
@@ -37,7 +35,7 @@ The LMAX team discovered a counter-intuitive principle: **A single CPU core exec
   - Journal to disk           - Zero Locks / Zero DB IO
 ```
 
-#### 3. Mechanical Sympathy & The Disruptor Ring Buffer
+### 3. Mechanical Sympathy & The Disruptor Ring Buffer
 **"Mechanical Sympathy"** (a term coined by Martin Thompson from race-car driving) means designing software algorithms to work *with* the underlying hardware architecture rather than against it.
 
 Modern CPUs execute instructions in nanoseconds, but fetching data from main RAM takes ~100 nanoseconds. CPUs rely heavily on **L1/L2/L3 Caches** (reading contiguous 64-byte *Cache Lines*). 
@@ -57,7 +55,7 @@ The **Disruptor** replaces conventional queues with a pre-allocated **Circular A
 - **Single-Writer Principle**: Eliminates lock contention by granting each memory location a single writer.
 - **Cache-Line Padding**: Prevents *False Sharing* by padding sequence counters to 64-byte boundaries.
 
-#### 4. Disruptor Setup Example (Java)
+### 4. Disruptor Setup Example (Java)
 ```java
 // Define the Event format
 class TradeEvent { public long price; }
@@ -92,12 +90,12 @@ ringBuffer.publishEvent((event, sequence) -> {
 
 <div class="scholarly-text">
 
-#### Paper 1: The LMAX Architecture (July 2011)
+### Paper 1: The LMAX Architecture (July 2011)
 *By Martin Fowler (Published on martinfowler.com)*
 
 LMAX is a new retail financial trading platform. As a result it has to process many trades with very low latency. The system is built on the JVM platform and centers on a Business Logic Processor that can handle 6 million orders per second on a single thread. The Business Logic Processor runs entirely in-memory using event sourcing. The Business Logic Processor is surrounded by Disruptors - a concurrency component that implements a network of queues that operate without needing locks. During the design process the team concluded that recent directions in high-performance concurrency models using queues are fundamentally at odds with modern CPU design.
 
-##### Business Logic Processor: Keeping It All in Memory
+#### Business Logic Processor: Keeping It All in Memory
 The Business Logic Processor takes input messages sequentially (in the form of a method invocation), runs business logic on it, and emits output events. It operates entirely in-memory; there is no database or other persistent store. Keeping all data in memory has two important benefits. Firstly it's fast - there's no database to provide disk IO to access, nor is there any transactional behavior to execute since all the processing is done sequentially. The second advantage is that it simplifies programming - there's no object/relational mapping to do. All the code can be written using Java's object model without having to make any compromises for the mapping to a database.
 
 Such an in-memory structure has an important consequence - what happens if something crashes? The heart of dealing with this is Event Sourcing - which means that the current state of the Business Logic Processor is entirely derivable by processing the input events. As long as the input event stream is kept in a durable store (which is one of the jobs of the input disruptor) you can always recreate the current state of the business logic engine by replaying the events.
@@ -113,7 +111,7 @@ The conclusion they came to was that to get the best caching behavior, you need 
 
 ---
 
-#### Paper 2: Disruptor: High Performance Alternative to Bounded Queues for Exchanging Data Between Concurrent Threads (May 2011)
+### Paper 2: Disruptor: High Performance Alternative to Bounded Queues for Exchanging Data Between Concurrent Threads (May 2011)
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>
@@ -147,11 +145,11 @@ However this is not a specialist solution that is only of relevance in the Finan
 
 The Disruptor has significantly less write contention, a lower concurrency overhead and is more cache friendly than comparable approaches, all of which results in greater throughput with less jitter at lower latency. On processors at moderate clock rates we have seen over 25 million messages per second and latencies lower than 50 nanoseconds. This performance is a significant improvement compared to any other implementation that we have seen. This is very close to the theoretical limit of a modern processor to exchange data between cores.
 
-#### 1. Overview
+### 1. Overview
 
 The Disruptor is the result of our efforts to build the world’s highest performance financial exchange at LMAX. Early designs focused on architectures derived from SEDA [1] and Actors [2] using pipelines for throughput. After profiling various implementations it became evident that the queuing of events between stages in the pipeline was dominating the costs. We found that queues also introduced latency and high levels of jitter. We expended significant effort on developing new queue implementations with better performance. However it became evident that queues as a fundamental data structure are limited due to the conflation of design concerns for the producers, consumers, and their data storage. The Disruptor is the result of our work to build a concurrent structure that cleanly separates these concerns.
 
-#### 2. The Complexities of Concurrency
+### 2. The Complexities of Concurrency
 
 In the context of this document, and computer science in general, concurrency means not only that two or more tasks happen in parallel, but also that they contend on access to resources. The contended resource may be a database, file, socket or even a location in memory.
 
@@ -201,7 +199,7 @@ This approach is not cheap - at each stage we have to incur the cost of en-queui
 
 It would be ideal if the graph of dependencies could be expressed without incurring the cost of putting the queues between stages.
 
-#### 3. Design of the LMAX Disruptor
+### 3. Design of the LMAX Disruptor
 
 While trying to address the problems described above, a design emerged through a rigorous separation of the concerns that we saw as being conflated in queues. This approach was combined with a focus on ensuring that any data should be owned by only one thread for write access, therefore eliminating write contention. That design became known as the “Disruptor”. It was so named because it had elements of similarity for dealing with graphs of dependencies to the concept of “Phasers” [4] in Java 7, introduced to support Fork-Join. The LMAX disruptor is designed to address all of the issues outlined above in an attempt to maximize the efficiency of memory allocation, and operate in a cache-friendly manner so that it will perform optimally on modern hardware.
 
@@ -215,7 +213,7 @@ Under heavy load queue-based systems can back up, which can lead to a reduction 
 
 3.2. Teasing Apart the Concerns We saw the following concerns as being conflated in all queue implementations, to the extent that this collection of distinct behaviours tend to define the interfaces that queues implement:
 
-#### 1. Storage of items being exchanged
+### 1. Storage of items being exchanged
 
 2. Coordination of producers claiming the next sequence for exchange 3. Coordination of consumers being notified that a new item is available When designing a financial exchange in a language that uses garbage collection, too much memory allocation can be problematic. So, as we have described linked-list backed queues are a not a good approach. Garbage collection is minimized if the entire storage for the exchange of data between processing stages can be preallocated. Further, if this allocation can be performed in a uniform chunk, then traversal of that data will be done in a manner that is very friendly to the caching strategies employed by modern processors. A datastructure that meets this requirement is an array with all the slots pre-filled. On creation of the ring buffer the Disruptor utilises the abstract factory pattern to pre-allocate the entries. When an entry is claimed, a producer can copy its data into the pre-allocated structure.
 
@@ -255,7 +253,7 @@ Separating the concerns normally conflated in queue implementations allows for a
 
 3.7. Code Example The code below is an example of a single producer and single consumer using the convenience interface BatchHandler for implementing a consumer. The consumer runs on a separate thread receiving entries as they become available.
 
-#### 4. Throughput Performance Testing
+### 4. Throughput Performance Testing
 
 As a reference we choose Doug Lea’s excellent java.util.concurrent.ArrayBlockingQueue [7] which has the highest performance of any bounded queue based on our testing. The tests are conducted in a blocking programming style to match that of the Disruptor. The tests cases detailed below are available in the Disruptor open source project.
 
@@ -329,7 +327,7 @@ For the above configurations an ArrayBlockingQueue was applied for each arc of d
 | Multicast: 1P – 3C | 2,355,379 | 68,157,033 | 70,018,204 |
 | Diamond: 1P – 3C | 3,433,665 | 61,229,488 | 63,123,343 |
 
-#### 5. Latency Performance Testing
+### 5. Latency Performance Testing
 
 To measure latency we take the three stage pipeline and generate events at less than saturation. This is achieved by waiting 1 microsecond after injecting an event before injecting the next and repeating 50 million times. To time at this level of precision it is necessary to use time stamp counters from the CPU. We chose CPUs with an invariant TSC because older processors suffer from changing frequency due to power saving and sleep states. Intel Nehalem and later processors use an invariant TSC which can be accessed by the latest Oracle JVMs running on Ubuntu 11.04. No CPU binding has been employed for this test. For comparison we use the ArrayBlockingQueue once again. We could have used ConcurrentLinkedQueue [8] which is likely to give better results but we want to use a bounded queue implementation to ensure producers do not outpace consumers by creating back pressure. The results below are for 2.2Ghz Core i7-2720QM running Java 1.6.0_25 64-bit on Ubuntu 11.04. Mean latency per hop for the Disruptor comes out at 52 nanoseconds compared to 32,757 nanoseconds for ArrayBlockingQueue. Profiling shows the use of locks and signalling via a condition variable are the main cause of latency for the ArrayBlockingQueue.
 
@@ -342,7 +340,7 @@ To measure latency we take the three stage pipeline and generate events at less 
 | 99.99% observations less than | 4,194,304 | 8,192 |
 | Max Latency | 5,069,086 | 175,567 |
 
-#### 6. Conclusion
+### 6. Conclusion
 
 The Disruptor is a major step forward for increasing throughput, reducing latency between concurrent execution contexts and ensuring predictable latency, an important consideration in many applications. Our testing shows that it out-performs comparable approaches for exchanging data between threads. We believe that this is the highest performance mechanism for such data exchange. By concentrating on a clean separation of the concerns involved in cross-thread data exchange, by eliminating write contention, minimizing read contention and ensuring that the code worked well with the caching employed by modern processors, we have created a highly efficient mechanism for exchanging data between threads in any application.
 

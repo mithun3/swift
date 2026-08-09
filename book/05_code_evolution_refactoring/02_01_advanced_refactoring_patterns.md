@@ -1,13 +1,14 @@
 
+
 <div class="page-break"></div>
 
-## Chapter 5.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)
+# Chapter 5.3: Advanced & Specialized Refactoring Patterns (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. Taxonomy of Advanced Refactoring Challenges
+### 1. Taxonomy of Advanced Refactoring Challenges
 As applications grow, codebases encounter systemic code smells that go beyond single-method cleanups. This chapter focuses on major architectural and dependency-level refactorings.
 
 ```
@@ -22,7 +23,7 @@ As applications grow, codebases encounter systemic code smells that go beyond si
 
 ---
 
-#### 2. Refactoring Module Dependencies (DIP & Layering)
+### 2. Refactoring Module Dependencies (DIP & Layering)
 When codebases grow, we must divide them into logical boundaries. A classic structure is **Presentation-Domain-Data (PDD) Layering**. 
 
 However, modularization often runs into dependency management issues:
@@ -63,9 +64,9 @@ To fix this, we apply the **Dependency Inversion Principle (DIP)**:
 
 ---
 
-#### 3. Code Examples — Refactoring Module Dependencies
+### 3. Code Examples — Refactoring Module Dependencies
 
-##### Java Implementation (DIP + Constructor Injection)
+#### Java Implementation (DIP + Constructor Injection)
 ```java
 // STEP 1: Abstraction in the Domain Layer
 public interface SalesRecordSource {
@@ -171,13 +172,13 @@ class CsvSalesRecordSource(SalesRecordSource):
 
 ### SECTION 2: SYNTHESIZED ACADEMIC SUMMARY
 
-#### 1. Beyond Basic Transformations
+### 1. Beyond Basic Transformations
 Advanced refactoring patterns extend beyond simple extractions and renamings to address structural and architectural deficiencies within a codebase. These patterns are essential for dismantling deep-rooted technical debt and realigning the software architecture with its evolving domain model.
 
-#### 2. Architectural Refactoring
+### 2. Architectural Refactoring
 Complex patterns often involve cross-component restructurings, such as extracting classes, breaking circular dependencies, or implementing inversion of control. These large-scale refactorings require careful orchestration and robust test coverage to ensure system stability during the transition.
 
-#### 3. Refactoring to Patterns
+### 3. Refactoring to Patterns
 A key objective of advanced refactoring is guiding the codebase toward established design patterns. By recognizing structural friction, developers can apply targeted refactorings to introduce patterns like Factory, Observer, or Command, thereby enhancing system flexibility and comprehensibility.
 
 ---

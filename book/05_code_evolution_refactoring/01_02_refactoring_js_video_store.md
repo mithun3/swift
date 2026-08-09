@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 5.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)
+# Chapter 5.2: Refactoring a JavaScript Video Store (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Video Store — The Canonical Refactoring Teaching Case
+### 1. The Video Store — The Canonical Refactoring Teaching Case
 
 The video store example is the most famous case study in software engineering education. It first appeared in the opening chapter of Martin Fowler's *Refactoring: Improving the Design of Existing Code* (1999), written in Java. In 2016, Fowler revisited it in modern JavaScript to demonstrate that the same refactoring principles apply — but that JavaScript's flexibility opens up multiple valid architectural paths where Java's object-oriented idiom offered only one.
 
@@ -36,7 +34,7 @@ This chapter is important for two reasons:
 
 ---
 
-#### 2. Why Refactor the Video Store Function?
+### 2. Why Refactor the Video Store Function?
 
 The `statement()` function is an example of the **Long Method** code smell. But Fowler is clear: *a code smell alone is not sufficient reason to refactor*. You need a concrete driver for change.
 
@@ -46,7 +44,7 @@ The refactoring eliminates this duplication by separating **calculation logic** 
 
 ---
 
-#### 3. The Four Approaches — Summary
+### 3. The Four Approaches — Summary
 
 | Approach | Style | Key Mechanism |
 | :--- | :--- | :--- |
@@ -59,9 +57,9 @@ Fowler's conclusion: **all four are equivalent computations**. The differences a
 
 ---
 
-#### 4. Code Walkthrough — Approach 1: Top-Level Functions
+### 4. Code Walkthrough — Approach 1: Top-Level Functions
 
-##### JavaScript (Original monolithic function — before refactoring)
+#### JavaScript (Original monolithic function — before refactoring)
 ```javascript
 function statement(customer, movies) {
   let totalAmount = 0;
@@ -255,13 +253,13 @@ def html_statement(customer: Customer, movies: Dict[str, Movie]) -> str:
 
 ### SECTION 2: SYNTHESIZED ACADEMIC SUMMARY
 
-#### 1. Practical Application of Refactoring
+### 1. Practical Application of Refactoring
 The Video Store example serves as the canonical demonstration of Fowler's refactoring principles applied to a tangible codebase. It illustrates how monolithic, procedural code can be systematically dismantled and reconstructed into a cohesive, object-oriented design without altering external behavior.
 
-#### 2. Decomposing Monolithic Functions
+### 2. Decomposing Monolithic Functions
 The primary focus of this exercise is the decomposition of large, complex functions into smaller, intention-revealing methods. By applying the "Extract Method" pattern, the logic becomes modular, making it easier to isolate bugs and introduce new pricing or rental rules.
 
-#### 3. Polymorphism and Design Patterns
+### 3. Polymorphism and Design Patterns
 As the refactoring progresses, the example demonstrates the transition from complex conditional logic (e.g., switch statements) to polymorphic structures. This application of the State or Strategy pattern inherently makes the codebase more resilient to future changes in business requirements.
 
 ---

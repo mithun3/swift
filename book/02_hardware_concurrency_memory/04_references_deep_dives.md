@@ -1,19 +1,17 @@
-<div class="page-break"></div>
-
-## Chapter 2.4: Citation & Reference Deep-Dives for Module 2
+# Chapter 2.4: Citation & Reference Deep-Dives for Module 2
 
 This chapter provides standalone, in-depth research profiles of foundational hardware architecture theories, low-latency messaging mechanisms, and concurrent execution models referenced across Module 2.
 
 ---
 
-### Deep-Dive 2.4.1: Herb Sutter's "The Free Lunch Is Over" (Dr. Dobb's Journal, 2005)
+## Deep-Dive 2.4.1: Herb Sutter's "The Free Lunch Is Over" (Dr. Dobb's Journal, 2005)
 
 - **Background**: Published in March 2005 by Herb Sutter (Chair of the ISO C++ Standards Committee).
 - **Impact**: Marked the official recognition in the software engineering community that clock speed growth had stalled out. It signaled the mandatory shift toward multithreading, concurrency models, lock-free data structures, and functional programming concepts.
 
 ---
 
-### Deep-Dive 2.4.2: Amdahl's Law vs. Gustafson's Law
+## Deep-Dive 2.4.2: Amdahl's Law vs. Gustafson's Law
 
 While Amdahl's Law predicted strict limits on parallel speedup assuming a *fixed problem size*, John Gustafson (1988) observed that in practice, as we get more processors, we scale the *problem size* to maintain a fixed execution time.
 
@@ -42,7 +40,7 @@ public void processLargeDataset(int cores) {
 
 ---
 
-### Deep-Dive 2.4.3: Esmaeilzadeh's "Dark Silicon" (ISCA 2011)
+## Deep-Dive 2.4.3: Esmaeilzadeh's "Dark Silicon" (ISCA 2011)
 
 **Paper**: *"Dark Silicon and the End of Multicore Scaling"* (Hadi Esmaeilzadeh et al., ISCA 2011).
 
@@ -53,7 +51,7 @@ public void processLargeDataset(int cores) {
 
 ---
 
-### Deep-Dive 2.4.4: Moore's Law, Jean Hoerni, and Rock's Law
+## Deep-Dive 2.4.4: Moore's Law, Jean Hoerni, and Rock's Law
 
 - **Gordon E. Moore's Original 1965 Article**: 
   - **Citation**: Moore, Gordon E. (1965). *"Cramming more components onto integrated circuits"*, *Electronics Magazine*, Vol. 38, No. 8, April 19, 1965.
@@ -73,7 +71,7 @@ public void processLargeDataset(int cores) {
 
 ---
 
-### Deep-Dive 2.4.5: Leslie Lamport's "Happens-Before" Relation (1978)
+## Deep-Dive 2.4.5: Leslie Lamport's "Happens-Before" Relation (1978)
 
 **Full Profile: "Time, Clocks, and the Ordering of Events in a Distributed System" (CACM, 1978)**
 In 1978, Leslie Lamport published this foundational paper, which became one of the most cited in computer science. It introduced the concept of logical clocks and the **Happens-Before** relation.
@@ -88,7 +86,7 @@ If neither $a \rightarrow b$ nor $b \rightarrow a$ holds, the two events are **c
 
 ---
 
-### Deep-Dive 2.4.6: JSR-133 & Hardware Memory Barriers
+## Deep-Dive 2.4.6: JSR-133 & Hardware Memory Barriers
 
 **JSR-133: Java Memory Model Revision (Bill Pugh & Doug Lea, 2004)**
 - **Problem with Early JMM (Java 1.0 - 1.4)**: The original 1996 Java Memory Model spec in JLS Chapter 17 was flawed. It allowed final fields to change value after construction and permitted broken double-checked locking idioms (`Double-Checked Locking is Broken` declaration).
@@ -104,7 +102,7 @@ If neither $a \rightarrow b$ nor $b \rightarrow a$ holds, the two events are **c
 
 ---
 
-### Deep-Dive 2.4.7: Aeron Ultra-Low Latency Messaging & Ring Buffers
+## Deep-Dive 2.4.7: Aeron Ultra-Low Latency Messaging & Ring Buffers
 *(Based on Michael Barker's "Bad Concurrency" & Real-Time Media Driver Design)*
 
 ```
@@ -124,7 +122,7 @@ If neither $a \rightarrow b$ nor $b \rightarrow a$ holds, the two events are **c
 
 ---
 
-### Summary of Cited Works & Further Reading
+## Summary of Cited Works & Further Reading
 
 [6] H. Sutter, "Welcome to the Jungle," HerbSutter.com, 2011. Available: https://herbsutter.com/welcome-to-the-jungle/
 [7] R. Schaller, "Moore's Law: Past, Present, Future," IEEE Spectrum, 1997. DOI: 10.1109/6.591665

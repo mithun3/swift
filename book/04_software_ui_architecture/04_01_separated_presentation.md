@@ -1,24 +1,22 @@
 
-<div class="page-break"></div>
-
-## Chapter 4.4: Separated Presentation (Martin Fowler)
+# Chapter 4.4: Separated Presentation (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. Introduction
+### 1. Introduction
 Separated Presentation is one of the most fundamental principles in UI architecture. It dictates that presentation logic (code that handles the user interface) should be completely decoupled from domain logic (business rules and data manipulation). This separation ensures that the domain remains oblivious to how it is presented, allowing for multiple presentations to sit on top of the same domain.
 
-#### 2. Key Concepts
+### 2. Key Concepts
 - **Logical vs. Physical Separation:** Separation is primarily a logical concept (different modules or layers) rather than physical (different servers or tiers), though physical separation often necessitates logical separation.
 - **Smalltalk-80 Origins:** The pattern originated in the Smalltalk-80 Model-View-Controller (MVC) framework, which pioneered the idea of separating the domain (Model) from the UI (View/Controller).
 - **The Observer Pattern:** Because the domain layer cannot depend on the presentation layer, it uses the Observer pattern to notify the presentation of state changes, allowing the UI to update dynamically without coupling the domain to the UI.
 
-#### 3. Real-World Examples
+### 3. Real-World Examples
 Imagine writing an application with a Graphical User Interface (GUI). If you strictly follow Separated Presentation, you should be able to build a Command-Line Interface (CLI) for the exact same application without duplicating any domain logic. If there is duplication, some domain logic has likely leaked into the presentation layer.
 
-#### 4. Code Examples (Java / JS / Python)
+### 4. Code Examples (Java / JS / Python)
 
 **Violating Separated Presentation (Domain logic in UI):**
 
@@ -85,7 +83,7 @@ class CheckoutWindow(tk.Frame):
 ---
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM & RESEARCH TEXTS
+## SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>
@@ -97,7 +95,7 @@ class CheckoutWindow(tk.Frame):
   <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
 </div>
 
-#### Separated Presentation and Domain Decoupling
+### Separated Presentation and Domain Decoupling
 The Separated Presentation pattern, as codified by Martin Fowler, dictates an absolute logical decoupling between presentation components and domain logic. Rooted in the original Smalltalk-80 MVC paradigm, this architectural layering ensures that the domain model remains completely unaware of its presentation mechanisms. 
 
 Fowler outlines several core principles for implementation:

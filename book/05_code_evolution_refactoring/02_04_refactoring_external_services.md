@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 5.2d: Refactoring Code that Accesses External Services (Martin Fowler, 2015)
+# Chapter 5.6: Refactoring Code that Accesses External Services (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The External Service Coupling Problem
+### 1. The External Service Coupling Problem
 
 When application code calls external APIs or services directly, it tends to tangle three distinct concerns into one place:
 
@@ -47,7 +45,7 @@ This tangling makes the code:
 
 ---
 
-#### 2. The Gateway Pattern
+### 2. The Gateway Pattern
 
 The **Gateway** pattern (Fowler, *Patterns of Enterprise Application Architecture*, 2002) wraps access to an external service behind an interface that speaks your application's language — not the external service's API language.
 
@@ -58,7 +56,7 @@ Benefits:
 
 ---
 
-#### 3. The Seam Concept (Michael Feathers)
+### 3. The Seam Concept (Michael Feathers)
 
 A **Seam** is a place in code where you can alter behavior without editing the code at that point. Seams exist at:
 - Interface boundaries (dependency injection points)
@@ -69,9 +67,9 @@ Introducing a gateway interface creates a seam — allowing tests to inject a fa
 
 ---
 
-#### 4. Code Examples — Separating the Connection, Gateway, and Domain
+### 4. Code Examples — Separating the Connection, Gateway, and Domain
 
-##### Java Implementation
+#### Java Implementation
 ```java
 // STEP 1: Define the Gateway interface (the Seam)
 interface YouTubeGateway {
@@ -261,13 +259,13 @@ def test_monthly_views():
 
 ### SECTION 2: SYNTHESIZED ACADEMIC SUMMARY
 
-#### 1. Isolating the Domain from the Infrastructure
+### 1. Isolating the Domain from the Infrastructure
 When refactoring code that interacts with external services, the primary architectural goal is isolation. The core domain logic must be shielded from the volatility, latency, and specific implementation details of third-party APIs, databases, or messaging queues.
 
-#### 2. The Anti-Corruption Layer
+### 2. The Anti-Corruption Layer
 A critical pattern in this context is the Anti-Corruption Layer (ACL). By introducing translation interfaces between the external service and the internal domain, the codebase prevents external data models from polluting internal business logic, facilitating easier swapping or upgrading of external dependencies.
 
-#### 3. Handling Failure and Idempotency
+### 3. Handling Failure and Idempotency
 Refactoring integrations often involves formalizing how the system handles transient failures. Techniques such as circuit breakers, retries, and ensuring idempotent operations are introduced during refactoring to transform brittle, tightly-coupled integrations into robust, fault-tolerant interactions.
 
 ---

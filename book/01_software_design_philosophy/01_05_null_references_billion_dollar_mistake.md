@@ -32,7 +32,7 @@ If a programmer forgets to add an `if (customer != null)` check, the program wil
 
 Modern languages have evolved to fix this mistake by bringing the absence of a value into the type system (e.g., using `Optional`, `Maybe` types, or strict null safety where `String` and `String?` are different types).
 
-#### 1. Java
+### 1. Java
 
 **The Problem:**
 ```java
@@ -56,7 +56,7 @@ public String getCityNameSafe(Optional<User> userOpt) {
 }
 ```
 
-#### 2. JavaScript / TypeScript
+### 2. JavaScript / TypeScript
 
 **The Problem:**
 ```javascript
@@ -81,7 +81,7 @@ function printZipCodeSafe(user: User | null) {
 }
 ```
 
-#### 3. Python
+### 3. Python
 
 **The Problem:**
 ```python
@@ -156,7 +156,7 @@ As discussed in modern engineering circles (such as HackerNews debates and JavaP
 
 ### Modern Null Safety Mechanisms: Rust & Kotlin
 
-#### 1. Rust's `Option<T>` and Borrow Checker
+### 1. Rust's `Option<T>` and Borrow Checker
 Rust entirely eliminates null pointers at compile time. There is no `null` keyword in safe Rust. Absence of a value is represented by the `Option<T>` enum:
 ```rust
 enum Option<T> {
@@ -166,7 +166,7 @@ enum Option<T> {
 ```
 Combined with pattern matching (`match` or `if let`), the compiler guarantees at compile time that an unhandled `None` variant cannot cause runtime crashes.
 
-#### 2. Kotlin vs Java Null Safety Comparison
+### 2. Kotlin vs Java Null Safety Comparison
 
 | Feature | Java (Pre-8) | Java 8+ | Kotlin |
 | :--- | :--- | :--- | :--- |

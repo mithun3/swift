@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 3.3: LMAX Technology Blog Lessons — Scale, Testing & Code Hygiene
+# Chapter 3.3: LMAX Technology Blog Lessons — Scale, Testing & Code Hygiene
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. Real-World Engineering Practices at LMAX Exchange
+### 1. Real-World Engineering Practices at LMAX Exchange
 While architectural patterns (such as Event Sourcing and the Disruptor) provide high-throughput theoretical frameworks, maintaining an ultra-low-latency financial platform requires rigorous day-to-day engineering hygiene and testing discipline.
 
 The LMAX Technology Blog series explores four core operational and software engineering lessons:
@@ -30,7 +28,7 @@ The LMAX Technology Blog series explores four core operational and software engi
   └─────────────────────────────────────────────────────────────┘
 ```
 
-#### 2. Numerical Scale & Precision Anomalies in Managed Runtimes
+### 2. Numerical Scale & Precision Anomalies in Managed Runtimes
 In high-frequency financial platforms, numbers representing contract sizes and prices must avoid floating-point rounding errors (such as `0.1 + 0.2 = 0.30000000000000004`). Languages like Java provide `BigDecimal` for exact arbitrary-precision arithmetic.
 
 However, `BigDecimal` carries subtle traps:
@@ -38,7 +36,7 @@ However, `BigDecimal` carries subtle traps:
 - `.equals()` returns `false` when comparing `new BigDecimal("10")` and `new BigDecimal("10.0")` because scale is part of object equality!
 - Operations like `.stripTrailingZeros()` can result in **negative scales** (e.g., `100` stripped becomes `1E+2` with scale `-2`), causing unexpected results when combined with division and rounding modes.
 
-#### 3. Side-Effect Free Constructors & Testability
+### 3. Side-Effect Free Constructors & Testability
 Constructors that open files, perform network I/O, or instantiate complex dependent objects make unit testing nearly impossible. 
 
 By restricting constructors to **assignment and nothing else**, classes become instantly testable with lightweight mocks or in-memory streams, enforcing clean Dependency Injection.
@@ -47,11 +45,11 @@ By restricting constructors to **assignment and nothing else**, classes become i
 
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM RESEARCH PAPERS
+## SECTION 2: VERBATIM RESEARCH PAPERS
 
 <div class="scholarly-text">
 
-#### Article 1: A Question of Scale (May 2023)
+### Article 1: A Question of Scale (May 2023)
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>
@@ -326,7 +324,7 @@ We take a hop upstream - we assume the `wan-tunnel-global` must have sent a pack
 
 We already looked at this code once and didn’t ﬁnd anything, but perhaps, armed with this new knowledge, something else might jump out?
 
-### Back in the Wan Tunnel
+#### Back in the Wan Tunnel
 
 No, no it doesn’t. But it does change which bits of the code we look at. We’re only hitting a problem when we try to send a reasonably sized chunk of data down a constricted pipe. How does this code cope with that? Does it block, or drop, or what?
 

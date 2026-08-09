@@ -1,27 +1,25 @@
-<div class="page-break"></div>
-
-## Chapter 5.3: Citation & Reference Deep-Dives for Module 5
+# Chapter 5.7: Citation & Reference Deep-Dives for Module 5
 
 This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 5.
 
 ---
 
-### Deep-Dive 5.3.1: Complete Profile of Martin Fowler's Refactoring Works
+## Deep-Dive 5.3.1: Complete Profile of Martin Fowler's Refactoring Works
 
-#### 1. *Refactoring: Improving the Design of Existing Code* (1st Edition, 1999)
+### 1. *Refactoring: Improving the Design of Existing Code* (1st Edition, 1999)
 - **Primary Focus**: Formally introducing the practice of refactoring to the mainstream software industry using Java.
 - **Key Concepts**: Defined the concept of "Code Smells" (co-authored with Kent Beck) and documented over 70 specific refactoring patterns with step-by-step mechanics and test-driven validations.
 - **Legacy**: Established the cataloging format for refactorings (Name, Summary, Motivation, Mechanics, Examples) which remains the industry standard.
 
-#### 2. *Refactoring: Improving the Design of Existing Code* (2nd Edition, 2019)
+### 2. *Refactoring: Improving the Design of Existing Code* (2nd Edition, 2019)
 - **Primary Focus**: Updating the canonical examples to JavaScript to reflect the rise of classless, functional, and web-centric programming paradigms.
 - **Key Updates**: Added new patterns like *Replace Loop with Pipeline*, *Slide Statements*, and *Split Loop*, while removing obsolete Java-specific structural patterns.
 
 ---
 
-### Deep-Dive 5.3.2: Detailed Mechanics of Key Refactoring Patterns
+## Deep-Dive 5.3.2: Detailed Mechanics of Key Refactoring Patterns
 
-#### 1. Extract Method / Function
+### 1. Extract Method / Function
 - **Motivation**: A long function or method is hard to read, test, and reuse. By grouping cohesive lines of code and extracting them into a named method, the caller becomes self-documenting.
 - **Mechanics**:
   1. Create a new function and name it after its intent (what it does, not how it does it).
@@ -31,7 +29,7 @@ This chapter provides standalone research profiles, detailed mechanics, and arch
   5. Replace the extracted code in the source function with a call to the new function.
   6. Compile and test.
 
-#### 2. Replace Temp with Query
+### 2. Replace Temp with Query
 - **Motivation**: Temporary variables store the result of an expression and are only visible within the function. They force caller functions to be longer and more coupled. Replacing them with query methods allows other methods in the class to access the values.
 - **Mechanics**:
   1. Identify a temporary variable that is assigned once.
@@ -42,7 +40,7 @@ This chapter provides standalone research profiles, detailed mechanics, and arch
 
 ---
 
-### Deep-Dive 5.3.3: SOLID Principles in Refactoring Context
+## Deep-Dive 5.3.3: SOLID Principles in Refactoring Context
 
 The SOLID principles guide the target structure of refactoring efforts:
 
@@ -54,7 +52,7 @@ The SOLID principles guide the target structure of refactoring efforts:
 
 ---
 
-### Deep-Dive 5.3.4: Complete IEEE Bibliography for Module 5
+## Deep-Dive 5.3.4: Complete IEEE Bibliography for Module 5
 
 [28] M. Fowler, "An Example of Preparatory Refactoring," MartinFowler.com, 2014. Available: https://martinfowler.com/articles/preparatory-refactoring-example.html
 [29] M. Fowler, "Refactoring Code to Load a Document," MartinFowler.com, 2016.

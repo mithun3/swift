@@ -1,20 +1,18 @@
 
-<div class="page-break"></div>
-
-## Chapter 4.5: Presentation Domain Data Layering (Martin Fowler)
+# Chapter 4.5: Presentation Domain Data Layering (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. Introduction
+### 1. Introduction
 The three-layer architecture (Presentation, Domain, and Data) is perhaps the most ubiquitous pattern in software engineering. By dividing an information-rich program into a UI layer (handling HTTP or GUI), a domain logic layer (validations and business rules), and a data access layer (database persistence), developers can organize code in a way that maps cleanly to logical areas of concern. 
 
-#### 2. Key Concepts: Cognitive Scope Narrowing
+### 2. Key Concepts: Cognitive Scope Narrowing
 While substitutability (swapping out the database) and testability (testing the domain without the UI) are often cited as the primary reasons for layering, Martin Fowler highlights an even more practical benefit: **scope narrowing**. 
 Layering allows developers to reduce their cognitive load by focusing on one specific problem at a time. When working in the domain layer, you don't need to worry about how the data is rendered on the screen or how it is mapped to a SQL schema. It is a structural enabler for the concept of "Two Hats" from refactoring.
 
-#### 3. Real-World Examples & Diagram
+### 3. Real-World Examples & Diagram
 While Presentation-Domain-Data is the standard, variations exist such as Hexagonal Architecture (Ports and Adapters) or Clean Architecture. The core difference lies in dependency direction.
 
 ```text
@@ -38,7 +36,7 @@ While Presentation-Domain-Data is the standard, variations exist such as Hexagon
 ```
 *Note: In three-layer, Domain depends on Data. In Hexagonal/Clean, Data depends on Domain (Dependency Inversion).*
 
-#### 4. Code Examples (Java / JS / Python)
+### 4. Code Examples (Java / JS / Python)
 
 **Implementing the Three-Layer Architecture**
 
@@ -156,7 +154,7 @@ class OrderRepository:
 ---
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM & RESEARCH TEXTS
+## SECTION 2: VERBATIM & RESEARCH TEXTS
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>
@@ -168,7 +166,7 @@ class OrderRepository:
   <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
 </div>
 
-#### Presentation Domain Data Layering and Cognitive Scope
+### Presentation Domain Data Layering and Cognitive Scope
 The three-layer architecture (Presentation, Domain, Data) remains a ubiquitous strategy for modularizing information-rich software. While substitutability (e.g., swapping databases) and testability are frequently cited as the primary drivers for this architecture, Martin Fowler emphasizes a more profound psychological benefit: cognitive scope narrowing.
 
 By rigidly enforcing boundaries between user interface concerns, business logic, and database persistence, developers can dramatically reduce their cognitive load. Operating within the domain layer allows a developer to focus exclusively on business rules, treating data access as an abstract contract and ignoring the mechanics of UI rendering. This separation mirrors the cognitive context switching found in the "Two Hats" refactoring technique.

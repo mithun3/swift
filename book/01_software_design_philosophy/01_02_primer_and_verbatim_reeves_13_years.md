@@ -1,20 +1,20 @@
 <div class="page-break"></div>
 
-## Chapter 1.1b: Letter to the Editor & 13 Years Later
+# Chapter 1.2: Letter to the Editor & 13 Years Later (Jack W. Reeves)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The Backlash and Misinterpretation
+### 1. The Backlash and Misinterpretation
 When Jack Reeves published his original essay, he expected a massive industry debate. Instead, he got silence. It took years, and the rise of the Agile movement, for the essay to gain traction. When it finally did, many misinterpreted his core message of "Code is Design" to mean "Don't design, just hack code."
 
 This was a fundamental misunderstanding. Reeves argued that upfront thinking (using tools like UML or whiteboards) is essential, but it is not the *final product*. The final design document is the source code itself, because that is what the compiler (the manufacturing plant) actually builds from.
 
-#### 2. Real-World Analogy: The Novelist's Outline
+### 2. Real-World Analogy: The Novelist's Outline
 Consider a novelist writing a book. They might spend weeks creating an outline, character sketches, and plot diagrams on a whiteboard. This is valuable preparation. However, if they hand the outline to a printing press, they won't get a novel. The *actual writing of the chapters* is where the final, nuanced design of the story happens. In software, UML diagrams are the outline; source code is the novel.
 
-#### 3. Code Example: UML vs. Code Reality
+### 3. Code Example: UML vs. Code Reality
 A UML diagram might show a simple relationship: `Customer 1 --> * Order`. This is a useful abstraction, but it lacks the critical engineering details required to actually function.
 
 When a programmer writes the code, they must make concrete design decisions that the UML ignored:
@@ -43,18 +43,6 @@ The act of writing this code *is* the act of designing the system's memory manag
 
 <div class="page-break"></div>
 
-### SECTION 2: VERBATIM RESEARCH PAPERS
-
-#### Paper 2: Letter to the Editor (Precursor to What Is Software Design?) (1992)
-
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Letter to the Editor<br>
-  <strong>Author(s):</strong> Jack W. Reeves<br>
-  <strong>Published:</strong> Written May 19, 1992<br>
-  <strong>Source type:</strong> Correspondence<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
 
 May 19, 1992
 
@@ -135,7 +123,7 @@ May 19, 1992
 
 <div class="page-break"></div>
 
-#### Paper 3: What Is Software Design: 13 Years Later (2005)
+### Paper 3: What Is Software Design: 13 Years Later (2005)
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>

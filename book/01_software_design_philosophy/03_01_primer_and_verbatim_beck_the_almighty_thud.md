@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 1.3: The Almighty Thud (Martin Fowler)
+# Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. The "Thud" Phenomenon in Enterprise Architecture
+### 1. The "Thud" Phenomenon in Enterprise Architecture
 In traditional enterprise software projects, management and architecture teams frequently evaluated design quality by weight and volume. When an external consultant or architect delivered an exhaustive design document, it arrived in massive physical binders. Dropping it on a desk produced a heavy, physical **"Thud"**.
 
 ```
@@ -22,13 +20,13 @@ In traditional enterprise software projects, management and architecture teams f
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 2. The Dictionary Mentality vs. Effective Communication
+### 2. The Dictionary Mentality vs. Effective Communication
 Martin Fowler argues that CASE (Computer-Aided Software Engineering) tools promote a dangerous **"dictionary mentality"**:
 - Developers attempt to document *every single attribute*, *every getter/setter*, and *every trivial interaction*.
 - Example: Defining a `Contract` class as "a contract between many parties" and `dateSigned` as "the date the contract was signed."
 - This results in zero added conceptual value while burying readers in self-evident noise.
 
-#### 3. The Art of Minimalist Auxiliary Documentation
+### 3. The Art of Minimalist Auxiliary Documentation
 Effective documentation is **selective communication**. Good documentation highlights only the non-obvious, high-level interactions and package dependencies, leaving algorithmic details to the source code.
 
 Fowler's guidelines for effective auxiliary documentation:
@@ -42,7 +40,7 @@ Fowler's guidelines for effective auxiliary documentation:
 
 ### SECTION 2: VERBATIM RESEARCH PAPER
 
-#### Paper 5: The Almighty Thud (1997)
+### Paper 5: The Almighty Thud (1997)
 
 <div class="source-attribution">
   <strong>VERBATIM SOURCE</strong><br>
@@ -65,7 +63,7 @@ That question is the wrong question. If you document everything, you are giving 
 
 And all this documentation must be brief. Only if it is brief will people read it and understand it. Only if it is brief will you be able to keep it up to date. You won’t be able to talk about everything, and nor should you. A friend of mine told me about a project where they were reluctant to change class names, not because the code took too long to change, but the documentation took too long to change. When documentation becomes a problem you should deal with it. Throw at least half of it away.
 
-##### What should you say?
+#### What should you say?
 How should you choose what to show? I’m afraid that is down to your professional judgement. There are no rules to guide you, only your own skill as a designer and communicator. Maybe that is why people try to show everything, because they cannot decide what to leave out. So here is my approach, as it stands at the moment.
 
 If your system is of any reasonable size, divide your system into packages (a la UML or Java). Each package consists of a group of classes that work together for a particular purpose. Document the overall structure of your system with a diagram that shows packages and their dependencies. (In UML this is a specific use of a class diagram, I use it so often that I like to name it a package diagram, see my book UML Distilled.) Work with your design to minimize these dependencies, this is the key to minimizing the coupling in your system. (There’s not much to read on how to do this, the best one I know is Robert Martin’s Designing Object-Oriented C++ Applications Using the Booch Method.)

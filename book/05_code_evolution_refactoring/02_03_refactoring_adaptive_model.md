@@ -1,12 +1,10 @@
-<div class="page-break"></div>
-
-## Chapter 5.2c: Refactoring to an Adaptive Model (Martin Fowler)
+# Chapter 5.5: Refactoring to an Adaptive Model (Martin Fowler)
 
 ---
 
-### SECTION 1: PRIMER ON THE BASICS
+## SECTION 1: PRIMER ON THE BASICS
 
-#### 1. What Is an Adaptive Model?
+### 1. What Is an Adaptive Model?
 
 An **Adaptive Model** (also known as a **Data-Driven Model**) is a computational design where business rules are encoded as data — typically JSON, XML, or a domain-specific language (DSL) — rather than as imperative code. A separate interpreter or rule engine reads that data and executes it.
 
@@ -42,7 +40,7 @@ An **Adaptive Model** (also known as a **Data-Driven Model**) is a computational
 
 ---
 
-#### 2. When to Use an Adaptive Model
+### 2. When to Use an Adaptive Model
 
 The adaptive model pattern is powerful but complex. Apply it only when:
 
@@ -55,7 +53,7 @@ The adaptive model pattern is powerful but complex. Apply it only when:
 
 ---
 
-#### 3. The Production Rule System Pattern
+### 3. The Production Rule System Pattern
 
 A **Production Rule System** organizes computation through a collection of *Production Rules*, each structured as:
 
@@ -83,9 +81,9 @@ The interpreter evaluates each rule's condition against the input. If the condit
 
 ---
 
-#### 4. Code Examples — Imperative to Adaptive Model
+### 4. Code Examples — Imperative to Adaptive Model
 
-##### JavaScript Implementation
+#### JavaScript Implementation
 ```javascript
 // BEFORE: Imperative recommendation logic
 function recommend(spec) {
@@ -209,13 +207,13 @@ def recommend(spec: Spec, rules: List[Rule] = RULES) -> Set[str]:
 
 ### SECTION 2: SYNTHESIZED ACADEMIC SUMMARY
 
-#### 1. Designing for Unforeseen Change
+### 1. Designing for Unforeseen Change
 The adaptive model of refactoring focuses on structuring software to gracefully accommodate unknown future requirements. Rather than attempting to predict every possible edge case (which often leads to speculative generality), the goal is to maintain a state of "softness" or malleability in the architecture.
 
-#### 2. Continuous Evolution
+### 2. Continuous Evolution
 Adaptive refactoring is not a distinct phase but a continuous, integrated activity. It requires constant vigilance against structural degradation and a commitment to incremental improvement, ensuring the codebase remains aligned with the shifting realities of the business domain.
 
-#### 3. Feedback Loops and Safenets
+### 3. Feedback Loops and Safenets
 A robust adaptive model relies heavily on rapid feedback loops, primarily provided by a comprehensive suite of automated tests. This safety net allows developers to experiment and iterate aggressively, confidently reshaping the architecture as new insights are gained.
 
 ---
