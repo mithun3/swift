@@ -116,13 +116,12 @@ WaitStrategy busySpinStrategy = new BusySpinWaitStrategy();
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Single-Threaded Execution Mechanics in LMAX Architecture<br>
-  <strong>Author(s):</strong> Martin Fowler & Mike Barker<br>
-  <strong>Published:</strong> 2011, ACM Queue / MartinFowler.com<br>
-  <strong>Note:</strong> Technical synthesis of single-writer event loop design.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Single-Threaded Execution Mechanics in LMAX Architecture
+> - **Author(s):** Martin Fowler & Mike Barker
+> - **Published:** 2011, ACM Queue / MartinFowler.com
+> 
+> *Note: Technical synthesis of single-writer event loop design.*
 
 ### Single-Writer Principle Mechanics
 The single-writer principle asserts that mutating system state sequentially on a dedicated single thread removes the necessity for mutual exclusion locks, concurrent collection overhead, and transactional rollbacks. 

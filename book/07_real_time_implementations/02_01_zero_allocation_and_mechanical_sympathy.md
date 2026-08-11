@@ -154,14 +154,13 @@ public final class FlyweightOrderBookEvent {
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Mechanical Sympathy: Cache Lines and Memory Layout<br>
-  <strong>Author(s):</strong> Martin Thompson<br>
-  <strong>Published:</strong> 2011, Mechanical Sympathy Technical Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Note:</strong> Reproducing foundational principles of hardware-aware memory design.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Mechanical Sympathy: Cache Lines and Memory Layout
+> - **Author(s):** Martin Thompson
+> - **Published:** 2011, Mechanical Sympathy Technical Blog
+> - **Source type:** Engineering Blog
+> 
+> *Note: Reproducing foundational principles of hardware-aware memory design.*
 
 ### Mechanics of Hardware Caching
 Hardware designers have spent decades optimizing CPU cache hierarchies to bridge the growing speed gap between high-frequency CPU cores and relatively slow DRAM main memory. When software engineers write code that ignores memory layout, CPU hardware spent idling on memory fetch operations dominates execution time.

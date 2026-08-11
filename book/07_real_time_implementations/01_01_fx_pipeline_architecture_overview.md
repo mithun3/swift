@@ -69,14 +69,13 @@ When engineering high-frequency trading platforms, **mean latency is a vanity me
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Real-Time Trading Systems & Mechanical Sympathy<br>
-  <strong>Author(s):</strong> Martin Thompson & LMAX Engineering Team<br>
-  <strong>Published:</strong> 2011-2018<br>
-  <strong>Source type:</strong> High-Performance Computing Research<br>
-  <strong>Note:</strong> Synthesized research principles governing ultra-low-latency real-time financial systems.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Real-Time Trading Systems & Mechanical Sympathy
+> - **Author(s):** Martin Thompson & LMAX Engineering Team
+> - **Published:** 2011-2018
+> - **Source type:** High-Performance Computing Research
+> 
+> *Note: Synthesized research principles governing ultra-low-latency real-time financial systems.*
 
 ### Architectural Mechanics of Low-Latency Systems
 Traditional computing abstractions—such as virtual memory, object orientation, and operating system schedulers—were engineered to maximize multi-tenant throughput and developer convenience rather than deterministic latency. In high-frequency electronic trading, these abstractions introduce non-deterministic overheads.

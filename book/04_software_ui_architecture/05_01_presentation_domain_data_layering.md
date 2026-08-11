@@ -157,15 +157,14 @@ class OrderRepository:
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Presentation Domain Data Layering<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> 2015, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essay<br>
-  <strong>Original URL:</strong> https://martinfowler.com/bliki/PresentationDomainDataLayering.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Presentation Domain Data Layering
+> - **Author(s):** Martin Fowler
+> - **Published:** 2015, martinfowler.com
+> - **Source type:** Architecture Essay
+> - **Original URL:** https://martinfowler.com/bliki/PresentationDomainDataLayering.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### Presentation Domain Data Layering and Cognitive Scope
 The three-layer architecture (Presentation, Domain, Data) remains a ubiquitous strategy for modularizing information-rich software. While substitutability (e.g., swapping databases) and testability are frequently cited as the primary drivers for this architecture, Martin Fowler emphasizes a more profound psychological benefit: cognitive scope narrowing.

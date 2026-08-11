@@ -171,14 +171,15 @@ Ordering rules fall under two cases: within-thread and between-thread:
 ---
 
 > **VERBATIM SOURCE**
-> **Title:** Semantics of Multithreaded Java
-> **Author(s):** Jeremy Manson and William Pugh
-> **Published:** January 11, 2002
-> **Source type:** Academic paper
-> **Original URL:** https://www.cs.umd.edu/~pugh/java/memoryModel/semantics.pdf
-> **DOI:** 10.1145/1040305.1040336
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** Semantics of Multithreaded Java
+> - **Author(s):** Jeremy Manson and William Pugh
+> - **Published:** January 11, 2002
+> - **Source type:** Academic paper
+> - **Original URL:** https://www.cs.umd.edu/~pugh/java/memoryModel/semantics.pdf
+> - **DOI:** 10.1145/1040305.1040336
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 

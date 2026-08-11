@@ -105,14 +105,15 @@ if __name__ == '__main__':
 ## SECTION 2: VERBATIM TEXT
 
 > **VERBATIM SOURCE**
-> **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
-> **Author(s):** Herb Sutter
-> **Published:** March 2005, Dr. Dobb's Journal
-> **Source type:** Internet article
-> **Original URL:** http://www.gotw.ca/publications/concurrency-ddj.htm
-> **DOI:** N/A
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
+> - **Author(s):** Herb Sutter
+> - **Published:** March 2005, Dr. Dobb's Journal
+> - **Source type:** Internet article
+> - **Original URL:** http://www.gotw.ca/publications/concurrency-ddj.htm
+> - **DOI:** N/A
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
@@ -127,14 +128,15 @@ What this means is that if you want your application to benefit from the perform
 ---
 
 > **VERBATIM SOURCE**
-> **Title:** Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket
-> **Author(s):** Herb Sutter
-> **Published:** December 2011, Sutter's Mill / Dr. Dobb's
-> **Source type:** Internet article
-> **Original URL:** https://herbsutter.com/welcome-to-the-jungle/
-> **DOI:** N/A
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket
+> - **Author(s):** Herb Sutter
+> - **Published:** December 2011, Sutter's Mill / Dr. Dobb's
+> - **Source type:** Internet article
+> - **Original URL:** https://herbsutter.com/welcome-to-the-jungle/
+> - **DOI:** N/A
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 

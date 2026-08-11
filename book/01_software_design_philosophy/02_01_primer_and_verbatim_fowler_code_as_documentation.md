@@ -45,15 +45,14 @@ Fowler highlights key practices that turn source code into clear documentation:
 
 ### Paper 4: Code As Documentation (2005)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Code As Documentation<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> March 2005, martinfowler.com<br>
-  <strong>Source type:</strong> Internet article<br>
-  <strong>Original URL:</strong> https://martinfowler.com/bliki/CodeAsDocumentation.html<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Code As Documentation
+> - **Author(s):** Martin Fowler
+> - **Published:** March 2005, martinfowler.com
+> - **Source type:** Internet article
+> - **Original URL:** https://martinfowler.com/bliki/CodeAsDocumentation.html
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 One of the common elements of agile methods is that they raise programming to a central role in software development - one much greater than the software engineering community usually does. Part of this is classifying the code as a major, if not the primary documentation of a software system.
 

@@ -86,15 +86,14 @@ class CheckoutWindow(tk.Frame):
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Separated Presentation<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> June 2006, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Pattern Essay<br>
-  <strong>Original URL:</strong> https://martinfowler.com/eaaDev/SeparatedPresentation.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Separated Presentation
+> - **Author(s):** Martin Fowler
+> - **Published:** June 2006, martinfowler.com
+> - **Source type:** Architecture Pattern Essay
+> - **Original URL:** https://martinfowler.com/eaaDev/SeparatedPresentation.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### Separated Presentation and Domain Decoupling
 The Separated Presentation pattern, as codified by Martin Fowler, dictates an absolute logical decoupling between presentation components and domain logic. Rooted in the original Smalltalk-80 MVC paradigm, this architectural layering ensures that the domain model remains completely unaware of its presentation mechanisms. 

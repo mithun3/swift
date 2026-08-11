@@ -44,14 +44,13 @@ Fowler's guidelines for effective auxiliary documentation:
 
 ### Paper 5: The Almighty Thud (1997)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> The Almighty Thud<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> November/December 1997, Distributed Computing<br>
-  <strong>Source type:</strong> Magazine Column<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** The Almighty Thud
+> - **Author(s):** Martin Fowler
+> - **Published:** November/December 1997, Distributed Computing
+> - **Source type:** Magazine Column
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 I was chatting with a client about an object model review they wanted to me to do. “We can send some documentation in advance, would that be useful?” they asked. I replied in the affirmative, hoping that I was not lying. Two days later the UPS man dropped the package off outside my door, it made a loud noise. It was a good inch and a half of documentation.
 

@@ -48,15 +48,14 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
 ### Paper 3: Bad Concurrency (March/April 2020)
 *By Michael Barker (bad-concurrency.blogspot.com)*
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Bad Concurrency Blog Posts (I Heard a Rumour... & Flow Control in Aeron)<br>
-  <strong>Author(s):</strong> Michael Barker<br>
-  <strong>Published:</strong> April/March 2020<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://bad-concurrency.blogspot.com/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Bad Concurrency Blog Posts (I Heard a Rumour... & Flow Control in Aeron)
+> - **Author(s):** Michael Barker
+> - **Published:** April/March 2020
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://bad-concurrency.blogspot.com/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 #### I Heard a Rumour...
 **Saturday, 11 April 2020**

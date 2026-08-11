@@ -92,15 +92,14 @@ export const InvoiceComponent: React.FC<{ items: Array<{ price: number; qty: num
 
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> GUI Architectures / Presentation Domain Separation<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> 2001-2006, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essay<br>
-  <strong>Original URL:</strong> https://martinfowler.com/eaaDev/uiArchs.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** GUI Architectures / Presentation Domain Separation
+> - **Author(s):** Martin Fowler
+> - **Published:** 2001-2006, martinfowler.com
+> - **Source type:** Architecture Essay
+> - **Original URL:** https://martinfowler.com/eaaDev/uiArchs.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 #### Presentation Domain Separation & GUI Architecture Evolution
 Martin Fowler's foundational writings on Presentation Domain Separation (PDS) established a critical architectural boundary: the strict isolation of presentation concerns from domain (business) logic. Fowler articulated that intermingling user interface rendering with business calculations inevitably degrades both simplicity and maintainability.

@@ -43,6 +43,17 @@ The act of writing this code *is* the act of designing the system's memory manag
 
 <div class="page-break"></div>
 
+### SECTION 2: VERBATIM RESEARCH PAPERS
+
+#### Paper 2: Letter to the Editor (Precursor to What Is Software Design?) (1992)
+
+> **VERBATIM SOURCE**
+> - **Title:** Letter to the Editor
+> - **Author(s):** Jack W. Reeves
+> - **Published:** Written May 19, 1992
+> - **Source type:** Correspondence
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 May 19, 1992
 
@@ -125,14 +136,13 @@ May 19, 1992
 
 ### Paper 3: What Is Software Design: 13 Years Later (2005)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> What Is Software Design: 13 Years Later<br>
-  <strong>Author(s):</strong> Jack W. Reeves<br>
-  <strong>Published:</strong> 2005, developer.*<br>
-  <strong>Source type:</strong> Follow-up Article<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** What Is Software Design: 13 Years Later
+> - **Author(s):** Jack W. Reeves
+> - **Published:** 2005, developer.*
+> - **Source type:** Follow-up Article
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 People have occasionally asked whether I did any follow-on writing to my "What Is Software Design" article. The answer has basically been "No, not really." I want to make it clear that that is not because I forgot about it or otherwise changed my mind. Allow me to offer a bit of explanation.
 

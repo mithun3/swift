@@ -337,14 +337,13 @@ When Jack Reeves published his essay in the *C++ Journal* in 1992, it was initia
 
 ### Paper 1: What Is Software Design? (1992)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> What Is Software Design?<br>
-  <strong>Author(s):</strong> Jack W. Reeves<br>
-  <strong>Published:</strong> Fall 1992, C++ Journal<br>
-  <strong>Source type:</strong> Original Journal Article<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** What Is Software Design?
+> - **Author(s):** Jack W. Reeves
+> - **Published:** Fall 1992, C++ Journal
+> - **Source type:** Original Journal Article
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 Object oriented techniques, and C++ in particular, seem to be taking the software world by storm. Numerous articles and books have appeared describing how to apply the new techniques. In general, the questions of whether O-O techniques are just hype have been replaced by questions of how to get the benefits with the least amount of pain. Object oriented techniques have been around for some time, but this exploding popularity seems a bit unusual. Why the sudden interest? All kinds of explanations have been offered. In truth, there is probably no single reason. Probably, a combination of factors has finally reached critical mass and things are taking off. Nevertheless, it seems that C++ itself is a major factor in this latest phase of the software revolution. Again, there are probably a number of reasons why, but I want to suggest an answer from a slightly different perspective: C++ has become popular because it makes it easier to design software and program at the same time.
 
@@ -558,14 +557,13 @@ May 19, 1992
 
 ### Paper 3: What Is Software Design: 13 Years Later (2005)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> What Is Software Design: 13 Years Later<br>
-  <strong>Author(s):</strong> Jack W. Reeves<br>
-  <strong>Published:</strong> 2005, developer.*<br>
-  <strong>Source type:</strong> Follow-up Article<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** What Is Software Design: 13 Years Later
+> - **Author(s):** Jack W. Reeves
+> - **Published:** 2005, developer.*
+> - **Source type:** Follow-up Article
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 People have occasionally asked whether I did any follow-on writing to my "What Is Software Design" article. The answer has basically been "No, not really." I want to make it clear that that is not because I forgot about it or otherwise changed my mind. Allow me to offer a bit of explanation.
 
@@ -756,15 +754,14 @@ def get_zip_safe(user: Optional[User]) -> str:
 
 ## SECTION 2 — VERBATIM TEXT
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Null References: The Billion Dollar Mistake (Presentation Abstract & Keynote Extract)<br>
-  <strong>Author(s):</strong> Sir Tony Hoare<br>
-  <strong>Publication venue:</strong> QCon London Software Development Conference<br>
-  <strong>Date:</strong> August 25, 2009<br>
-  <strong>Original URL:</strong> https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/<br>
-  <strong>Note:</strong> This text is reproduced verbatim from the original published presentation abstract and the defining transcript extract for educational study. As this was a keynote presentation rather than a formal academic paper, the following represents the canonical quote and context that introduced the concept to the software engineering lexicon.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Null References: The Billion Dollar Mistake (Presentation Abstract & Keynote Extract)
+> - **Author(s):** Sir Tony Hoare
+> - **Publication venue:** QCon London Software Development Conference
+> - **Date:** August 25, 2009
+> - **Original URL:** https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/
+> 
+> *Note: This text is reproduced verbatim from the original published presentation abstract and the defining transcript extract for educational study. As this was a keynote presentation rather than a formal academic paper, the following represents the canonical quote and context that introduced the concept to the software engineering lexicon.*
 
 ### Presentation Abstract
 
@@ -871,15 +868,14 @@ Fowler highlights key practices that turn source code into clear documentation:
 
 ### Paper 4: Code As Documentation (2005)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Code As Documentation<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> March 2005, martinfowler.com<br>
-  <strong>Source type:</strong> Internet article<br>
-  <strong>Original URL:</strong> https://martinfowler.com/bliki/CodeAsDocumentation.html<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Code As Documentation
+> - **Author(s):** Martin Fowler
+> - **Published:** March 2005, martinfowler.com
+> - **Source type:** Internet article
+> - **Original URL:** https://martinfowler.com/bliki/CodeAsDocumentation.html
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 One of the common elements of agile methods is that they raise programming to a central role in software development - one much greater than the software engineering community usually does. Part of this is classifying the code as a major, if not the primary documentation of a software system.
 
@@ -974,14 +970,13 @@ Fowler's guidelines for effective auxiliary documentation:
 
 ### Paper 5: The Almighty Thud (1997)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> The Almighty Thud<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> November/December 1997, Distributed Computing<br>
-  <strong>Source type:</strong> Magazine Column<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** The Almighty Thud
+> - **Author(s):** Martin Fowler
+> - **Published:** November/December 1997, Distributed Computing
+> - **Source type:** Magazine Column
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 I was chatting with a client about an object model review they wanted to me to do. “We can send some documentation in advance, would that be useful?” they asked. I replied in the affirmative, hoping that I was not lying. Two days later the UPS man dropped the package off outside my door, it made a loud noise. It was a good inch and a half of documentation.
 
@@ -1224,14 +1219,15 @@ if __name__ == '__main__':
 ## SECTION 2: VERBATIM TEXT
 
 > **VERBATIM SOURCE**
-> **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
-> **Author(s):** Herb Sutter
-> **Published:** March 2005, Dr. Dobb's Journal
-> **Source type:** Internet article
-> **Original URL:** http://www.gotw.ca/publications/concurrency-ddj.htm
-> **DOI:** N/A
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software
+> - **Author(s):** Herb Sutter
+> - **Published:** March 2005, Dr. Dobb's Journal
+> - **Source type:** Internet article
+> - **Original URL:** http://www.gotw.ca/publications/concurrency-ddj.htm
+> - **DOI:** N/A
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
@@ -1246,14 +1242,15 @@ What this means is that if you want your application to benefit from the perform
 ---
 
 > **VERBATIM SOURCE**
-> **Title:** Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket
-> **Author(s):** Herb Sutter
-> **Published:** December 2011, Sutter's Mill / Dr. Dobb's
-> **Source type:** Internet article
-> **Original URL:** https://herbsutter.com/welcome-to-the-jungle/
-> **DOI:** N/A
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** Welcome to the Jungle: Or, A Heterogeneous Supercomputer in Every Pocket
+> - **Author(s):** Herb Sutter
+> - **Published:** December 2011, Sutter's Mill / Dr. Dobb's
+> - **Source type:** Internet article
+> - **Original URL:** https://herbsutter.com/welcome-to-the-jungle/
+> - **DOI:** N/A
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
@@ -1475,14 +1472,15 @@ Apart from the apparent constraints of physics and economics, one respondent to 
 ---
 
 > **VERBATIM SOURCE**
-> **Title:** Moore's Law: The Engine of Innovation
-> **Author(s):** Intel Newsroom
-> **Published:** 2023, Intel Corporation
-> **Source type:** Corporate Technical Release
-> **Original URL:** https://download.intel.com/newsroom/2023/manufacturing/moores-law-electronics.pdf
-> **DOI:** N/A
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** Moore's Law: The Engine of Innovation
+> - **Author(s):** Intel Newsroom
+> - **Published:** 2023, Intel Corporation
+> - **Source type:** Corporate Technical Release
+> - **Original URL:** https://download.intel.com/newsroom/2023/manufacturing/moores-law-electronics.pdf
+> - **DOI:** N/A
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
@@ -1686,14 +1684,15 @@ Ordering rules fall under two cases: within-thread and between-thread:
 ---
 
 > **VERBATIM SOURCE**
-> **Title:** Semantics of Multithreaded Java
-> **Author(s):** Jeremy Manson and William Pugh
-> **Published:** January 11, 2002
-> **Source type:** Academic paper
-> **Original URL:** https://www.cs.umd.edu/~pugh/java/memoryModel/semantics.pdf
-> **DOI:** 10.1145/1040305.1040336
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** Semantics of Multithreaded Java
+> - **Author(s):** Jeremy Manson and William Pugh
+> - **Published:** January 11, 2002
+> - **Source type:** Academic paper
+> - **Original URL:** https://www.cs.umd.edu/~pugh/java/memoryModel/semantics.pdf
+> - **DOI:** 10.1145/1040305.1040336
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
@@ -2810,14 +2809,13 @@ The conclusion they came to was that to get the best caching behavior, you need 
 
 ### Paper 2: Disruptor: High Performance Alternative to Bounded Queues for Exchanging Data Between Concurrent Threads (May 2011)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads<br>
-  <strong>Author(s):</strong> Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart<br>
-  <strong>Published:</strong> May 2011, LMAX Technical Paper<br>
-  <strong>Source type:</strong> Technical Paper<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** LMAX Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads
+> - **Author(s):** Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart
+> - **Published:** May 2011, LMAX Technical Paper
+> - **Source type:** Technical Paper
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 
 Martin Thompson ⋅ Dave Farley ⋅ Michael Barker ⋅ Patricia Gee ⋅ Andrew Stewart
@@ -3139,15 +3137,14 @@ By restricting constructors to **assignment and nothing else**, classes become i
 
 ### Article 1: A Question of Scale (May 2023)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> A Question of Scale<br>
-  <strong>Author(s):</strong> Simon Warren<br>
-  <strong>Published:</strong> May 2023, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/a-question-of-scale/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** A Question of Scale
+> - **Author(s):** Simon Warren
+> - **Published:** May 2023, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/a-question-of-scale/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 During testing, it was noticed that occasionally an order placed over Broker FIX received no acknowledgement. This was strange, not least because we hadn’t actually made any changes to the message flow around the system.
 
@@ -3186,15 +3183,14 @@ The fix was updating the order book configuration so that `contract size` and `q
 
 #### Article 2: First Impressions of Testing at LMAX (December 2023)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> First Impressions of Testing at LMAX<br>
-  <strong>Author(s):</strong> Yuliia Povoliashko, Hans Sharda, and Stewart Atkinson<br>
-  <strong>Published:</strong> December 2023, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/first-impressions-of-testing-at-lmax/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** First Impressions of Testing at LMAX
+> - **Author(s):** Yuliia Povoliashko, Hans Sharda, and Stewart Atkinson
+> - **Published:** December 2023, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/first-impressions-of-testing-at-lmax/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 One aspect that stood out to me is the company’s pair programming approach. Tester-developer pairing is a common practice at LMAX, with testers contributing to code and developers writing tests. This approach fosters excellent knowledge sharing and collaboration.
 
@@ -3204,15 +3200,14 @@ Another unique aspect of working at LMAX is the practice of writing tests first,
 
 #### Article 3: Why I Don't Do Work in Constructors (September 2024)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Why I Don't Do Work in Constructors<br>
-  <strong>Author(s):</strong> James Byatt<br>
-  <strong>Published:</strong> September 2024, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/why-i-dont-do-work-in-constructors/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Why I Don't Do Work in Constructors
+> - **Author(s):** James Byatt
+> - **Published:** September 2024, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/why-i-dont-do-work-in-constructors/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 In Java, the only thing I’ll do in a constructor is assign a parameter to a field. Sounds strict? Let me explain.
 
@@ -3254,15 +3249,14 @@ final class Thingy implements AutoCloseable {
 
 #### Article 4: Coverage Can Only Show You What to Delete (May 2023)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Coverage Can Only Show You What to Delete<br>
-  <strong>Author(s):</strong> James Byatt<br>
-  <strong>Published:</strong> May 2023, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/coverage-can-only-show-you-what-to-delete/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Coverage Can Only Show You What to Delete
+> - **Author(s):** James Byatt
+> - **Published:** May 2023, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/coverage-can-only-show-you-what-to-delete/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 The best thing code coverage can tell you is that code is unused, and should therefore be deleted.
 
@@ -3288,15 +3282,14 @@ When using TDD we’re only supposed to write code in response to a failing test
 #### Article 5: The Impossible NullPointerException (June 2022)
 *By James Byatt (LMAX Technology Blog)*
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> The Impossible NullPointerException<br>
-  <strong>Author(s):</strong> James Byatt<br>
-  <strong>Published:</strong> June 2022, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/the-impossible-null-pointer-exception/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** The Impossible NullPointerException
+> - **Author(s):** James Byatt
+> - **Published:** June 2022, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 Our new production exchange recently produced an impossible looking `NullPointerException`. At the same time, we saw another application in the same deployment throw an `OutOfMemoryError`. Both problems turned out to have the same root cause. This post tells the story of how we found that out.
 
@@ -3598,15 +3591,14 @@ final Subscription subscription = aeron.addSubscription(criticalSub, STREAM_ID);
 ### Paper 3: Bad Concurrency (March/April 2020)
 *By Michael Barker (bad-concurrency.blogspot.com)*
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Bad Concurrency Blog Posts (I Heard a Rumour... & Flow Control in Aeron)<br>
-  <strong>Author(s):</strong> Michael Barker<br>
-  <strong>Published:</strong> April/March 2020<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://bad-concurrency.blogspot.com/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Bad Concurrency Blog Posts (I Heard a Rumour... & Flow Control in Aeron)
+> - **Author(s):** Michael Barker
+> - **Published:** April/March 2020
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://bad-concurrency.blogspot.com/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 #### I Heard a Rumour...
 **Saturday, 11 April 2020**
@@ -3988,15 +3980,14 @@ export const InvoiceComponent: React.FC<{ items: Array<{ price: number; qty: num
 
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> GUI Architectures / Presentation Domain Separation<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> 2001-2006, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essay<br>
-  <strong>Original URL:</strong> https://martinfowler.com/eaaDev/uiArchs.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** GUI Architectures / Presentation Domain Separation
+> - **Author(s):** Martin Fowler
+> - **Published:** 2001-2006, martinfowler.com
+> - **Source type:** Architecture Essay
+> - **Original URL:** https://martinfowler.com/eaaDev/uiArchs.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 #### Presentation Domain Separation & GUI Architecture Evolution
 Martin Fowler's foundational writings on Presentation Domain Separation (PDS) established a critical architectural boundary: the strict isolation of presentation concerns from domain (business) logic. Fowler articulated that intermingling user interface rendering with business calculations inevitably degrades both simplicity and maintainability.
@@ -4211,15 +4202,14 @@ Addy Osmani highlights how React applications within individual micro-frontends 
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Micro Frontends<br>
-  <strong>Author(s):</strong> Cam Jackson & Martin Fowler<br>
-  <strong>Published:</strong> June 2019, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Article<br>
-  <strong>Original URL:</strong> https://martinfowler.com/articles/micro-frontends.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Micro Frontends
+> - **Author(s):** Cam Jackson & Martin Fowler
+> - **Published:** June 2019, martinfowler.com
+> - **Source type:** Architecture Article
+> - **Original URL:** https://martinfowler.com/articles/micro-frontends.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### Micro Frontends & React Modularity
 The architectural extension of microservices into the presentation tier is formally defined by Cam Jackson and Martin Fowler as "Micro Frontends." This approach directly addresses the scaling bottlenecks of monolithic Single-Page Applications (SPAs) by decentralizing the frontend into vertically aligned, independently deployable domains.
@@ -4326,7 +4316,6 @@ class PricingEngineFactory {
 
 ## 2. Verbatim & Research Texts
 
-> [!IMPORTANT]
 > **VERBATIM SOURCE**
 > - **Title:** Serverless Architectures / Feature Toggles
 > - **Author(s):** Mike Roberts, Pete Hodgson & Martin Fowler
@@ -4470,15 +4459,14 @@ class CheckoutWindow(tk.Frame):
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Separated Presentation<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> June 2006, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Pattern Essay<br>
-  <strong>Original URL:</strong> https://martinfowler.com/eaaDev/SeparatedPresentation.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Separated Presentation
+> - **Author(s):** Martin Fowler
+> - **Published:** June 2006, martinfowler.com
+> - **Source type:** Architecture Pattern Essay
+> - **Original URL:** https://martinfowler.com/eaaDev/SeparatedPresentation.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### Separated Presentation and Domain Decoupling
 The Separated Presentation pattern, as codified by Martin Fowler, dictates an absolute logical decoupling between presentation components and domain logic. Rooted in the original Smalltalk-80 MVC paradigm, this architectural layering ensures that the domain model remains completely unaware of its presentation mechanisms. 
@@ -4773,15 +4761,14 @@ class OrderRepository:
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Presentation Domain Data Layering<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> 2015, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essay<br>
-  <strong>Original URL:</strong> https://martinfowler.com/bliki/PresentationDomainDataLayering.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Presentation Domain Data Layering
+> - **Author(s):** Martin Fowler
+> - **Published:** 2015, martinfowler.com
+> - **Source type:** Architecture Essay
+> - **Original URL:** https://martinfowler.com/bliki/PresentationDomainDataLayering.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### Presentation Domain Data Layering and Cognitive Scope
 The three-layer architecture (Presentation, Domain, Data) remains a ubiquitous strategy for modularizing information-rich software. While substitutability (e.g., swapping databases) and testability are frequently cited as the primary drivers for this architecture, Martin Fowler emphasizes a more profound psychological benefit: cognitive scope narrowing.
@@ -5150,15 +5137,14 @@ When **validating user input**, throwing exceptions is the wrong tool. An except
 
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Refactoring Fundamentals & Preparatory Refactoring<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> 2014-2016, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essays & Articles<br>
-  <strong>Original URL:</strong> https://martinfowler.com/articles/preparatory-refactoring-example.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Refactoring Fundamentals & Preparatory Refactoring
+> - **Author(s):** Martin Fowler
+> - **Published:** 2014-2016, martinfowler.com
+> - **Source type:** Architecture Essays & Articles
+> - **Original URL:** https://martinfowler.com/articles/preparatory-refactoring-example.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### 1. The Core Philosophy of Refactoring
 Fowler's foundational work on refactoring establishes it not merely as a technical chore, but as an essential practice for software sustainability. Refactoring is defined as restructuring code without changing its observable behavior. The primary goal is to improve the internal structure, making the codebase easier to understand and cheaper to modify.
@@ -6576,14 +6562,13 @@ When engineering high-frequency trading platforms, **mean latency is a vanity me
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Real-Time Trading Systems & Mechanical Sympathy<br>
-  <strong>Author(s):</strong> Martin Thompson & LMAX Engineering Team<br>
-  <strong>Published:</strong> 2011-2018<br>
-  <strong>Source type:</strong> High-Performance Computing Research<br>
-  <strong>Note:</strong> Synthesized research principles governing ultra-low-latency real-time financial systems.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Real-Time Trading Systems & Mechanical Sympathy
+> - **Author(s):** Martin Thompson & LMAX Engineering Team
+> - **Published:** 2011-2018
+> - **Source type:** High-Performance Computing Research
+> 
+> *Note: Synthesized research principles governing ultra-low-latency real-time financial systems.*
 
 ### Architectural Mechanics of Low-Latency Systems
 Traditional computing abstractions—such as virtual memory, object orientation, and operating system schedulers—were engineered to maximize multi-tenant throughput and developer convenience rather than deterministic latency. In high-frequency electronic trading, these abstractions introduce non-deterministic overheads.
@@ -6759,14 +6744,13 @@ public final class FlyweightOrderBookEvent {
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Mechanical Sympathy: Cache Lines and Memory Layout<br>
-  <strong>Author(s):</strong> Martin Thompson<br>
-  <strong>Published:</strong> 2011, Mechanical Sympathy Technical Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Note:</strong> Reproducing foundational principles of hardware-aware memory design.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Mechanical Sympathy: Cache Lines and Memory Layout
+> - **Author(s):** Martin Thompson
+> - **Published:** 2011, Mechanical Sympathy Technical Blog
+> - **Source type:** Engineering Blog
+> 
+> *Note: Reproducing foundational principles of hardware-aware memory design.*
 
 ### Mechanics of Hardware Caching
 Hardware designers have spent decades optimizing CPU cache hierarchies to bridge the growing speed gap between high-frequency CPU cores and relatively slow DRAM main memory. When software engineers write code that ignores memory layout, CPU hardware spent idling on memory fetch operations dominates execution time.
@@ -6902,13 +6886,12 @@ WaitStrategy busySpinStrategy = new BusySpinWaitStrategy();
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Single-Threaded Execution Mechanics in LMAX Architecture<br>
-  <strong>Author(s):</strong> Martin Fowler & Mike Barker<br>
-  <strong>Published:</strong> 2011, ACM Queue / MartinFowler.com<br>
-  <strong>Note:</strong> Technical synthesis of single-writer event loop design.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Single-Threaded Execution Mechanics in LMAX Architecture
+> - **Author(s):** Martin Fowler & Mike Barker
+> - **Published:** 2011, ACM Queue / MartinFowler.com
+> 
+> *Note: Technical synthesis of single-writer event loop design.*
 
 ### Single-Writer Principle Mechanics
 The single-writer principle asserts that mutating system state sequentially on a dedicated single thread removes the necessity for mutual exclusion locks, concurrent collection overhead, and transactional rollbacks. 
@@ -7005,13 +6988,12 @@ java -XX:+UnlockExperimentalVMOptions \
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Operating System Noise and Latency Jitter in High-Frequency Trading<br>
-  <strong>Author(s):</strong> Todd Montgomery & Gil Tene<br>
-  <strong>Published:</strong> 2014-2019, Systems Performance Architecture<br>
-  <strong>Note:</strong> Research analysis on OS jitter sources and JVM safepoint pauses.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Operating System Noise and Latency Jitter in High-Frequency Trading
+> - **Author(s):** Todd Montgomery & Gil Tene
+> - **Published:** 2014-2019, Systems Performance Architecture
+> 
+> *Note: Research analysis on OS jitter sources and JVM safepoint pauses.*
 
 ### OS Jitter & Safepoint Elimination
 In high-performance computing, Operating System "Noise" (OS Jitter) refers to asynchronous interruptions of user-level application threads by kernel events, timer interrupts, page faults, and context switches. Even when an application codebase has achieved zero heap allocations, OS timer interrupts occurring at 1000Hz cause 1-to-5 microsecond stalls per millisecond.

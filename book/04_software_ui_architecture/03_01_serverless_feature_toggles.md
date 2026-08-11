@@ -163,7 +163,6 @@ public class PricingEngineFactory {
 
 ## 2. Verbatim & Research Texts
 
-> [!IMPORTANT]
 > **VERBATIM SOURCE**
 > - **Title:** Serverless Architectures / Feature Toggles
 > - **Author(s):** Mike Roberts, Pete Hodgson & Martin Fowler

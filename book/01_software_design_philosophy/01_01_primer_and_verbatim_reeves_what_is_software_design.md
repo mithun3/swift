@@ -102,14 +102,13 @@ When Jack Reeves published his essay in the *C++ Journal* in 1992, it was initia
 
 ### Paper 1: What Is Software Design? (1992)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> What Is Software Design?<br>
-  <strong>Author(s):</strong> Jack W. Reeves<br>
-  <strong>Published:</strong> Fall 1992, C++ Journal<br>
-  <strong>Source type:</strong> Original Journal Article<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** What Is Software Design?
+> - **Author(s):** Jack W. Reeves
+> - **Published:** Fall 1992, C++ Journal
+> - **Source type:** Original Journal Article
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 Object oriented techniques, and C++ in particular, seem to be taking the software world by storm. Numerous articles and books have appeared describing how to apply the new techniques. In general, the questions of whether O-O techniques are just hype have been replaced by questions of how to get the benefits with the least amount of pain. Object oriented techniques have been around for some time, but this exploding popularity seems a bit unusual. Why the sudden interest? All kinds of explanations have been offered. In truth, there is probably no single reason. Probably, a combination of factors has finally reached critical mass and things are taking off. Nevertheless, it seems that C++ itself is a major factor in this latest phase of the software revolution. Again, there are probably a number of reasons why, but I want to suggest an answer from a slightly different perspective: C++ has become popular because it makes it easier to design software and program at the same time.
 

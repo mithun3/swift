@@ -187,15 +187,14 @@ Addy Osmani highlights how React applications within individual micro-frontends 
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Micro Frontends<br>
-  <strong>Author(s):</strong> Cam Jackson & Martin Fowler<br>
-  <strong>Published:</strong> June 2019, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Article<br>
-  <strong>Original URL:</strong> https://martinfowler.com/articles/micro-frontends.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Micro Frontends
+> - **Author(s):** Cam Jackson & Martin Fowler
+> - **Published:** June 2019, martinfowler.com
+> - **Source type:** Architecture Article
+> - **Original URL:** https://martinfowler.com/articles/micro-frontends.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### Micro Frontends & React Modularity
 The architectural extension of microservices into the presentation tier is formally defined by Cam Jackson and Martin Fowler as "Micro Frontends." This approach directly addresses the scaling bottlenecks of monolithic Single-Page Applications (SPAs) by decentralizing the frontend into vertically aligned, independently deployable domains.

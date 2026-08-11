@@ -53,15 +53,14 @@ By restricting constructors to **assignment and nothing else**, classes become i
 
 ### Article 1: A Question of Scale (May 2023)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> A Question of Scale<br>
-  <strong>Author(s):</strong> Simon Warren<br>
-  <strong>Published:</strong> May 2023, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/a-question-of-scale/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** A Question of Scale
+> - **Author(s):** Simon Warren
+> - **Published:** May 2023, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/a-question-of-scale/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 During testing, it was noticed that occasionally an order placed over Broker FIX received no acknowledgement. This was strange, not least because we hadn’t actually made any changes to the message flow around the system.
 
@@ -100,15 +99,14 @@ The fix was updating the order book configuration so that `contract size` and `q
 
 #### Article 2: First Impressions of Testing at LMAX (December 2023)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> First Impressions of Testing at LMAX<br>
-  <strong>Author(s):</strong> Yuliia Povoliashko, Hans Sharda, and Stewart Atkinson<br>
-  <strong>Published:</strong> December 2023, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/first-impressions-of-testing-at-lmax/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** First Impressions of Testing at LMAX
+> - **Author(s):** Yuliia Povoliashko, Hans Sharda, and Stewart Atkinson
+> - **Published:** December 2023, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/first-impressions-of-testing-at-lmax/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 One aspect that stood out to me is the company’s pair programming approach. Tester-developer pairing is a common practice at LMAX, with testers contributing to code and developers writing tests. This approach fosters excellent knowledge sharing and collaboration.
 
@@ -118,15 +116,14 @@ Another unique aspect of working at LMAX is the practice of writing tests first,
 
 #### Article 3: Why I Don't Do Work in Constructors (September 2024)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Why I Don't Do Work in Constructors<br>
-  <strong>Author(s):</strong> James Byatt<br>
-  <strong>Published:</strong> September 2024, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/why-i-dont-do-work-in-constructors/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Why I Don't Do Work in Constructors
+> - **Author(s):** James Byatt
+> - **Published:** September 2024, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/why-i-dont-do-work-in-constructors/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 In Java, the only thing I’ll do in a constructor is assign a parameter to a field. Sounds strict? Let me explain.
 
@@ -168,15 +165,14 @@ final class Thingy implements AutoCloseable {
 
 #### Article 4: Coverage Can Only Show You What to Delete (May 2023)
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Coverage Can Only Show You What to Delete<br>
-  <strong>Author(s):</strong> James Byatt<br>
-  <strong>Published:</strong> May 2023, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/coverage-can-only-show-you-what-to-delete/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Coverage Can Only Show You What to Delete
+> - **Author(s):** James Byatt
+> - **Published:** May 2023, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/coverage-can-only-show-you-what-to-delete/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 The best thing code coverage can tell you is that code is unused, and should therefore be deleted.
 
@@ -202,15 +198,14 @@ When using TDD we’re only supposed to write code in response to a failing test
 #### Article 5: The Impossible NullPointerException (June 2022)
 *By James Byatt (LMAX Technology Blog)*
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> The Impossible NullPointerException<br>
-  <strong>Author(s):</strong> James Byatt<br>
-  <strong>Published:</strong> June 2022, LMAX Technology Blog<br>
-  <strong>Source type:</strong> Engineering Blog<br>
-  <strong>Original URL:</strong> https://technology.lmax.com/posts/the-impossible-null-pointer-exception/<br>
-  <strong>Note:</strong> The following text is reproduced verbatim — exact word-for-word.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** The Impossible NullPointerException
+> - **Author(s):** James Byatt
+> - **Published:** June 2022, LMAX Technology Blog
+> - **Source type:** Engineering Blog
+> - **Original URL:** https://technology.lmax.com/posts/the-impossible-null-pointer-exception/
+> 
+> *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 Our new production exchange recently produced an impossible looking `NullPointerException`. At the same time, we saw another application in the same deployment throw an `OutOfMemoryError`. Both problems turned out to have the same root cause. This post tells the story of how we found that out.
 

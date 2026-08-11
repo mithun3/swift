@@ -111,15 +111,14 @@ def get_zip_safe(user: Optional[User]) -> str:
 
 ## SECTION 2 — VERBATIM TEXT
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Null References: The Billion Dollar Mistake (Presentation Abstract & Keynote Extract)<br>
-  <strong>Author(s):</strong> Sir Tony Hoare<br>
-  <strong>Publication venue:</strong> QCon London Software Development Conference<br>
-  <strong>Date:</strong> August 25, 2009<br>
-  <strong>Original URL:</strong> https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/<br>
-  <strong>Note:</strong> This text is reproduced verbatim from the original published presentation abstract and the defining transcript extract for educational study. As this was a keynote presentation rather than a formal academic paper, the following represents the canonical quote and context that introduced the concept to the software engineering lexicon.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Null References: The Billion Dollar Mistake (Presentation Abstract & Keynote Extract)
+> - **Author(s):** Sir Tony Hoare
+> - **Publication venue:** QCon London Software Development Conference
+> - **Date:** August 25, 2009
+> - **Original URL:** https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/
+> 
+> *Note: This text is reproduced verbatim from the original published presentation abstract and the defining transcript extract for educational study. As this was a keynote presentation rather than a formal academic paper, the following represents the canonical quote and context that introduced the concept to the software engineering lexicon.*
 
 ### Presentation Abstract
 

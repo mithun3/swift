@@ -80,13 +80,12 @@ java -XX:+UnlockExperimentalVMOptions \
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Operating System Noise and Latency Jitter in High-Frequency Trading<br>
-  <strong>Author(s):</strong> Todd Montgomery & Gil Tene<br>
-  <strong>Published:</strong> 2014-2019, Systems Performance Architecture<br>
-  <strong>Note:</strong> Research analysis on OS jitter sources and JVM safepoint pauses.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Operating System Noise and Latency Jitter in High-Frequency Trading
+> - **Author(s):** Todd Montgomery & Gil Tene
+> - **Published:** 2014-2019, Systems Performance Architecture
+> 
+> *Note: Research analysis on OS jitter sources and JVM safepoint pauses.*
 
 ### OS Jitter & Safepoint Elimination
 In high-performance computing, Operating System "Noise" (OS Jitter) refers to asynchronous interruptions of user-level application threads by kernel events, timer interrupts, page faults, and context switches. Even when an application codebase has achieved zero heap allocations, OS timer interrupts occurring at 1000Hz cause 1-to-5 microsecond stalls per millisecond.

@@ -346,15 +346,14 @@ When **validating user input**, throwing exceptions is the wrong tool. An except
 
 ### SECTION 2: VERBATIM & RESEARCH TEXTS
 
-<div class="source-attribution">
-  <strong>VERBATIM SOURCE</strong><br>
-  <strong>Title:</strong> Refactoring Fundamentals & Preparatory Refactoring<br>
-  <strong>Author(s):</strong> Martin Fowler<br>
-  <strong>Published:</strong> 2014-2016, martinfowler.com<br>
-  <strong>Source type:</strong> Architecture Essays & Articles<br>
-  <strong>Original URL:</strong> https://martinfowler.com/articles/preparatory-refactoring-example.html<br>
-  <strong>Note:</strong> The following text presents the core architectural text and research synthesis for educational study.
-</div>
+> **VERBATIM SOURCE**
+> - **Title:** Refactoring Fundamentals & Preparatory Refactoring
+> - **Author(s):** Martin Fowler
+> - **Published:** 2014-2016, martinfowler.com
+> - **Source type:** Architecture Essays & Articles
+> - **Original URL:** https://martinfowler.com/articles/preparatory-refactoring-example.html
+> 
+> *Note: The following text presents the core architectural text and research synthesis for educational study.*
 
 ### 1. The Core Philosophy of Refactoring
 Fowler's foundational work on refactoring establishes it not merely as a technical chore, but as an essential practice for software sustainability. Refactoring is defined as restructuring code without changing its observable behavior. The primary goal is to improve the internal structure, making the codebase easier to understand and cheaper to modify.

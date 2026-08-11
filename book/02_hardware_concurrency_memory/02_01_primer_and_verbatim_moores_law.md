@@ -121,14 +121,15 @@ Apart from the apparent constraints of physics and economics, one respondent to 
 ---
 
 > **VERBATIM SOURCE**
-> **Title:** Moore's Law: The Engine of Innovation
-> **Author(s):** Intel Newsroom
-> **Published:** 2023, Intel Corporation
-> **Source type:** Corporate Technical Release
-> **Original URL:** https://download.intel.com/newsroom/2023/manufacturing/moores-law-electronics.pdf
-> **DOI:** N/A
-> **Repository:** N/A
-> **Note:** The text below is reproduced verbatim — exact word-for-word —
+> - **Title:** Moore's Law: The Engine of Innovation
+> - **Author(s):** Intel Newsroom
+> - **Published:** 2023, Intel Corporation
+> - **Source type:** Corporate Technical Release
+> - **Original URL:** https://download.intel.com/newsroom/2023/manufacturing/moores-law-electronics.pdf
+> - **DOI:** N/A
+> - **Repository:** N/A
+> 
+> *Note: The text below is reproduced verbatim — exact word-for-word —*
 > for educational study. All rights remain with the original author(s)
 > and publisher(s).
 
