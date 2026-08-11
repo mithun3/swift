@@ -4,16 +4,21 @@
 # Script: run_load_generator.sh
 # Description: Executes the high-throughput garbage-free load generator
 # Usage: ./run_load_generator.sh <queue-path> <target-rate> [message-count]
-# Example: ./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
-# Example: ./run_load_generator.sh /tmp/fx-queues/queue-a 1 1  (Sends exactly 1 message at 1 msgs/sec)
+# Example 1: ./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
+#   -> Runs infinitely, generating 5,000,000 messages per second.
+# Example 2: ./run_load_generator.sh /tmp/fx-queues/queue-a 500000 5000000
+#   -> Runs for exactly 10 seconds, generating a total of 5,000,000 messages 
+#      at a rate of 500,000 messages per second.
+# Example 3: ./run_load_generator.sh /tmp/fx-queues/queue-a 1 1  (Sends exactly 1 message at 1 msgs/sec)
 # ==============================================================================
 
 set -e
 
 if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
     echo "Usage: $0 <queue-path> <target-rate> [message-count]"
-    echo "Example: $0 /tmp/fx-queues/queue-a 5000000"
-    echo "Example: $0 /tmp/fx-queues/queue-a 1 1"
+    echo "Example 1: $0 /tmp/fx-queues/queue-a 5000000"
+    echo "Example 2: $0 /tmp/fx-queues/queue-a 500000 5000000"
+    echo "Example 3: $0 /tmp/fx-queues/queue-a 1 1"
     exit 1
 fi
 

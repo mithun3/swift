@@ -41,40 +41,119 @@
 | **Dynamic** | **Release Toggles** <br> (In-flight feature release, Canary rollouts) | **Ops Toggles** <br> (Circuit breakers, degraded mode performance switches) |
 | **Static** | **Experiment Toggles** <br> (A/B testing user variants, statistical measurement) | **Permission Toggles** <br> (Premium features, enterprise tier access control) |
 
-#### Clean Feature Toggles in Code
+#### Clean Feature Toggles in Code: Implementation Examples
+
+When implementing Feature Toggles, it's crucial to prevent the toggle logic from polluting your core domain code. Here are examples of decoupled strategy patterns across different languages.
+
+##### JavaScript
 
 > [!WARNING]
 > **Bad Practice: Scattered If-Else Flags**
 > Feature flag logic pollutes business code directly.
 
-```typescript
+```javascript
 // BAD: Feature flag logic pollutes business code directly
-if (featureFlags.isEnabled("NEW_PRICING_ENGINE_2026", user)) {
-  return calculateNewPricing(cart);
-} else {
-  return calculateLegacyPricing(cart);
+function calculateCheckout(cart, user) {
+  if (featureFlags.isEnabled("NEW_PRICING_ENGINE", user)) {
+    return calculateNewPricing(cart);
+  } else {
+    return calculateLegacyPricing(cart);
+  }
 }
 ```
 
 > [!TIP]
 > **Good Practice: Decoupled Strategy Pattern**
-> Feature Toggle decoupled behind a Polymorphic Strategy Interface.
+> Feature Toggle decoupled behind a Factory or Strategy interface.
 
-```typescript
-// GOOD: Feature Toggle decoupled behind Polymorphic Strategy Interface
-interface PricingStrategy {
-  calculateTotal(cart: Cart): number;
+```javascript
+// GOOD: Feature Toggle decoupled behind a Strategy Pattern
+class ModernPricingStrategy {
+  calculateTotal(cart) { /* ... */ return total; }
+}
+
+class LegacyPricingStrategy {
+  calculateTotal(cart) { /* ... */ return total; }
 }
 
 class PricingEngineFactory {
-  constructor(private readonly toggleService: ToggleService) {}
-
-  getStrategy(user: User): PricingStrategy {
-    if (this.toggleService.isEnabled("NEW_PRICING_ENGINE_2026", user)) {
-      return new ModernV2PricingStrategy();
-    }
-    return new LegacyV1PricingStrategy();
+  constructor(toggleService) {
+    this.toggleService = toggleService;
   }
+
+  getStrategy(user) {
+    if (this.toggleService.isEnabled("NEW_PRICING_ENGINE", user)) {
+      return new ModernPricingStrategy();
+    }
+    return new LegacyPricingStrategy();
+  }
+}
+```
+
+##### Python
+
+```python
+# GOOD: Feature Toggle decoupled in Python
+from abc import ABC, abstractmethod
+
+class PricingStrategy(ABC):
+    @abstractmethod
+    def calculate_total(self, cart) -> float:
+        pass
+
+class ModernPricingStrategy(PricingStrategy):
+    def calculate_total(self, cart) -> float:
+        return 100.0 # Modern calculation logic
+
+class LegacyPricingStrategy(PricingStrategy):
+    def calculate_total(self, cart) -> float:
+        return 90.0 # Legacy calculation logic
+
+class PricingEngineFactory:
+    def __init__(self, toggle_service):
+        self.toggle_service = toggle_service
+
+    def get_strategy(self, user) -> PricingStrategy:
+        if self.toggle_service.is_enabled("NEW_PRICING_ENGINE", user):
+            return ModernPricingStrategy()
+        return LegacyPricingStrategy()
+```
+
+##### Java
+
+```java
+// GOOD: Feature Toggle decoupled in Java
+public interface PricingStrategy {
+    double calculateTotal(Cart cart);
+}
+
+public class ModernPricingStrategy implements PricingStrategy {
+    @Override
+    public double calculateTotal(Cart cart) {
+        return 100.0; // Modern logic
+    }
+}
+
+public class LegacyPricingStrategy implements PricingStrategy {
+    @Override
+    public double calculateTotal(Cart cart) {
+        return 90.0; // Legacy logic
+    }
+}
+
+public class PricingEngineFactory {
+    private final ToggleService toggleService;
+
+    public PricingEngineFactory(ToggleService toggleService) {
+        this.toggleService = toggleService;
+    }
+
+    public PricingStrategy getStrategy(User user) {
+        if (toggleService.isEnabled("NEW_PRICING_ENGINE", user)) {
+            return new ModernPricingStrategy();
+        }
+        return new LegacyPricingStrategy();
+    }
 }
 ```
 
@@ -127,6 +206,28 @@ Based on Pete Hodgson's definitive guide on MartinFowler.com, Feature Toggles (i
 - **The Keystone Interface**: Instead of scattering toggle checks throughout backend logic, try to apply the toggle at the UI layer or entry point (the "Keystone Interface"). This keeps the core domain logic clean.
 - **Limit Toggle Scope**: Impose limits on the number of active toggles in the system. When a limit is reached, teams must remove old toggles before adding new ones.
 - **Abstract Toggle Logic**: As shown in the Primer, use patterns like Strategy or Factory to hide the toggle logic from the main application code, ensuring that the feature flag check doesn't pollute the business rules.
+
+### Use Cases and Real-World Examples
+
+> [!NOTE]
+> **Practical Applications of Feature Toggles**
+> Feature flags are foundational to modern software delivery and incident management.
+
+1. **Canary Releases (Release Toggles)**: 
+   - *Scenario*: A major e-commerce platform is replacing its monolithic checkout service with a new microservice.
+   - *Implementation*: They use a dynamic release toggle to route 1% of live user traffic to the new service while 99% continues using the old system. If the error rate on the new service stays below a threshold, the toggle is slowly dialed up to 10%, 50%, and eventually 100%.
+
+2. **A/B Testing (Experiment Toggles)**:
+   - *Scenario*: A media streaming app wants to test if a new "recommendation carousel" layout increases user engagement.
+   - *Implementation*: The engineering team implements an experiment toggle that randomly assigns 50% of users to the control group (old layout) and 50% to the variant group (new layout). Engagement metrics are statistically analyzed to determine the winning design before rolling it out permanently.
+
+3. **Circuit Breakers for Third-Party Dependencies (Ops Toggles)**:
+   - *Scenario*: A flight booking website relies on an external third-party API for live weather updates on the destination page.
+   - *Implementation*: During a major storm, the third-party API becomes unresponsive, causing page load times to spike. An operations team triggers a long-lived ops toggle to disable the weather widget globally, allowing the core flight booking flow to proceed without latency until the third-party service recovers.
+
+4. **Tiered Access and Premium Features (Permission Toggles)**:
+   - *Scenario*: A SaaS productivity tool offers a "Pro" tier with advanced reporting features.
+   - *Implementation*: Rather than maintaining separate codebases, the team uses permission toggles tied to the user's subscription state in the database. When a basic user attempts to access the reports, the toggle returns false, and the UI dynamically hides the feature or presents an upsell prompt.
 
 ---
 

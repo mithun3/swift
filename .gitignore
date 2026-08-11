@@ -35,3 +35,8 @@ logs/
 node_modules/
 dist/
 build/
+
+# report
+*.html
+*.svg
+*.png

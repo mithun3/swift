@@ -173,6 +173,11 @@ The `.hlog` outputs from `TelemetryRecorder` are HdrHistogram log files. Use the
 
 In high-throughput systems, latency is usually stable up to the 99th percentile, after which it spikes exponentially (the "hockey stick" curve). By using a logarithmic X-axis for percentiles (90%, 99%, 99.9%, 99.99%), the script clearly visualises the exact tail latencies where the system begins to saturate.
 
+To generate a consolidated, human-readable **`latency_report.html`** file, use the separate Python script:
+```bash
+python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
+```
+
 ---
 
 ## 6. Running the Benchmark
@@ -184,13 +189,24 @@ scripts/build.sh
 # 2. Start the pipeline (all 4 services)
 scripts/deploy.sh
 
-# 3. Run the load generator at 5M msgs/sec (infinite loop, coordinated-omission-aware)
+# 3. Run the full benchmark suite (Load Generation -> Process Latency -> HTML Report)
+# Example: 5M msgs/sec for 10M messages total
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 /tmp/fx-latency*.hlog
+
+# 4. Stop the pipeline (Ctrl+C or kill the PIDs)
+```
+
+Alternatively, you can run the scripts in a standalone manner:
+
+```bash
+# 3a. Run load generator manually
 scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000
 
-# 4. Wait 60 seconds, then stop the pipeline (Ctrl+C or kill the PIDs)
-
-# 5. Process and visualise the latency histograms for all stages
+# 3b. Process latencies
 ./scripts/process_latency.sh /tmp/fx-latency*.hlog
+
+# 3c. Generate HTML report
+python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
 ```
 
 ---

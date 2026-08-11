@@ -3,6 +3,7 @@
 # ==============================================================================
 # Script: process_latency.sh
 # Description: Processes HdrHistogram .hlog files to generate .hgrm percentiles and latency plots.
+#              (Note: HTML report generation is handled separately via generate_html_report.py)
 # Usage: ./process_latency.sh <path_to.hlog>
 # Example: ./process_latency.sh /tmp/fx-latency.hlog
 # ==============================================================================

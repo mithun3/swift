@@ -226,11 +226,9 @@ scripts/view_db.sh
 The pipeline includes a coordinated-omission-aware load generator and an HdrHistogram telemetry recorder. See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for full details.
 
 ```bash
-# Run load generator at 5M msgs/sec (infinite)
-scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000
-
-# Process and visualise end-to-end and stage-specific tail latencies from the .hlog files
-./scripts/process_latency.sh /tmp/fx-latency*.hlog
+# Run the full benchmark suite (Load generation -> Latency processing -> HTML report)
+# Example: target rate 5M msgs/sec for 10M messages total
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 /tmp/fx-latency*.hlog
 ```
 
 ---
