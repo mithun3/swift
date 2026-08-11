@@ -190,19 +190,19 @@ As mentioned earlier the idea of using flow control to provide dynamic back pres
 ```
    TCP (Unicast — One sender, one receiver)
    ┌──────────────────────────────────────────────────────────────────┐
-   │ Sender         ←─── ACK (window size) ───         Receiver      │
-   │                ─── data (window bytes) ───▶                     │
-   │ Flow control built into every TCP segment header (16-bit field) │
+   │ Sender         ←─── ACK (window size) ───         Receiver       │
+   │                ─── data (window bytes) ───▶                      │
+   │ Flow control built into every TCP segment header (16-bit field)  │
    └──────────────────────────────────────────────────────────────────┘
 
    UDP Multicast (One sender, many receivers — Aeron's domain)
    ┌──────────────────────────────────────────────────────────────────┐
-   │ Sender ──── data ────▶ Receiver A (fast)                        │
-   │             ──── data ────▶ Receiver B (slow) ← Status Msgs     │
-   │             ──── data ────▶ Receiver C (critical, tagged)       │
+   │ Sender ──── data ────▶ Receiver A (fast)                         │
+   │             ──── data ────▶ Receiver B (slow) ← Status Msgs      │
+   │             ──── data ────▶ Receiver C (critical, tagged)        │
    │                                                                  │
-   │ Flow control strategies (Max / Min / Tagged) determine which    │
-   │ receiver's window constrains the sender's publish rate.         │
+   │ Flow control strategies (Max / Min / Tagged) determine which     │
+   │ receiver's window constrains the sender's publish rate.          │
    └──────────────────────────────────────────────────────────────────┘
 ```
 

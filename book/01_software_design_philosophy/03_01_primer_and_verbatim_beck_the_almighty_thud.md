@@ -11,15 +11,15 @@ In traditional enterprise software projects, management and architecture teams f
 
 ```
                            THE "THUD" FAILURE CYCLE
-┌────────────────────────────────────────────────────────────────────────┐
-│ 1. CASE Tools produce hundreds of pages of exhaustive dictionary specs │
-├────────────────────────────────────────────────────────────────────────┤
-│ 2. Document lands on desk with an "Almighty Thud"                     │
-├────────────────────────────────────────────────────────────────────────┤
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. CASE Tools produce hundreds of pages of exhaustive dictionary specs  │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 2. Document lands on desk with an "Almighty Thud"                       │
+├─────────────────────────────────────────────────────────────────────────┤
 │ 3. Developers are buried in detail; nobody reads or updates it          │
-├────────────────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────────────────────┤
 │ 4. Code drifts from documentation -> Documentation becomes useless noise│
-└────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 2. The Dictionary Mentality vs. Effective Communication

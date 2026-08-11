@@ -21,14 +21,14 @@ However, Fowler introduces a vital nuance:
 
 ```
                   SOFTWARE DOCUMENTATION SPECTRUM
-┌─────────────────────────────────────────────────────────────────┐
-│ Gibberish UML Diagrams / Outdated Specs  --> Poor Understanding  │
-├─────────────────────────────────────────────────────────────────┤
-│ Unreadable, Obfuscated Source Code       --> Poor Understanding  │
-├─────────────────────────────────────────────────────────────────┤
+┌───────────────────────────────────────────────────────────────────┐
+│ Gibberish UML Diagrams / Outdated Specs  --> Poor Understanding   │
+├───────────────────────────────────────────────────────────────────┤
+│ Unreadable, Obfuscated Source Code       --> Poor Understanding   │
+├───────────────────────────────────────────────────────────────────┤
 │ Expressive, Well-Refactored Source Code  --> Clear Primary Design │
 │ + Concise High-Level Auxiliary Diagrams  --> Complete System View │
-└─────────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────┘
 ```
 
 ### 3. How to Make Code Act as Documentation

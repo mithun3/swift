@@ -2,7 +2,6 @@
 
 # Chapter 4.3: Serverless Architectures & Feature Toggles
 
-> [!NOTE]
 > **Authors:** Mike Roberts, Pete Hodgson & Martin Fowler
 
 ---
@@ -22,7 +21,6 @@
 | OS patching, scaling groups, load balancers managed by team | Scales automatically from 0 to 10,000 instances |
 | Fixed costs or hourly billing | Pay ONLY per millisecond of execution time |
 
-> [!TIP]
 > **Key Characteristics of FaaS**
 > 1. **Stateless Processing**: Function instances are ephemeral. Local file memory is discarded when the function exits. State must be externalized to databases (DynamoDB) or distributed caches (ElastiCache).
 > 2. **Cold Starts**: If a function has not been invoked recently, spawning a fresh container creates execution latency (100ms–1s).
@@ -47,7 +45,6 @@ When implementing Feature Toggles, it's crucial to prevent the toggle logic from
 
 ##### JavaScript
 
-> [!WARNING]
 > **Bad Practice: Scattered If-Else Flags**
 > Feature flag logic pollutes business code directly.
 
@@ -62,7 +59,6 @@ function calculateCheckout(cart, user) {
 }
 ```
 
-> [!TIP]
 > **Good Practice: Decoupled Strategy Pattern**
 > Feature Toggle decoupled behind a Factory or Strategy interface.
 
@@ -197,7 +193,6 @@ Based on Pete Hodgson's definitive guide on MartinFowler.com, Feature Toggles (i
 
 ### Implementation Best Practices
 
-> [!CAUTION]
 > **Toggle Debt**
 > Toggles introduce technical debt. Left unchecked, a codebase can become riddled with complex conditional logic, making it brittle and difficult to understand.
 
@@ -208,7 +203,6 @@ Based on Pete Hodgson's definitive guide on MartinFowler.com, Feature Toggles (i
 
 ### Use Cases and Real-World Examples
 
-> [!NOTE]
 > **Practical Applications of Feature Toggles**
 > Feature flags are foundational to modern software delivery and incident management.
 

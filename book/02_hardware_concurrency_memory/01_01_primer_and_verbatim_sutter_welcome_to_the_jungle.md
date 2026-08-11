@@ -11,16 +11,16 @@ For three decades, software engineering enjoyed an unprecedented luxury known as
 
 ```
                  THE ERA OF THE "FREE LUNCH" (1975-2005)
-┌──────────────────────────────────────────────────────────────────────┐
+┌───────────────────────────────────────────────────────────────────────┐
 │  Software Application (Written in C, C++, Java, etc.)                 │
-├──────────────────────────────────────────────────────────────────────┤
-│  [No Code Changes Required]                                          │
-│         │                                                            │
-│         ▼                                                            │
-│  Hardware Manufacturers Increase CPU Clock Speed (10 MHz -> 3 GHz)   │
-├──────────────────────────────────────────────────────────────────────┤
+├───────────────────────────────────────────────────────────────────────┤
+│  [No Code Changes Required]                                           │
+│         │                                                             │
+│         ▼                                                             │
+│  Hardware Manufacturers Increase CPU Clock Speed (10 MHz -> 3 GHz)    │
+├───────────────────────────────────────────────────────────────────────┤
 │  Result: Existing application runs exponentially faster automatically │
-└──────────────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────────┘
 ```
 
 Software engineers did not need to write parallel or multithreaded code to achieve high throughput. They simply waited for next year's CPU generation.

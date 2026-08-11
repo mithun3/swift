@@ -83,7 +83,7 @@ Fowler explains that when working on code you wear one of two hats at a time —
            THE TWO HATS
 
    ┌────────────────────────────────────┐   ┌────────────────────────────────────┐
-   │ 🎩 HAT 1: ADDING FUNCTIONALITY    │   │ 🎩 HAT 2: REFACTORING             │
+   │   HAT 1: ADDING FUNCTIONALITY      │   │   HAT 2: REFACTORING               │
    │                                    │   │                                    │
    │ - Adding new behavior              │   │ - Restructuring existing code      │
    │ - Tests are being written          │   │ - NO new behavior added            │
