@@ -1,8 +1,8 @@
 <div class="page-break"></div>
 
-# Chapter 5.3: Citation & Reference Deep-Dives — Module 5
+# Chapter 6.3: Citation & Reference Deep-Dives — Module 6
 
-This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 5.
+This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 6.
 
 ---
 
@@ -54,7 +54,7 @@ The SOLID principles guide the target structure of refactoring efforts:
 
 ---
 
-## Deep-Dive 5.3.4: Complete IEEE Bibliography for Module 5
+## Deep-Dive 5.3.4: Complete IEEE Bibliography for Module 6
 
 [28] M. Fowler, "An Example of Preparatory Refactoring," MartinFowler.com, 2014. Available: https://martinfowler.com/articles/preparatory-refactoring-example.html
 [29] M. Fowler, "Refactoring Code to Load a Document," MartinFowler.com, 2016.

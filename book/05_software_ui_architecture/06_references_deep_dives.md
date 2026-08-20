@@ -1,8 +1,8 @@
 <div class="page-break"></div>
 
-# Chapter 4.6: Citation & Reference Deep-Dives for Module 4
+# Chapter 5.6: Citation & Reference Deep-Dives for Module 5
 
-This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 4.
+This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 5.
 
 ---
 
@@ -92,7 +92,7 @@ Feature flags provide powerful deployment flexibility, but unmanaged toggles cre
 
 ---
 
-## Deep-Dive 4.6.5: Summary of Cited Works for Module 4
+## Deep-Dive 4.6.5: Summary of Cited Works for Module 5
 
 - [20] M. Fowler, "GUI Architectures," MartinFowler.com, 2006. Available: https://martinfowler.com/eaaDev/uiArchs.html
 - [21] M. Fowler, "Presentation Domain Separation," MartinFowler.com, 2001/06. Available: https://martinfowler.com/eaaDev/SeparatedPresentation.html

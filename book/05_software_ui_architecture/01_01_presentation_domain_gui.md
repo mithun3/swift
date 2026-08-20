@@ -1,9 +1,9 @@
 <div class="page-break"></div>
 
-# Module 4: Software & UI Architecture Patterns
+# Module 5: Software & UI Architecture Patterns
 
 
-## Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)
+## Chapter 5.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)
 
 ---
 

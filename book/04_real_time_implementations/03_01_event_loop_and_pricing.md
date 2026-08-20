@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 7.3: Event Loop and Pricing Mechanisms
+# Chapter 4.3: Event Loop and Pricing Mechanisms
 
 ---
 

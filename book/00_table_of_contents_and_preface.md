@@ -43,41 +43,41 @@
 
 ---
 
-### Module 4: Software & UI Architecture Patterns
+### Module 4: Real-Time Implementations (Case Study)
 
-- [Chapter 4.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)](./04_software_ui_architecture/01_01_presentation_domain_gui.md)
-- [Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)](./04_software_ui_architecture/02_01_micro_frontends_react.md)
-- [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](./04_software_ui_architecture/03_01_serverless_feature_toggles.md)
-- [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](./04_software_ui_architecture/04_01_separated_presentation.md)
-- [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](./04_software_ui_architecture/05_01_presentation_domain_data_layering.md)
-- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](./04_software_ui_architecture/06_references_deep_dives.md)
+- [Chapter 4.1: FX Pipeline Architecture Overview](./04_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
+- [Chapter 4.2: Zero-Allocation and Mechanical Sympathy in Practice](./04_real_time_implementations/02_01_zero_allocation_and_mechanical_sympathy.md)
+- [Chapter 4.3: Event Loop and Pricing Mechanisms](./04_real_time_implementations/03_01_event_loop_and_pricing.md)
+- [Chapter 4.4: Advanced HFT Patterns and Tuning](./04_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
 
 ---
 
-### Module 5: Code Evolution & Refactoring Patterns
+### Module 5: Software & UI Architecture Patterns
 
-- [Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./05_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
-- [Chapter 5.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./05_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
-- [Chapter 5.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./05_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
-- [Chapter 5.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./05_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
-- [Chapter 5.2c: Refactoring to an Adaptive Model (Martin Fowler)](./05_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
-- [Chapter 5.2d: Refactoring Code that Accesses External Services (Martin Fowler)](./05_code_evolution_refactoring/02_04_refactoring_external_services.md)
-- [Chapter 5.3: Citation & Reference Deep-Dives — Module 5](./05_code_evolution_refactoring/03_references_deep_dives.md)
-
----
-
-### Module 6: Bibliography & Subject Index
-
-- [Chapter 6.1: Complete IEEE Bibliography & Subject Index](./06_bibliography_and_index/01_complete_bibliography_and_subject_index.md)
+- [Chapter 5.1: Presentation Domain Separation & GUI Architectures (Martin Fowler)](./05_software_ui_architecture/01_01_presentation_domain_gui.md)
+- [Chapter 5.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)](./05_software_ui_architecture/02_01_micro_frontends_react.md)
+- [Chapter 5.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](./05_software_ui_architecture/03_01_serverless_feature_toggles.md)
+- [Chapter 5.4: Separated Presentation (Martin Fowler, 2006)](./05_software_ui_architecture/04_01_separated_presentation.md)
+- [Chapter 5.5: Presentation Domain Data Layering (Martin Fowler, 2015)](./05_software_ui_architecture/05_01_presentation_domain_data_layering.md)
+- [Chapter 5.6: Citation & Reference Deep-Dives — Module 5](./05_software_ui_architecture/06_references_deep_dives.md)
 
 ---
 
-### Module 7: Real-Time Implementations (Case Study)
+### Module 6: Code Evolution & Refactoring Patterns
 
-- [Chapter 7.1: FX Pipeline Architecture Overview](./07_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
-- [Chapter 7.2: Zero-Allocation and Mechanical Sympathy in Practice](./07_real_time_implementations/02_01_zero_allocation_and_mechanical_sympathy.md)
-- [Chapter 7.3: Event Loop and Pricing Mechanisms](./07_real_time_implementations/03_01_event_loop_and_pricing.md)
-- [Chapter 7.4: Advanced HFT Patterns and Tuning](./07_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
+- [Chapter 6.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./06_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
+- [Chapter 6.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./06_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
+- [Chapter 6.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./06_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
+- [Chapter 6.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./06_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
+- [Chapter 6.2c: Refactoring to an Adaptive Model (Martin Fowler)](./06_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
+- [Chapter 6.2d: Refactoring Code that Accesses External Services (Martin Fowler)](./06_code_evolution_refactoring/02_04_refactoring_external_services.md)
+- [Chapter 6.3: Citation & Reference Deep-Dives — Module 6](./06_code_evolution_refactoring/03_references_deep_dives.md)
+
+---
+
+### Module 7: Bibliography & Subject Index
+
+- [Chapter 7.1: Complete IEEE Bibliography & Subject Index](./07_bibliography_and_index/01_complete_bibliography_and_subject_index.md)
 
 ---
 
@@ -168,10 +168,10 @@ This compendium follows three principles:
 | **1** | Core Foundations of Software Engineering & Design Philosophy | 6 |
 | **2** | Hardware Evolution, Concurrency & Memory Models | 5 |
 | **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 8 |
-| **4** | Software & UI Architecture Patterns | 10 |
-| **5** | Code Evolution & Refactoring Patterns | 9 |
-| **6** | Bibliography & Subject Index | — |
-| **7** | Real-Time Implementations (Case Study) | 3 |
+| **4** | Real-Time Implementations (Case Study) | 3 |
+| **5** | Software & UI Architecture Patterns | 10 |
+| **6** | Code Evolution & Refactoring Patterns | 9 |
+| **7** | Bibliography & Subject Index | — |
 | **Total** | | **41** |
 
 ### Sources Used in This Volume

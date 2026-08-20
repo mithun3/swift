@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 5.3: Advanced & Specialized Refactoring Patterns (Martin Fowler)
+# Chapter 6.3: Advanced & Specialized Refactoring Patterns (Martin Fowler)
 
 ---
 

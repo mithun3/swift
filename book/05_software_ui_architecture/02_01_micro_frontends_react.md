@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 4.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)
+# Chapter 5.2: Micro Frontends & Modular React Architecture (Cam Jackson, Martin Fowler & Addy Osmani)
 
 ---
 

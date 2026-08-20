@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Module 6: Bibliography and Index
+# Module 7: Bibliography and Index
 
 ## Part A: Complete Bibliography
 

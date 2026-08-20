@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 4.5: Presentation Domain Data Layering (Martin Fowler)
+# Chapter 5.5: Presentation Domain Data Layering (Martin Fowler)
 
 ---
 

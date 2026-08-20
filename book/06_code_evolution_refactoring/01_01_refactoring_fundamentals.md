@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 5.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
+# Chapter 6.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
 
 ---
 

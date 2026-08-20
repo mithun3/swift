@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 4.3: Serverless Architectures & Feature Toggles
+# Chapter 5.3: Serverless Architectures & Feature Toggles
 
 > **Authors:** Mike Roberts, Pete Hodgson & Martin Fowler
 
