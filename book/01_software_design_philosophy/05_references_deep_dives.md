@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 1.4: Citation & Reference Deep-Dives — Module 1
+# Chapter 1.5: Citation & Reference Deep-Dives — Module 1
 
 This chapter provides standalone, in-depth research and analytical profiles of all major cited books, foundational theories, historical figures, and methodologies referenced across Module 1.
 

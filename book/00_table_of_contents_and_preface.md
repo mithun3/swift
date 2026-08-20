@@ -17,8 +17,8 @@
 - [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](./01_software_design_philosophy/01_02_primer_and_verbatim_reeves_13_years.md)
 - [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](./01_software_design_philosophy/02_01_primer_and_verbatim_fowler_code_as_documentation.md)
 - [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](./01_software_design_philosophy/03_01_primer_and_verbatim_beck_the_almighty_thud.md)
-- [Chapter 1.4: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/04_references_deep_dives.md)
-- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/01_05_null_references_billion_dollar_mistake.md)
+- [Chapter 1.4: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/04_01_null_references_billion_dollar_mistake.md)
+- [Chapter 1.5: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/05_references_deep_dives.md)
 
 ---
 
@@ -37,9 +37,9 @@
 - [Chapter 3.2: The LMAX Architecture & The Disruptor Pattern (Martin Fowler & LMAX Team, 2011)](./03_actor_model_lmax_disruptor/02_01_primer_and_verbatim_fowler_lmax_architecture.md)
 - [Chapter 3.3: LMAX Technology Blog — Scale, Testing, Constructors, Coverage & The Impossible NullPointerException](./03_actor_model_lmax_disruptor/03_01_primer_and_verbatim_lmax_engineering_blogs.md)
 - [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](./03_actor_model_lmax_disruptor/04_01_primer_and_verbatim_barker_bad_concurrency.md)
-- [Chapter 3.5: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/05_references_deep_dives.md)
-- [Chapter 3.6: Deep Dive: Concepts of the LMAX Disruptor](./03_actor_model_lmax_disruptor/06_01_primer_lmax_disruptor_concepts.md)
-- [Chapter 3.7: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/07_01_primer_mechanical_sympathy.md)
+- [Chapter 3.5: Deep Dive: Concepts of the LMAX Disruptor](./03_actor_model_lmax_disruptor/05_01_primer_lmax_disruptor_concepts.md)
+- [Chapter 3.6: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/06_01_primer_mechanical_sympathy.md)
+- [Chapter 3.7: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/07_references_deep_dives.md)
 
 ---
 
@@ -50,7 +50,7 @@
 - [Chapter 4.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](./04_software_ui_architecture/03_01_serverless_feature_toggles.md)
 - [Chapter 4.4: Separated Presentation (Martin Fowler, 2006)](./04_software_ui_architecture/04_01_separated_presentation.md)
 - [Chapter 4.5: Presentation Domain Data Layering (Martin Fowler, 2015)](./04_software_ui_architecture/05_01_presentation_domain_data_layering.md)
-- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](./04_software_ui_architecture/04_references_deep_dives.md)
+- [Chapter 4.6: Citation & Reference Deep-Dives — Module 4](./04_software_ui_architecture/06_references_deep_dives.md)
 
 ---
 
@@ -143,7 +143,7 @@ This book is print-ready. Each chapter begins with a `<div class="page-break">` 
 
 ## Preface & Overview
 
-Software engineering is governed by foundational paradigms that span decades of research, hardware evolution, architectural innovation, and practical craftsmanship. This compendium systematically aggregates **38 key reference texts and research papers** into six structured modules — covering the full arc from the philosophy of what software design *is*, through to the hardware realities that constrain it, the concurrent computation models that exploit it, and the refactoring techniques that continuously improve it.
+Software engineering is governed by foundational paradigms that span decades of research, hardware evolution, architectural innovation, and practical craftsmanship. This compendium systematically aggregates **38 key reference texts and research papers** into seven structured modules — covering the full arc from the philosophy of what software design *is*, through to the hardware realities that constrain it, the concurrent computation models that exploit it, and the refactoring techniques that continuously improve it.
 
 ### Why These Papers?
 

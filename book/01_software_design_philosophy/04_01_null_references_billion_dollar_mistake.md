@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)
+# Chapter 1.4: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)
 
 ## SECTION 1 — PRIMER ON THE BASICS
 

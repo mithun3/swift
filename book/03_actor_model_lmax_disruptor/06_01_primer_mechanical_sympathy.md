@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 3.7: Deep Dive: Mechanical Sympathy
+# Chapter 3.6: Deep Dive: Mechanical Sympathy
 
 > *"You don't have to be an engineer to be a racing driver, but you do have to have **Mechanical Sympathy**."* — Jackie Stewart (Three-time Formula One World Champion)
 
