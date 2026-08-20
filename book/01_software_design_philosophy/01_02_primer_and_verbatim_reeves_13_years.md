@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 1.2: Letter to the Editor & 13 Years Later (Jack W. Reeves)
+# Chapter 1.2: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)
 
 ---
 

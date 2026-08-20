@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 1.3: Code As Documentation (Martin Fowler)
+# Chapter 1.3: Code As Documentation (Martin Fowler, 2005)
 
 ---
 

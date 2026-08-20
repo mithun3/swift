@@ -1,12 +1,12 @@
 <div class="page-break"></div>
 
-# Chapter 5.6: Citation & Reference Deep-Dives for Module 5
+# Chapter 5.7: Citation & Reference Deep-Dives — Module 5
 
 This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 5.
 
 ---
 
-## Deep-Dive 4.6.1: The Model-View-Controller (MVC) Architectural Lineage
+## Deep-Dive 5.7.1: The Model-View-Controller (MVC) Architectural Lineage
 
 ```text
 Smalltalk-80 (1979) ──▶ Desktop GUI Era (1990s) ──▶ Web Framework Era (2000s)
@@ -26,7 +26,7 @@ Smalltalk-80 (1979) ──▶ Desktop GUI Era (1990s) ──▶ Web Framework Er
 
 ---
 
-## Deep-Dive 4.6.2: Micro-Frontend Runtime Integration Mechanics
+## Deep-Dive 5.7.2: Micro-Frontend Runtime Integration Mechanics
 
 ### Webpack 5 Module Federation Architecture
 Module Federation allows a container shell application to load remote bundles over the network at runtime without shared build steps.
@@ -46,7 +46,7 @@ Module Federation allows a container shell application to load remote bundles ov
 
 ---
 
-## Deep-Dive 4.6.3: Serverless Function Execution Lifecycle & Cold Start Mitigation
+## Deep-Dive 5.7.3: Serverless Function Execution Lifecycle & Cold Start Mitigation
 
 Function-as-a-Service (FaaS) environments (such as AWS Lambda, Google Cloud Functions, and Azure Functions) manage microservice execution by dynamically spinning up isolated micro-VM containers (e.g. AWS Firecracker) upon incoming HTTP events.
 
@@ -67,7 +67,7 @@ Function-as-a-Service (FaaS) environments (such as AWS Lambda, Google Cloud Func
 
 ---
 
-## Deep-Dive 4.6.4: Feature Toggle Debt Lifecycle & Canary Release Pipelines
+## Deep-Dive 5.7.4: Feature Toggle Debt Lifecycle & Canary Release Pipelines
 
 Feature flags provide powerful deployment flexibility, but unmanaged toggles create toxic technical debt ("Flag Rot").
 
@@ -92,7 +92,7 @@ Feature flags provide powerful deployment flexibility, but unmanaged toggles cre
 
 ---
 
-## Deep-Dive 4.6.5: Summary of Cited Works for Module 5
+## Deep-Dive 5.7.5: Summary of Cited Works for Module 5
 
 - [20] M. Fowler, "GUI Architectures," MartinFowler.com, 2006. Available: https://martinfowler.com/eaaDev/uiArchs.html
 - [21] M. Fowler, "Presentation Domain Separation," MartinFowler.com, 2001/06. Available: https://martinfowler.com/eaaDev/SeparatedPresentation.html
@@ -104,8 +104,9 @@ Feature flags provide powerful deployment flexibility, but unmanaged toggles cre
 - [27] P. Hodgson and M. Fowler, "Feature Toggles," MartinFowler.com, 2017. Available: https://martinfowler.com/articles/feature-toggles.html
 
 **Subject Index Cross-References:**
-- Feature Toggles ..... Ch 4.3
-- Micro Frontends ..... Ch 4.2
-- MVC ................. Ch 4.1, Ch 4.4
-- Presentation Domain Separation ........ Ch 4.1, Ch 4.4, Ch 4.5
-- Serverless .......... Ch 4.3
+- Feature Toggles ..... Ch 5.3
+- Functional Reactive Programming (FRP) .. Ch 5.6
+- Micro Frontends ..... Ch 5.2
+- MVC ................. Ch 5.1, Ch 5.4
+- Presentation Domain Separation ........ Ch 5.1, Ch 5.4, Ch 5.5
+- Serverless .......... Ch 5.3

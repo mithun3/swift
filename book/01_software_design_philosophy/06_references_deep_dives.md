@@ -1,12 +1,12 @@
 <div class="page-break"></div>
 
-# Chapter 1.5: Citation & Reference Deep-Dives — Module 1
+# Chapter 1.7: Citation & Reference Deep-Dives — Module 1
 
 This chapter provides standalone, in-depth research and analytical profiles of all major cited books, foundational theories, historical figures, and methodologies referenced across Module 1.
 
 ---
 
-## Deep-Dive 1.4.1: The Evolution of C++ as a Software Design Language
+## Deep-Dive 1.7.1: The Evolution of C++ as a Software Design Language
 
 ```
 1979: C with Classes (Bjarne Stroustrup at Bell Labs)
@@ -34,7 +34,7 @@ C++ introduced fundamental language mechanisms that enabled direct expression of
 
 ---
 
-## Deep-Dive 1.4.2: Structured Programming vs. Object-Oriented Design
+## Deep-Dive 1.7.2: Structured Programming vs. Object-Oriented Design
 
 | Dimension | Structured Programming (1970s–1980s) | Object-Oriented Design (1990s–Present) |
 | :--- | :--- | :--- |
@@ -46,7 +46,7 @@ C++ introduced fundamental language mechanisms that enabled direct expression of
 
 ---
 
-## Deep-Dive 1.4.3: The Fallacy of "Begging the Question" in Software Engineering
+## Deep-Dive 1.7.3: The Fallacy of "Begging the Question" in Software Engineering
 
 In classical logic, **Begging the Question** (*Petitio Principii*) is a logical fallacy where an argument's premises assume the truth of the conclusion, instead of supporting it.
 
@@ -66,13 +66,14 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 
 ---
 
-## Deep-Dive 1.4.4: Summary of Cited Works & Further Reading
+## Deep-Dive 1.7.4: Summary of Cited Works & Further Reading
 
 [1] J. W. Reeves, "What is software design?" C++ Journal, Fall 1992. Available: https://www.developerdotstar.com/mag/articles/reeves_design_main.html
 [2] J. W. Reeves, "What is software design: 13 years later," Developer Dot Star, Feb. 2005. Available: https://www.developerdotstar.com/mag/articles/reeves_design_main.html
 [3] J. W. Reeves, "Letter to the Editor," C++ Journal, 1992. Available: https://www.developerdotstar.com/mag/articles/reeves_design_main.html
 [4] M. Fowler, "Code As Documentation," MartinFowler.com, 2005. Available: https://martinfowler.com/bliki/CodeAsDocumentation.html
 [5] M. Fowler, "The Almighty Thud," MartinFowler.com, 1997. Available: https://martinfowler.com/ (archive)
+[6] D. L. Parnas, "On the Criteria To Be Used in Decomposing Systems into Modules," Communications of the ACM, vol. 15, no. 12, pp. 1053-1058, Dec. 1972.
 
 **Supplementary Books**
 [S1] S. McConnell, *Code Complete: A Practical Handbook of Software Construction*, Microsoft Press, 1993, 2004.
@@ -82,4 +83,9 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 [S5] J. Kerievsky, *Refactoring to Patterns*, Addison-Wesley, 2004.
 
 **Subject Index Cross-References:**
-- Software Design ..... Ch 1.1, Ch 1.1b
+- Code as Documentation .. Ch 1.3
+- Information Hiding ..... Ch 1.6
+- Modular Decomposition .. Ch 1.6
+- Null References ........ Ch 1.5
+- Software Design ........ Ch 1.1, Ch 1.2
+- UML as Sketch .......... Ch 1.4

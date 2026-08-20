@@ -14,11 +14,12 @@
 ### Module 1: Core Foundations of Software Engineering & Design Philosophy
 
 - [Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)](./01_software_design_philosophy/01_01_primer_and_verbatim_reeves_what_is_software_design.md)
-- [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](./01_software_design_philosophy/01_02_primer_and_verbatim_reeves_13_years.md)
-- [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](./01_software_design_philosophy/02_01_primer_and_verbatim_fowler_code_as_documentation.md)
-- [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](./01_software_design_philosophy/03_01_primer_and_verbatim_beck_the_almighty_thud.md)
-- [Chapter 1.4: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/04_01_null_references_billion_dollar_mistake.md)
-- [Chapter 1.5: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/05_references_deep_dives.md)
+- [Chapter 1.2: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](./01_software_design_philosophy/01_02_primer_and_verbatim_reeves_13_years.md)
+- [Chapter 1.3: Code As Documentation (Martin Fowler, 2005)](./01_software_design_philosophy/02_01_primer_and_verbatim_fowler_code_as_documentation.md)
+- [Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler, 1997)](./01_software_design_philosophy/03_01_primer_and_verbatim_beck_the_almighty_thud.md)
+- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/04_01_null_references_billion_dollar_mistake.md)
+- [Chapter 1.6: On the Criteria To Be Used in Decomposing Systems into Modules (David Parnas, 1972)](./01_software_design_philosophy/05_01_primer_parnas_modularity.md)
+- [Chapter 1.7: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/06_references_deep_dives.md)
 
 ---
 
@@ -39,16 +40,19 @@
 - [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](./03_actor_model_lmax_disruptor/04_01_primer_and_verbatim_barker_bad_concurrency.md)
 - [Chapter 3.5: Deep Dive: Concepts of the LMAX Disruptor](./03_actor_model_lmax_disruptor/05_01_primer_lmax_disruptor_concepts.md)
 - [Chapter 3.6: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/06_01_primer_mechanical_sympathy.md)
-- [Chapter 3.7: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/07_references_deep_dives.md)
+- [Chapter 3.7: Deep Dive: CQRS and Event Sourcing](./03_actor_model_lmax_disruptor/07_01_primer_cqrs_and_event_sourcing.md)
+- [Chapter 3.8: Deep Dive: CSP vs. Actor Model](./03_actor_model_lmax_disruptor/08_01_primer_csp_vs_actor_model.md)
+- [Chapter 3.9: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/09_references_deep_dives.md)
 
 ---
 
 ### Module 4: Real-Time Implementations (Case Study)
 
-- [Chapter 4.1: FX Pipeline Architecture Overview](./04_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
+- [Chapter 4.1: Foreign Exchange (FX) Low-Latency Pipeline Architecture Overview](./04_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
 - [Chapter 4.2: Zero-Allocation and Mechanical Sympathy in Practice](./04_real_time_implementations/02_01_zero_allocation_and_mechanical_sympathy.md)
 - [Chapter 4.3: Event Loop and Pricing Mechanisms](./04_real_time_implementations/03_01_event_loop_and_pricing.md)
-- [Chapter 4.4: Advanced HFT Patterns and Tuning](./04_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
+- [Chapter 4.4: Advanced HFT Patterns, Kernel Bypass, and OS Tuning](./04_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
+- [Chapter 4.5: Deep Dive: Garbage Collection Pauses vs. Ownership](./04_real_time_implementations/05_01_primer_gc_vs_ownership.md)
 
 ---
 
@@ -59,19 +63,21 @@
 - [Chapter 5.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](./05_software_ui_architecture/03_01_serverless_feature_toggles.md)
 - [Chapter 5.4: Separated Presentation (Martin Fowler, 2006)](./05_software_ui_architecture/04_01_separated_presentation.md)
 - [Chapter 5.5: Presentation Domain Data Layering (Martin Fowler, 2015)](./05_software_ui_architecture/05_01_presentation_domain_data_layering.md)
-- [Chapter 5.6: Citation & Reference Deep-Dives — Module 5](./05_software_ui_architecture/06_references_deep_dives.md)
+- [Chapter 5.6: Functional Reactive Programming (FRP) and State Management](./05_software_ui_architecture/06_01_primer_reactive_programming.md)
+- [Chapter 5.7: Citation & Reference Deep-Dives — Module 5](./05_software_ui_architecture/07_references_deep_dives.md)
 
 ---
 
 ### Module 6: Code Evolution & Refactoring Patterns
 
-- [Chapter 6.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./06_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
-- [Chapter 6.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./06_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
-- [Chapter 6.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./06_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
-- [Chapter 6.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./06_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
-- [Chapter 6.2c: Refactoring to an Adaptive Model (Martin Fowler)](./06_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
-- [Chapter 6.2d: Refactoring Code that Accesses External Services (Martin Fowler)](./06_code_evolution_refactoring/02_04_refactoring_external_services.md)
-- [Chapter 6.3: Citation & Reference Deep-Dives — Module 6](./06_code_evolution_refactoring/03_references_deep_dives.md)
+- [Chapter 6.1: Testing Strategies and Test-Driven Development (TDD)](./06_code_evolution_refactoring/01_00_primer_testing_and_tdd.md)
+- [Chapter 6.2: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./06_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
+- [Chapter 6.3: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./06_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
+- [Chapter 6.4: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./06_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
+- [Chapter 6.5: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./06_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
+- [Chapter 6.6: Refactoring to an Adaptive Model (Martin Fowler)](./06_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
+- [Chapter 6.7: Refactoring Code that Accesses External Services (Martin Fowler)](./06_code_evolution_refactoring/02_04_refactoring_external_services.md)
+- [Chapter 6.8: Citation & Reference Deep-Dives — Module 6](./06_code_evolution_refactoring/03_references_deep_dives.md)
 
 ---
 
@@ -163,15 +169,15 @@ This compendium follows three principles:
 
 ### Module Overview
 
-| Module | Topic | Papers Covered |
+| Module | Topic | Chapters |
 | :--- | :--- | :---: |
-| **1** | Core Foundations of Software Engineering & Design Philosophy | 6 |
-| **2** | Hardware Evolution, Concurrency & Memory Models | 5 |
-| **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 8 |
-| **4** | Real-Time Implementations (Case Study) | 3 |
-| **5** | Software & UI Architecture Patterns | 10 |
-| **6** | Code Evolution & Refactoring Patterns | 9 |
-| **7** | Bibliography & Subject Index | — |
+| **1** | Core Foundations of Software Engineering & Design Philosophy | 7 |
+| **2** | Hardware Evolution, Concurrency & Memory Models | 4 |
+| **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 9 |
+| **4** | Real-Time Implementations (Case Study) | 5 |
+| **5** | Software & UI Architecture Patterns | 7 |
+| **6** | Code Evolution & Refactoring Patterns | 8 |
+| **7** | Bibliography & Subject Index | 1 |
 | **Total** | | **41** |
 
 ### Sources Used in This Volume

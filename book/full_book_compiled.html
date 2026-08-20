@@ -886,7 +886,42 @@ Design</a></li>
 <li><a href="#code-example-proving-false-sharing" id="toc-code-example-proving-false-sharing">6. Code Example: Proving
 False Sharing</a></li>
 </ul></li>
-<li><a href="#chapter-3.7-citation-reference-deep-dives-module-3" id="toc-chapter-3.7-citation-reference-deep-dives-module-3">Chapter 3.7:
+<li><a href="#chapter-3.7-deep-dive-cqrs-and-event-sourcing" id="toc-chapter-3.7-deep-dive-cqrs-and-event-sourcing">Chapter 3.7: Deep
+Dive: CQRS and Event Sourcing</a>
+<ul>
+<li><a href="#the-bottleneck-of-crud" id="toc-the-bottleneck-of-crud">1.
+The Bottleneck of CRUD</a></li>
+<li><a href="#event-sourcing" id="toc-event-sourcing">2. Event
+Sourcing</a></li>
+<li><a href="#cqrs-command-query-responsibility-segregation" id="toc-cqrs-command-query-responsibility-segregation">3. CQRS (Command
+Query Responsibility Segregation)</a>
+<ul>
+<li><a href="#the-flow-in-high-performance-systems" id="toc-the-flow-in-high-performance-systems">The Flow in
+High-Performance Systems</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#chapter-3.8-deep-dive-csp-vs.-actor-model" id="toc-chapter-3.8-deep-dive-csp-vs.-actor-model">Chapter 3.8: Deep
+Dive: CSP vs. Actor Model</a>
+<ul>
+<li><a href="#the-actor-model-focus-on-the-entities" id="toc-the-actor-model-focus-on-the-entities">1. The Actor Model: Focus
+on the Entities</a>
+<ul>
+<li><a href="#key-characteristics" id="toc-key-characteristics">Key
+Characteristics:</a></li>
+</ul></li>
+<li><a href="#csp-communicating-sequential-processes-focus-on-the-channels" id="toc-csp-communicating-sequential-processes-focus-on-the-channels">2.
+CSP (Communicating Sequential Processes): Focus on the Channels</a>
+<ul>
+<li><a href="#key-characteristics-1" id="toc-key-characteristics-1">Key
+Characteristics:</a></li>
+</ul></li>
+<li><a href="#comparison-and-trade-offs" id="toc-comparison-and-trade-offs">3. Comparison and Trade-offs</a>
+<ul>
+<li><a href="#when-to-use-which" id="toc-when-to-use-which">When to use
+which?</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#chapter-3.9-citation-reference-deep-dives-module-3" id="toc-chapter-3.9-citation-reference-deep-dives-module-3">Chapter 3.9:
 Citation &amp; Reference Deep-Dives — Module 3</a>
 <ul>
 <li><a href="#deep-dive-3.5.1-carl-hewitts-original-actor-formalism-1973-vs-1985" id="toc-deep-dive-3.5.1-carl-hewitts-original-actor-formalism-1973-vs-1985">Deep-Dive
@@ -1019,6 +1054,22 @@ Elimination</a></li>
 Solarflare EF_VI API</a></li>
 <li><a href="#reference-7.4.b-jep-318---epsilon-gc" id="toc-reference-7.4.b-jep-318---epsilon-gc">Reference 7.4.B: JEP 318 -
 Epsilon GC</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#chapter-4.5-deep-dive-garbage-collection-pauses-vs.-ownership" id="toc-chapter-4.5-deep-dive-garbage-collection-pauses-vs.-ownership">Chapter
+4.5: Deep Dive: Garbage Collection Pauses vs. Ownership</a>
+<ul>
+<li><a href="#the-stop-the-world-problem" id="toc-the-stop-the-world-problem">1. The Stop-The-World
+Problem</a></li>
+<li><a href="#mitigation-strategy-zero-allocation" id="toc-mitigation-strategy-zero-allocation">2. Mitigation Strategy:
+Zero-Allocation</a></li>
+<li><a href="#the-ownership-alternative-rust" id="toc-the-ownership-alternative-rust">3. The Ownership Alternative
+(Rust)</a>
+<ul>
+<li><a href="#why-ownership-excels-in-real-time-systems" id="toc-why-ownership-excels-in-real-time-systems">Why Ownership Excels
+in Real-Time Systems</a></li>
+<li><a href="#the-shift-in-high-frequency-trading" id="toc-the-shift-in-high-frequency-trading">The Shift in High-Frequency
+Trading</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#module-5-software-ui-architecture-patterns-1" id="toc-module-5-software-ui-architecture-patterns-1">Module 5: Software
@@ -1472,8 +1523,12 @@ The Impossible NullPointerException</a></li>
 3.5: Deep Dive: Concepts of the LMAX Disruptor</a></li>
 <li><a href="./03_actor_model_lmax_disruptor/06_01_primer_mechanical_sympathy.md">Chapter
 3.6: Deep Dive: Mechanical Sympathy</a></li>
-<li><a href="./03_actor_model_lmax_disruptor/07_references_deep_dives.md">Chapter
-3.7: Citation &amp; Reference Deep-Dives — Module 3</a></li>
+<li><a href="./03_actor_model_lmax_disruptor/07_01_primer_cqrs_and_event_sourcing.md">Chapter
+3.7: Deep Dive: CQRS and Event Sourcing</a></li>
+<li><a href="./03_actor_model_lmax_disruptor/08_01_primer_csp_vs_actor_model.md">Chapter
+3.8: Deep Dive: CSP vs. Actor Model</a></li>
+<li><a href="./03_actor_model_lmax_disruptor/09_references_deep_dives.md">Chapter
+3.9: Citation &amp; Reference Deep-Dives — Module 3</a></li>
 </ul>
 <hr />
 <h3 id="module-4-real-time-implementations-case-study">Module 4:
@@ -1487,6 +1542,8 @@ Real-Time Implementations (Case Study)</h3>
 4.3: Event Loop and Pricing Mechanisms</a></li>
 <li><a href="./04_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md">Chapter
 4.4: Advanced HFT Patterns and Tuning</a></li>
+<li><a href="./04_real_time_implementations/05_01_primer_gc_vs_ownership.md">Chapter
+4.5: Deep Dive: Garbage Collection Pauses vs. Ownership</a></li>
 </ul>
 <hr />
 <h3 id="module-5-software-ui-architecture-patterns">Module 5: Software
@@ -1673,13 +1730,13 @@ Memory Models</td>
 <td style="text-align: left;"><strong>3</strong></td>
 <td style="text-align: left;">High-Performance Architecture, Actor Model
 &amp; LMAX Disruptor</td>
-<td style="text-align: center;">8</td>
+<td style="text-align: center;">10</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>4</strong></td>
 <td style="text-align: left;">Real-Time Implementations (Case
 Study)</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>5</strong></td>
@@ -1701,7 +1758,7 @@ Patterns</td>
 <tr>
 <td style="text-align: left;"><strong>Total</strong></td>
 <td style="text-align: left;"></td>
-<td style="text-align: center;"><strong>41</strong></td>
+<td style="text-align: center;"><strong>44</strong></td>
 </tr>
 </tbody>
 </table>
@@ -8232,7 +8289,206 @@ their own L1 caches.</p>
 <div class="page-break">
 
 </div>
-<h1 id="chapter-3.7-citation-reference-deep-dives-module-3">Chapter 3.7:
+<h1 id="chapter-3.7-deep-dive-cqrs-and-event-sourcing">Chapter 3.7: Deep
+Dive: CQRS and Event Sourcing</h1>
+<p>To fully appreciate the LMAX Architecture and how it manages to
+process millions of transactions per second, it is crucial to understand
+how it handles data persistence. In a traditional architecture, a
+transaction often involves acquiring locks and waiting for a database to
+write to disk. This I/O bottleneck completely defeats the purpose of an
+in-memory, mechanical sympathy-driven architecture like the
+Disruptor.</p>
+<p>To solve this, LMAX relies heavily on two complementary patterns:
+<strong>CQRS (Command Query Responsibility Segregation)</strong> and
+<strong>Event Sourcing</strong>.</p>
+<hr />
+<h2 id="the-bottleneck-of-crud">1. The Bottleneck of CRUD</h2>
+<p>In a standard CRUD (Create, Read, Update, Delete) system, the same
+database and the same data model are used for both reading and writing.
+- When a user submits a trade, the system updates a row in a relational
+database. - When a user views their portfolio, the system queries that
+same table.</p>
+<p>This leads to significant contention: 1. <strong>Locking:</strong>
+Writes must lock rows to prevent dirty reads, slowing down reads. 2.
+<strong>Schema Compromise:</strong> The data model is often a compromise
+between what is fast to write and what is fast to query. 3. <strong>I/O
+Bound:</strong> The core business logic thread is blocked waiting for
+the database disk I/O to complete.</p>
+<h2 id="event-sourcing">2. Event Sourcing</h2>
+<p>Instead of storing the <em>current state</em> of an entity,
+<strong>Event Sourcing</strong> stores a sequence of <em>state-changing
+events</em>. If you want to know the current balance of an account, you
+don’t look up a “balance” column. Instead, you take an initial state
+(balance = 0) and replay all events (Deposit $10, Withdraw $5, Deposit
+$20) to arrive at the current state ($25).</p>
+<p>In the context of LMAX: - The core business logic (the Event
+Processor) runs entirely in memory. - When a command arrives (e.g.,
+“Place Trade”), it is processed, and the resulting state change is
+captured as an <strong>Event</strong>. - This Event is appended to an
+<strong>Event Store</strong> (an append-only log). - Append-only logs
+are incredibly fast because they require no indexing, no B-Tree
+rebalancing, and can be written sequentially to disk, maximizing disk
+throughput.</p>
+<p>If the system crashes, it simply reloads the last snapshot and
+replays the subsequent events from the Event Store to rebuild its exact
+in-memory state.</p>
+<h2 id="cqrs-command-query-responsibility-segregation">3. CQRS (Command
+Query Responsibility Segregation)</h2>
+<p>While Event Sourcing solves the fast-write problem, it makes querying
+difficult. You cannot easily run a SQL query like
+<code>SELECT * FROM Accounts WHERE balance &gt; 100</code> against an
+append-only log of events.</p>
+<p>This is where <strong>CQRS</strong> comes in. CQRS dictates that the
+system should be split into two sides: 1. <strong>The Command
+Side:</strong> Handles writes. It validates business rules, processes
+commands, and generates events (using Event Sourcing). 2. <strong>The
+Query Side:</strong> Handles reads. It listens to the events generated
+by the Command Side and updates highly optimized read models (e.g., a
+denormalized relational database, a fast in-memory cache, or an
+Elasticsearch index).</p>
+<h3 id="the-flow-in-high-performance-systems">The Flow in
+High-Performance Systems</h3>
+<ol type="1">
+<li>A <strong>Command</strong> is received and placed onto the Disruptor
+Ring Buffer.</li>
+<li>The <strong>Journaler (Consumer 1)</strong> reads the command and
+appends it to disk (Event Sourcing).</li>
+<li>The <strong>Business Logic Processor (Consumer 2)</strong>, knowing
+the command is safely journaled, updates its in-memory state and emits a
+new event.</li>
+<li>The <strong>Query Model Updater (Consumer 3)</strong> takes that
+event and updates a read-only database.</li>
+</ol>
+<p>Because these consumers can run in parallel (or in a defined
+dependency chain via the Sequence Barrier) on different CPU cores, the
+core business logic never blocks waiting for a database write. This
+separation is the key to maintaining deterministic, sub-millisecond
+latency.</p>
+<div class="page-break">
+
+</div>
+<h1 id="chapter-3.8-deep-dive-csp-vs.-actor-model">Chapter 3.8: Deep
+Dive: CSP vs. Actor Model</h1>
+<p>When dealing with concurrent systems, shared mutable state (locking,
+mutexes) is often cited as the root of all evil. To avoid locks, the
+software engineering community has largely converged on message-passing
+paradigms. The two most prominent models for message passing are the
+<strong>Actor Model</strong> (formalized by Gul Agha and popularized by
+Erlang/Akka) and <strong>Communicating Sequential Processes
+(CSP)</strong> (formalized by Tony Hoare and popularized by Go).</p>
+<p>While both advocate for “Do not communicate by sharing memory;
+instead, share memory by communicating,” they take fundamentally
+different approaches to how that communication is structured.</p>
+<hr />
+<h2 id="the-actor-model-focus-on-the-entities">1. The Actor Model: Focus
+on the Entities</h2>
+<p>In the Actor Model, the fundamental unit of computation is the
+<strong>Actor</strong>. - An Actor is an independent entity that
+encapsulates state and behavior. - Actors communicate exclusively by
+sending asynchronous messages to other Actors. - Every Actor has a
+unique address (a reference or mailbox).</p>
+<h3 id="key-characteristics">Key Characteristics:</h3>
+<ul>
+<li><strong>Asynchronous by Default:</strong> When Actor A sends a
+message to Actor B, it does not wait for B to receive it. It drops the
+message in B’s mailbox and continues executing.</li>
+<li><strong>Location Transparency:</strong> Because messages are sent to
+an address, it doesn’t matter if Actor B is on the same thread, the same
+machine, or halfway across the world. The runtime handles the
+routing.</li>
+<li><strong>Coupled to the Receiver:</strong> The sender must know the
+identity (address) of the receiver.</li>
+</ul>
+<p><strong>Analogy:</strong> The Actor Model is like the postal system.
+You write a letter, put an address on it, and drop it in a mailbox. You
+don’t wait at the mailbox for the recipient to pick it up.</p>
+<h2 id="csp-communicating-sequential-processes-focus-on-the-channels">2.
+CSP (Communicating Sequential Processes): Focus on the Channels</h2>
+<p>In CSP, the fundamental unit of communication is the
+<strong>Channel</strong>. - Processes (or goroutines in Go) are
+anonymous. They don’t have addresses or identities. - Processes
+communicate by sending and receiving messages through named
+Channels.</p>
+<h3 id="key-characteristics-1">Key Characteristics:</h3>
+<ul>
+<li><strong>Synchronous (Unbuffered) by Default:</strong> In pure CSP,
+communication is a rendezvous. If Process A sends a message to a
+channel, it blocks until Process B reads from that channel. (Note: Go
+allows buffered channels, which introduces some asynchronous behavior,
+but the underlying philosophy remains channel-centric).</li>
+<li><strong>Decoupled from the Receiver:</strong> Process A sends a
+message to Channel X. Process B reads from Channel X. A and B do not
+know about each other; they only know about the channel.</li>
+<li><strong>First-Class Channels:</strong> Channels can be passed around
+as variables, closed, or multiplexed (e.g., using a <code>select</code>
+statement in Go).</li>
+</ul>
+<p><strong>Analogy:</strong> CSP is like a pneumatic tube system in an
+office. You put a canister in a specific tube. You don’t know who is at
+the other end of the tube, you just know that someone responsible for
+that tube will receive it.</p>
+<h2 id="comparison-and-trade-offs">3. Comparison and Trade-offs</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;">Actor Model (Erlang, Akka)</th>
+<th style="text-align: left;">CSP (Go Channels, Clojure core.async)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Addressing</strong></td>
+<td style="text-align: left;">Direct (Actor A sends to Actor B)</td>
+<td style="text-align: left;">Anonymous (Process sends to Channel)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Coupling</strong></td>
+<td style="text-align: left;">Sender knows Receiver</td>
+<td style="text-align: left;">Sender and Receiver only know the
+Channel</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Synchronization</strong></td>
+<td style="text-align: left;">Asynchronous (Mailboxes)</td>
+<td style="text-align: left;">Synchronous / Rendezvous (by default)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Failure Handling</strong></td>
+<td style="text-align: left;">Built-in (Supervision trees, “Let it
+crash”)</td>
+<td style="text-align: left;">Manual (Error values, defer/recover)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Distribution</strong></td>
+<td style="text-align: left;">Trivially distributed across networks</td>
+<td style="text-align: left;">Typically confined to a single machine
+memory space</td>
+</tr>
+</tbody>
+</table>
+<h3 id="when-to-use-which">When to use which?</h3>
+<ul>
+<li><strong>Choose the Actor Model</strong> when building highly
+distributed, fault-tolerant systems where components need to maintain
+complex state machines and where failure recovery must be handled
+gracefully across a cluster (e.g., telecom switches, multiplayer game
+backends).</li>
+<li><strong>Choose CSP</strong> when building concurrent systems within
+a single application where you need to coordinate complex workflows,
+pipelines, and fan-out/fan-in processing without worrying about the
+identities of the workers (e.g., concurrent data processing, web server
+request handling).</li>
+</ul>
+<div class="page-break">
+
+</div>
+<h1 id="chapter-3.9-citation-reference-deep-dives-module-3">Chapter 3.9:
 Citation &amp; Reference Deep-Dives — Module 3</h1>
 <p>This chapter provides standalone research profiles, mathematical
 formalisms, hardware memory fence mechanics, and lock-free data
@@ -9267,6 +9523,87 @@ reclaiming it. Used for performance testing, ultra-low latency
 workloads, and short-lived batch jobs where GC pauses cannot be
 tolerated.</li>
 </ul>
+<div class="page-break">
+
+</div>
+<h1 id="chapter-4.5-deep-dive-garbage-collection-pauses-vs.-ownership">Chapter
+4.5: Deep Dive: Garbage Collection Pauses vs. Ownership</h1>
+<p>When implementing real-time systems, such as high-frequency trading
+platforms or low-latency game engines, predictability is more important
+than raw average throughput. A system that processes 10,000 messages per
+second with a guaranteed maximum latency of 1 millisecond is vastly
+superior to a system that processes 100,000 messages per second but
+occasionally pauses for 50 milliseconds.</p>
+<p>The primary enemy of predictable latency in modern managed languages
+(Java, C#, Go) is <strong>Garbage Collection (GC)</strong>.</p>
+<hr />
+<h2 id="the-stop-the-world-problem">1. The Stop-The-World Problem</h2>
+<p>In managed languages, the runtime environment periodically scans
+memory to find objects that are no longer referenced by the application
+and reclaims their memory.</p>
+<p>While modern Garbage Collectors (like Java’s ZGC or Shenandoah, and
+Go’s concurrent GC) have made massive strides in reducing pause times,
+they are fundamentally built around a “Stop-The-World” (STW) phase. Even
+concurrent collectors require brief pauses to scan thread stacks or
+synchronize memory barriers.</p>
+<p>In a system targeting sub-millisecond latency, a 5-millisecond GC
+pause is catastrophic. If an order book ticks and the JVM decides to run
+a minor collection, that tick is queued, processed late, and the trading
+algorithm makes decisions based on stale data.</p>
+<h2 id="mitigation-strategy-zero-allocation">2. Mitigation Strategy:
+Zero-Allocation</h2>
+<p>As discussed in the LMAX Disruptor chapters, the standard way to
+bypass the GC problem in Java is to adopt a
+<strong>Zero-Allocation</strong> architecture.</p>
+<ul>
+<li>Pre-allocate all necessary objects at application startup (e.g.,
+filling a Ring Buffer).</li>
+<li>Instead of creating new objects, mutate the fields of existing,
+pre-allocated objects.</li>
+<li>Use primitive arrays instead of collections of objects to avoid
+object headers and pointer chasing.</li>
+</ul>
+<p><strong>The Trade-off:</strong> Zero-allocation in Java is unnatural.
+It forces developers to write code that looks more like C than idiomatic
+Java. It breaks encapsulation, relies heavily on mutable state, and
+makes the codebase harder to maintain and test.</p>
+<h2 id="the-ownership-alternative-rust">3. The Ownership Alternative
+(Rust)</h2>
+<p>A completely different approach to memory management has gained
+immense popularity in system programming: <strong>Ownership</strong>, as
+implemented by Rust.</p>
+<p>Rust provides memory safety without a garbage collector. It achieves
+this through a strict set of compile-time rules enforced by the Borrow
+Checker: 1. Each value in Rust has an <em>owner</em>. 2. There can only
+be one owner at a time. 3. When the owner goes out of scope, the value
+is automatically and deterministically dropped (memory is freed).</p>
+<h3 id="why-ownership-excels-in-real-time-systems">Why Ownership Excels
+in Real-Time Systems</h3>
+<ol type="1">
+<li><strong>Deterministic Latency:</strong> Memory is freed exactly when
+an object goes out of scope. There is no background thread running, no
+stop-the-world pauses, and no heuristic-driven memory sweeps. The CPU
+cost of deallocation is spread evenly and predictably.</li>
+<li><strong>Idiomatic Code:</strong> Unlike Zero-Allocation in Java,
+developers using Rust do not have to resort to object pooling or mutable
+global arrays. They can write idiomatic, ergonomic code, allocate
+objects when needed, and trust the compiler to insert the exact
+<code>free()</code> calls at the right time.</li>
+<li><strong>Data Race Freedom:</strong> A side effect of the Ownership
+model is that the compiler can statically guarantee the absence of data
+races at compile time. You cannot accidentally share mutable state
+between threads.</li>
+</ol>
+<h3 id="the-shift-in-high-frequency-trading">The Shift in High-Frequency
+Trading</h3>
+<p>Historically, HFT systems were written in C or C++ to avoid GC
+pauses. However, C/C++ require manual memory management
+(<code>malloc</code>/<code>free</code>), leading to notorious bugs like
+use-after-free, double-free, and memory leaks.</p>
+<p>Languages with Ownership models provide the deterministic performance
+of C++ without the catastrophic memory safety bugs, making them an
+increasingly popular choice for bridging high-performance and modern
+software engineering practices.</p>
 <div class="page-break">
 
 </div>

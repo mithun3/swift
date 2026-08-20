@@ -2,6 +2,8 @@
 
 # Module 7: Bibliography and Index
 
+## Chapter 7.1: Complete IEEE Bibliography & Subject Index
+
 ## Part A: Complete Bibliography
 
 ### Module 1: Software Design Philosophy

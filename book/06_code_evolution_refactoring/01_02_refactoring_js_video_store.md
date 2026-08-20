@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 6.2: Refactoring a JavaScript Video Store (Martin Fowler)
+# Chapter 6.3: Refactoring a JavaScript Video Store (Martin Fowler, 2016)
 
 ---
 

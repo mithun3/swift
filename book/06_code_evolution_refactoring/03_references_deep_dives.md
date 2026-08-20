@@ -1,12 +1,12 @@
 <div class="page-break"></div>
 
-# Chapter 6.3: Citation & Reference Deep-Dives — Module 6
+# Chapter 6.8: Citation & Reference Deep-Dives — Module 6
 
 This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 6.
 
 ---
 
-## Deep-Dive 5.3.1: Complete Profile of Martin Fowler's Refactoring Works
+## Deep-Dive 6.8.1: Complete Profile of Martin Fowler's Refactoring Works
 
 ### 1. *Refactoring: Improving the Design of Existing Code* (1st Edition, 1999)
 - **Primary Focus**: Formally introducing the practice of refactoring to the mainstream software industry using Java.
@@ -19,7 +19,7 @@ This chapter provides standalone research profiles, detailed mechanics, and arch
 
 ---
 
-## Deep-Dive 5.3.2: Detailed Mechanics of Key Refactoring Patterns
+## Deep-Dive 6.8.2: Detailed Mechanics of Key Refactoring Patterns
 
 ### 1. Extract Method / Function
 - **Motivation**: A long function or method is hard to read, test, and reuse. By grouping cohesive lines of code and extracting them into a named method, the caller becomes self-documenting.
@@ -42,7 +42,7 @@ This chapter provides standalone research profiles, detailed mechanics, and arch
 
 ---
 
-## Deep-Dive 5.3.3: SOLID Principles in Refactoring Context
+## Deep-Dive 6.8.3: SOLID Principles in Refactoring Context
 
 The SOLID principles guide the target structure of refactoring efforts:
 
@@ -54,7 +54,7 @@ The SOLID principles guide the target structure of refactoring efforts:
 
 ---
 
-## Deep-Dive 5.3.4: Complete IEEE Bibliography for Module 6
+## Deep-Dive 6.8.4: Complete IEEE Bibliography for Module 6
 
 [28] M. Fowler, "An Example of Preparatory Refactoring," MartinFowler.com, 2014. Available: https://martinfowler.com/articles/preparatory-refactoring-example.html
 [29] M. Fowler, "Refactoring Code to Load a Document," MartinFowler.com, 2016.
@@ -73,9 +73,10 @@ The SOLID principles guide the target structure of refactoring efforts:
 [S14] M. C. Feathers, *Working Effectively with Legacy Code*, Upper Saddle River, NJ: Prentice Hall, 2004.
 
 **Subject Index Cross-References:**
-- Collection Pipelines .......... Ch 5.2, Ch 5.2b
-- Dependency Inversion .......... Ch 5.2, Ch 5.3
-- Gateway Pattern ..... Ch 5.2d, Ch 5.3
-- Notification Pattern .......... Ch 5.1, Ch 5.2
-- Preparatory Refactoring ......... Ch 5.1
-- Refactoring ......... Ch 5.1, Ch 5.1b, Ch 5.2, Ch 5.2b, Ch 5.2c, Ch 5.2d
+- Collection Pipelines .......... Ch 6.5
+- Dependency Inversion .......... Ch 6.4, Ch 6.7
+- Gateway Pattern ............... Ch 6.7
+- Notification Pattern .......... Ch 6.2, Ch 6.4
+- Preparatory Refactoring ....... Ch 6.2
+- Refactoring ................... Ch 6.2, Ch 6.3, Ch 6.4, Ch 6.5, Ch 6.6, Ch 6.7
+- TDD & Testing Strategies ...... Ch 6.1

@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 6.4: Refactoring with Loops and Collection Pipelines (Martin Fowler)
+# Chapter 6.5: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)
 
 ---
 

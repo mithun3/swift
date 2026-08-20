@@ -59,11 +59,12 @@ All intellectual property rights remain with the original authors and publishers
 ### Module 1: Core Foundations of Software Engineering & Design Philosophy
 
 - [Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)](./01_software_design_philosophy/01_01_primer_and_verbatim_reeves_what_is_software_design.md)
-- [Chapter 1.1b: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](./01_software_design_philosophy/01_02_primer_and_verbatim_reeves_13_years.md)
-- [Chapter 1.2: Code As Documentation (Martin Fowler, 2005)](./01_software_design_philosophy/02_01_primer_and_verbatim_fowler_code_as_documentation.md)
-- [Chapter 1.3: The Almighty Thud (Martin Fowler, 1997)](./01_software_design_philosophy/03_01_primer_and_verbatim_beck_the_almighty_thud.md)
-- [Chapter 1.4: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/04_01_null_references_billion_dollar_mistake.md)
-- [Chapter 1.5: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/05_references_deep_dives.md)
+- [Chapter 1.2: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)](./01_software_design_philosophy/01_02_primer_and_verbatim_reeves_13_years.md)
+- [Chapter 1.3: Code As Documentation (Martin Fowler, 2005)](./01_software_design_philosophy/02_01_primer_and_verbatim_fowler_code_as_documentation.md)
+- [Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler, 1997)](./01_software_design_philosophy/03_01_primer_and_verbatim_beck_the_almighty_thud.md)
+- [Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)](./01_software_design_philosophy/04_01_null_references_billion_dollar_mistake.md)
+- [Chapter 1.6: On the Criteria To Be Used in Decomposing Systems into Modules (David Parnas, 1972)](./01_software_design_philosophy/05_01_primer_parnas_modularity.md)
+- [Chapter 1.7: Citation & Reference Deep-Dives — Module 1](./01_software_design_philosophy/06_references_deep_dives.md)
 
 ---
 
@@ -84,16 +85,19 @@ All intellectual property rights remain with the original authors and publishers
 - [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](./03_actor_model_lmax_disruptor/04_01_primer_and_verbatim_barker_bad_concurrency.md)
 - [Chapter 3.5: Deep Dive: Concepts of the LMAX Disruptor](./03_actor_model_lmax_disruptor/05_01_primer_lmax_disruptor_concepts.md)
 - [Chapter 3.6: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/06_01_primer_mechanical_sympathy.md)
-- [Chapter 3.7: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/07_references_deep_dives.md)
+- [Chapter 3.7: Deep Dive: CQRS and Event Sourcing](./03_actor_model_lmax_disruptor/07_01_primer_cqrs_and_event_sourcing.md)
+- [Chapter 3.8: Deep Dive: CSP vs. Actor Model](./03_actor_model_lmax_disruptor/08_01_primer_csp_vs_actor_model.md)
+- [Chapter 3.9: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/09_references_deep_dives.md)
 
 ---
 
 ### Module 4: Real-Time Implementations (Case Study)
 
-- [Chapter 4.1: FX Pipeline Architecture Overview](./04_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
+- [Chapter 4.1: Foreign Exchange (FX) Low-Latency Pipeline Architecture Overview](./04_real_time_implementations/01_01_fx_pipeline_architecture_overview.md)
 - [Chapter 4.2: Zero-Allocation and Mechanical Sympathy in Practice](./04_real_time_implementations/02_01_zero_allocation_and_mechanical_sympathy.md)
 - [Chapter 4.3: Event Loop and Pricing Mechanisms](./04_real_time_implementations/03_01_event_loop_and_pricing.md)
-- [Chapter 4.4: Advanced HFT Patterns and Tuning](./04_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
+- [Chapter 4.4: Advanced HFT Patterns, Kernel Bypass, and OS Tuning](./04_real_time_implementations/04_01_advanced_hft_patterns_and_tuning.md)
+- [Chapter 4.5: Deep Dive: Garbage Collection Pauses vs. Ownership](./04_real_time_implementations/05_01_primer_gc_vs_ownership.md)
 
 ---
 
@@ -104,19 +108,21 @@ All intellectual property rights remain with the original authors and publishers
 - [Chapter 5.3: Serverless Architectures & Feature Toggles (Mike Roberts, Pete Hodgson & Martin Fowler)](./05_software_ui_architecture/03_01_serverless_feature_toggles.md)
 - [Chapter 5.4: Separated Presentation (Martin Fowler, 2006)](./05_software_ui_architecture/04_01_separated_presentation.md)
 - [Chapter 5.5: Presentation Domain Data Layering (Martin Fowler, 2015)](./05_software_ui_architecture/05_01_presentation_domain_data_layering.md)
-- [Chapter 5.6: Citation & Reference Deep-Dives — Module 5](./05_software_ui_architecture/06_references_deep_dives.md)
+- [Chapter 5.6: Functional Reactive Programming (FRP) and State Management](./05_software_ui_architecture/06_01_primer_reactive_programming.md)
+- [Chapter 5.7: Citation & Reference Deep-Dives — Module 5](./05_software_ui_architecture/07_references_deep_dives.md)
 
 ---
 
 ### Module 6: Code Evolution & Refactoring Patterns
 
-- [Chapter 6.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./06_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
-- [Chapter 6.1b: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./06_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
-- [Chapter 6.2: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./06_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
-- [Chapter 6.2b: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./06_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
-- [Chapter 6.2c: Refactoring to an Adaptive Model (Martin Fowler)](./06_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
-- [Chapter 6.2d: Refactoring Code that Accesses External Services (Martin Fowler)](./06_code_evolution_refactoring/02_04_refactoring_external_services.md)
-- [Chapter 6.3: Citation & Reference Deep-Dives — Module 6](./06_code_evolution_refactoring/03_references_deep_dives.md)
+- [Chapter 6.1: Testing Strategies and Test-Driven Development (TDD)](./06_code_evolution_refactoring/01_00_primer_testing_and_tdd.md)
+- [Chapter 6.2: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)](./06_code_evolution_refactoring/01_01_refactoring_fundamentals.md)
+- [Chapter 6.3: Refactoring a JavaScript Video Store (Martin Fowler, 2016)](./06_code_evolution_refactoring/01_02_refactoring_js_video_store.md)
+- [Chapter 6.4: Advanced & Specialized Refactoring Patterns (Martin Fowler)](./06_code_evolution_refactoring/02_01_advanced_refactoring_patterns.md)
+- [Chapter 6.5: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)](./06_code_evolution_refactoring/02_02_refactoring_loops_pipelines.md)
+- [Chapter 6.6: Refactoring to an Adaptive Model (Martin Fowler)](./06_code_evolution_refactoring/02_03_refactoring_adaptive_model.md)
+- [Chapter 6.7: Refactoring Code that Accesses External Services (Martin Fowler)](./06_code_evolution_refactoring/02_04_refactoring_external_services.md)
+- [Chapter 6.8: Citation & Reference Deep-Dives — Module 6](./06_code_evolution_refactoring/03_references_deep_dives.md)
 
 ---
 
@@ -208,15 +214,15 @@ This compendium follows three principles:
 
 ### Module Overview
 
-| Module | Topic | Papers Covered |
+| Module | Topic | Chapters |
 | :--- | :--- | :---: |
-| **1** | Core Foundations of Software Engineering & Design Philosophy | 6 |
-| **2** | Hardware Evolution, Concurrency & Memory Models | 5 |
-| **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 8 |
-| **4** | Real-Time Implementations (Case Study) | 3 |
-| **5** | Software & UI Architecture Patterns | 10 |
-| **6** | Code Evolution & Refactoring Patterns | 9 |
-| **7** | Bibliography & Subject Index | — |
+| **1** | Core Foundations of Software Engineering & Design Philosophy | 7 |
+| **2** | Hardware Evolution, Concurrency & Memory Models | 4 |
+| **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 9 |
+| **4** | Real-Time Implementations (Case Study) | 5 |
+| **5** | Software & UI Architecture Patterns | 7 |
+| **6** | Code Evolution & Refactoring Patterns | 8 |
+| **7** | Bibliography & Subject Index | 1 |
 | **Total** | | **41** |
 
 ### Sources Used in This Volume
@@ -239,7 +245,7 @@ All 38 source materials are reproduced verbatim with full attribution. Sources i
 # Module 1: Core Foundations of Software Engineering & Design Philosophy
 
 
-## Chapter 1.1: What Is Software Design? (Jack W. Reeves)
+## Chapter 1.1: What Is Software Design? (Jack W. Reeves, 1992)
 
 ---
 
@@ -433,7 +439,7 @@ Object oriented techniques, and C++ in particular, seem to be taking the softwar
 
 <div class="page-break"></div>
 
-# Chapter 1.2: Letter to the Editor & 13 Years Later (Jack W. Reeves)
+# Chapter 1.2: Letter to the Editor & What Is Software Design — 13 Years Later (Jack W. Reeves, 1992 & 2005)
 
 ---
 
@@ -655,7 +661,7 @@ People have occasionally asked whether I did any follow-on writing to my "What I
 
 <div class="page-break"></div>
 
-# Chapter 1.3: Code As Documentation (Martin Fowler)
+# Chapter 1.3: Code As Documentation (Martin Fowler, 2005)
 
 ---
 
@@ -758,7 +764,7 @@ You'll always find people will disagree on various points. Remember that a code 
 
 <div class="page-break"></div>
 
-# Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler)
+# Chapter 1.4: The Almighty Thud (Kent Beck & Martin Fowler, 1997)
 
 ---
 
@@ -860,7 +866,7 @@ When I started to write this article I was overwhelmed by the things I could tal
 
 <div class="page-break"></div>
 
-# Chapter 1.4: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)
+# Chapter 1.5: Null References — The Billion Dollar Mistake (Tony Hoare, 2009)
 
 ## SECTION 1 — PRIMER ON THE BASICS
 
@@ -1040,13 +1046,126 @@ In 1978, C.A.R. Hoare published *"Communicating Sequential Processes"* (CACM), e
 
 <div class="page-break"></div>
 
-# Chapter 1.5: Citation & Reference Deep-Dives — Module 1
+# Chapter 1.6: On the Criteria To Be Used in Decomposing Systems into Modules (David Parnas, 1972)
+
+## SECTION 1 — PRIMER ON THE BASICS
+
+Before reading David Parnas's seminal 1972 paper on modularity, it is important to understand the context of software design at the time and the problem he was trying to solve. Parnas introduced concepts that are now foundational to software engineering, specifically "information hiding."
+
+### The Problem: How Do We Divide a System?
+
+When building a large software system, it must be divided into smaller, manageable pieces called **modules**. But what criteria should we use to decide where the boundaries of these modules lie?
+
+Before Parnas, the conventional wisdom was to decompose systems based on a flowchart of steps—essentially, a sequential or functional decomposition. You would look at the steps the system takes to process data and create a module for each step. 
+
+### Parnas's Radical Idea: Information Hiding
+
+Parnas argued against flowchart-based decomposition. Instead, he proposed that a module should be designed to **hide a difficult design decision or a design decision that is likely to change**. This concept is known as **Information Hiding**.
+
+If a module hides a secret (like the specific data structure used, or the specifics of a hardware interface), then the rest of the system does not need to know about that secret. When the secret inevitably changes, only the module that hides it needs to be modified.
+
+### Real-World Examples & Modern Implementations
+
+### 1. Java
+
+**The Problem (Exposing Data Structures):**
+```java
+// Java - Exposing internal representation
+public class EmployeeDatabase {
+    // Bad: The internal array is public. If we want to change to a HashMap later,
+    // we break all code that uses this array.
+    public Employee[] employees = new Employee[100];
+}
+```
+
+**The Modern Solution (Information Hiding):**
+```java
+// Java - Hiding internal representation behind an interface
+public class EmployeeDatabase {
+    private Map<Integer, Employee> employees = new HashMap<>();
+
+    public void addEmployee(Employee emp) {
+        employees.put(emp.getId(), emp);
+    }
+
+    public Employee getEmployee(int id) {
+        return employees.get(id);
+    }
+}
+```
+
+### 2. TypeScript / JavaScript
+
+**The Problem:**
+```typescript
+// TypeScript - Exposing how a specific API works
+class PaymentProcessor {
+    processStripePayment(amount: number, token: string) {
+        // hardcoded Stripe logic
+    }
+}
+```
+
+**The Modern Solution:**
+```typescript
+// TypeScript - Hiding the payment provider behind a generic module interface
+interface PaymentModule {
+    processPayment(amount: number): boolean;
+}
+
+class StripePaymentModule implements PaymentModule {
+    processPayment(amount: number): boolean {
+        // secret Stripe implementation details hidden here
+        return true;
+    }
+}
+```
+
+### 3. Python
+
+**The Problem:**
+```python
+# Python - Direct database access spread everywhere
+def handle_user_request():
+    db = sqlite3.connect("users.db")
+    # SQL logic scattered, hard to change database engines
+```
+
+**The Modern Solution:**
+```python
+# Python - Hiding the database behind a Repository module
+class UserRepository:
+    def get_user(self, user_id: int):
+        # The fact that we use sqlite3 is a secret hidden by this module
+        pass
+
+def handle_user_request(repo: UserRepository):
+    user = repo.get_user(1)
+```
+
+## SECTION 2 — VERBATIM TEXT
+
+> **VERBATIM SOURCE**  
+> On the Criteria To Be Used in Decomposing Systems into Modules, David L. Parnas, Communications of the ACM, December 1972  
+> *This text is represented here as a placeholder for educational study.*
+
+(In a full realization of this book, the verbatim text of the 1972 Communications of the ACM paper by David L. Parnas would be inserted here, allowing readers to study his exact phrasing on information hiding and modular decomposition.)
+
+## SECTION 3 — CITATION & REFERENCE DEEP-DIVES
+
+### Information Hiding vs. Encapsulation
+
+While often used interchangeably, information hiding and encapsulation are technically distinct. Encapsulation is a language mechanism (like `private` keywords or classes) that bundles data and methods together. Information hiding is a design principle—a way of thinking about what a module should conceal from other modules. You can have encapsulation without information hiding if you expose all your internal state via public getters and setters. Parnas's work predates object-oriented programming's mainstream adoption and focuses purely on the design principle.
+
+<div class="page-break"></div>
+
+# Chapter 1.7: Citation & Reference Deep-Dives — Module 1
 
 This chapter provides standalone, in-depth research and analytical profiles of all major cited books, foundational theories, historical figures, and methodologies referenced across Module 1.
 
 ---
 
-## Deep-Dive 1.4.1: The Evolution of C++ as a Software Design Language
+## Deep-Dive 1.7.1: The Evolution of C++ as a Software Design Language
 
 ```
 1979: C with Classes (Bjarne Stroustrup at Bell Labs)
@@ -1074,7 +1193,7 @@ C++ introduced fundamental language mechanisms that enabled direct expression of
 
 ---
 
-## Deep-Dive 1.4.2: Structured Programming vs. Object-Oriented Design
+## Deep-Dive 1.7.2: Structured Programming vs. Object-Oriented Design
 
 | Dimension | Structured Programming (1970s–1980s) | Object-Oriented Design (1990s–Present) |
 | :--- | :--- | :--- |
@@ -1086,7 +1205,7 @@ C++ introduced fundamental language mechanisms that enabled direct expression of
 
 ---
 
-## Deep-Dive 1.4.3: The Fallacy of "Begging the Question" in Software Engineering
+## Deep-Dive 1.7.3: The Fallacy of "Begging the Question" in Software Engineering
 
 In classical logic, **Begging the Question** (*Petitio Principii*) is a logical fallacy where an argument's premises assume the truth of the conclusion, instead of supporting it.
 
@@ -1106,13 +1225,14 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 
 ---
 
-## Deep-Dive 1.4.4: Summary of Cited Works & Further Reading
+## Deep-Dive 1.7.4: Summary of Cited Works & Further Reading
 
 [1] J. W. Reeves, "What is software design?" C++ Journal, Fall 1992. Available: https://www.developerdotstar.com/mag/articles/reeves_design_main.html
 [2] J. W. Reeves, "What is software design: 13 years later," Developer Dot Star, Feb. 2005. Available: https://www.developerdotstar.com/mag/articles/reeves_design_main.html
 [3] J. W. Reeves, "Letter to the Editor," C++ Journal, 1992. Available: https://www.developerdotstar.com/mag/articles/reeves_design_main.html
 [4] M. Fowler, "Code As Documentation," MartinFowler.com, 2005. Available: https://martinfowler.com/bliki/CodeAsDocumentation.html
 [5] M. Fowler, "The Almighty Thud," MartinFowler.com, 1997. Available: https://martinfowler.com/ (archive)
+[6] D. L. Parnas, "On the Criteria To Be Used in Decomposing Systems into Modules," Communications of the ACM, vol. 15, no. 12, pp. 1053-1058, Dec. 1972.
 
 **Supplementary Books**
 [S1] S. McConnell, *Code Complete: A Practical Handbook of Software Construction*, Microsoft Press, 1993, 2004.
@@ -1122,7 +1242,12 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 [S5] J. Kerievsky, *Refactoring to Patterns*, Addison-Wesley, 2004.
 
 **Subject Index Cross-References:**
-- Software Design ..... Ch 1.1, Ch 1.1b
+- Code as Documentation .. Ch 1.3
+- Information Hiding ..... Ch 1.6
+- Modular Decomposition .. Ch 1.6
+- Null References ........ Ch 1.5
+- Software Design ........ Ch 1.1, Ch 1.2
+- UML as Sketch .......... Ch 1.4
 
 <div class="page-break"></div>
 
@@ -3793,7 +3918,110 @@ public class FalseSharingDemonstration {
 
 <div class="page-break"></div>
 
-# Chapter 3.7: Citation & Reference Deep-Dives — Module 3
+# Chapter 3.7: Deep Dive: CQRS and Event Sourcing
+
+To fully appreciate the LMAX Architecture and how it manages to process millions of transactions per second, it is crucial to understand how it handles data persistence. In a traditional architecture, a transaction often involves acquiring locks and waiting for a database to write to disk. This I/O bottleneck completely defeats the purpose of an in-memory, mechanical sympathy-driven architecture like the Disruptor.
+
+To solve this, LMAX relies heavily on two complementary patterns: **CQRS (Command Query Responsibility Segregation)** and **Event Sourcing**.
+
+---
+
+## 1. The Bottleneck of CRUD
+
+In a standard CRUD (Create, Read, Update, Delete) system, the same database and the same data model are used for both reading and writing. 
+- When a user submits a trade, the system updates a row in a relational database.
+- When a user views their portfolio, the system queries that same table.
+
+This leads to significant contention:
+1. **Locking:** Writes must lock rows to prevent dirty reads, slowing down reads.
+2. **Schema Compromise:** The data model is often a compromise between what is fast to write and what is fast to query.
+3. **I/O Bound:** The core business logic thread is blocked waiting for the database disk I/O to complete.
+
+## 2. Event Sourcing
+
+Instead of storing the *current state* of an entity, **Event Sourcing** stores a sequence of *state-changing events*. 
+If you want to know the current balance of an account, you don't look up a "balance" column. Instead, you take an initial state (balance = 0) and replay all events (Deposit $10, Withdraw $5, Deposit $20) to arrive at the current state ($25).
+
+In the context of LMAX:
+- The core business logic (the Event Processor) runs entirely in memory.
+- When a command arrives (e.g., "Place Trade"), it is processed, and the resulting state change is captured as an **Event**.
+- This Event is appended to an **Event Store** (an append-only log).
+- Append-only logs are incredibly fast because they require no indexing, no B-Tree rebalancing, and can be written sequentially to disk, maximizing disk throughput.
+
+If the system crashes, it simply reloads the last snapshot and replays the subsequent events from the Event Store to rebuild its exact in-memory state.
+
+## 3. CQRS (Command Query Responsibility Segregation)
+
+While Event Sourcing solves the fast-write problem, it makes querying difficult. You cannot easily run a SQL query like `SELECT * FROM Accounts WHERE balance > 100` against an append-only log of events.
+
+This is where **CQRS** comes in. CQRS dictates that the system should be split into two sides:
+1. **The Command Side:** Handles writes. It validates business rules, processes commands, and generates events (using Event Sourcing).
+2. **The Query Side:** Handles reads. It listens to the events generated by the Command Side and updates highly optimized read models (e.g., a denormalized relational database, a fast in-memory cache, or an Elasticsearch index).
+
+### The Flow in High-Performance Systems
+
+1. A **Command** is received and placed onto the Disruptor Ring Buffer.
+2. The **Journaler (Consumer 1)** reads the command and appends it to disk (Event Sourcing).
+3. The **Business Logic Processor (Consumer 2)**, knowing the command is safely journaled, updates its in-memory state and emits a new event.
+4. The **Query Model Updater (Consumer 3)** takes that event and updates a read-only database.
+
+Because these consumers can run in parallel (or in a defined dependency chain via the Sequence Barrier) on different CPU cores, the core business logic never blocks waiting for a database write. This separation is the key to maintaining deterministic, sub-millisecond latency.
+
+<div class="page-break"></div>
+
+# Chapter 3.8: Deep Dive: CSP vs. Actor Model
+
+When dealing with concurrent systems, shared mutable state (locking, mutexes) is often cited as the root of all evil. To avoid locks, the software engineering community has largely converged on message-passing paradigms. The two most prominent models for message passing are the **Actor Model** (formalized by Gul Agha and popularized by Erlang/Akka) and **Communicating Sequential Processes (CSP)** (formalized by Tony Hoare and popularized by Go).
+
+While both advocate for "Do not communicate by sharing memory; instead, share memory by communicating," they take fundamentally different approaches to how that communication is structured.
+
+---
+
+## 1. The Actor Model: Focus on the Entities
+
+In the Actor Model, the fundamental unit of computation is the **Actor**. 
+- An Actor is an independent entity that encapsulates state and behavior.
+- Actors communicate exclusively by sending asynchronous messages to other Actors.
+- Every Actor has a unique address (a reference or mailbox).
+
+### Key Characteristics:
+- **Asynchronous by Default:** When Actor A sends a message to Actor B, it does not wait for B to receive it. It drops the message in B's mailbox and continues executing.
+- **Location Transparency:** Because messages are sent to an address, it doesn't matter if Actor B is on the same thread, the same machine, or halfway across the world. The runtime handles the routing.
+- **Coupled to the Receiver:** The sender must know the identity (address) of the receiver. 
+
+**Analogy:** The Actor Model is like the postal system. You write a letter, put an address on it, and drop it in a mailbox. You don't wait at the mailbox for the recipient to pick it up.
+
+## 2. CSP (Communicating Sequential Processes): Focus on the Channels
+
+In CSP, the fundamental unit of communication is the **Channel**.
+- Processes (or goroutines in Go) are anonymous. They don't have addresses or identities.
+- Processes communicate by sending and receiving messages through named Channels.
+
+### Key Characteristics:
+- **Synchronous (Unbuffered) by Default:** In pure CSP, communication is a rendezvous. If Process A sends a message to a channel, it blocks until Process B reads from that channel. (Note: Go allows buffered channels, which introduces some asynchronous behavior, but the underlying philosophy remains channel-centric).
+- **Decoupled from the Receiver:** Process A sends a message to Channel X. Process B reads from Channel X. A and B do not know about each other; they only know about the channel.
+- **First-Class Channels:** Channels can be passed around as variables, closed, or multiplexed (e.g., using a `select` statement in Go).
+
+**Analogy:** CSP is like a pneumatic tube system in an office. You put a canister in a specific tube. You don't know who is at the other end of the tube, you just know that someone responsible for that tube will receive it.
+
+## 3. Comparison and Trade-offs
+
+| Feature | Actor Model (Erlang, Akka) | CSP (Go Channels, Clojure core.async) |
+| :--- | :--- | :--- |
+| **Addressing** | Direct (Actor A sends to Actor B) | Anonymous (Process sends to Channel) |
+| **Coupling** | Sender knows Receiver | Sender and Receiver only know the Channel |
+| **Synchronization**| Asynchronous (Mailboxes) | Synchronous / Rendezvous (by default) |
+| **Failure Handling**| Built-in (Supervision trees, "Let it crash") | Manual (Error values, defer/recover) |
+| **Distribution** | Trivially distributed across networks | Typically confined to a single machine memory space |
+
+### When to use which?
+
+- **Choose the Actor Model** when building highly distributed, fault-tolerant systems where components need to maintain complex state machines and where failure recovery must be handled gracefully across a cluster (e.g., telecom switches, multiplayer game backends).
+- **Choose CSP** when building concurrent systems within a single application where you need to coordinate complex workflows, pipelines, and fan-out/fan-in processing without worrying about the identities of the workers (e.g., concurrent data processing, web server request handling).
+
+<div class="page-break"></div>
+
+# Chapter 3.9: Citation & Reference Deep-Dives — Module 3
 
 This chapter provides standalone research profiles, mathematical formalisms, hardware memory fence mechanics, and lock-free data structure implementations for all major citations across Module 3.
 
@@ -4584,6 +4812,55 @@ Eliminating OS noise requires kernel-level core isolation combined with explicit
 
 ### Reference 7.4.B: JEP 318 - Epsilon GC
 - **No-Op Collector**: Allocates heap memory without reclaiming it. Used for performance testing, ultra-low latency workloads, and short-lived batch jobs where GC pauses cannot be tolerated.
+
+<div class="page-break"></div>
+
+# Chapter 4.5: Deep Dive: Garbage Collection Pauses vs. Ownership
+
+When implementing real-time systems, such as high-frequency trading platforms or low-latency game engines, predictability is more important than raw average throughput. A system that processes 10,000 messages per second with a guaranteed maximum latency of 1 millisecond is vastly superior to a system that processes 100,000 messages per second but occasionally pauses for 50 milliseconds.
+
+The primary enemy of predictable latency in modern managed languages (Java, C#, Go) is **Garbage Collection (GC)**.
+
+---
+
+## 1. The Stop-The-World Problem
+
+In managed languages, the runtime environment periodically scans memory to find objects that are no longer referenced by the application and reclaims their memory. 
+
+While modern Garbage Collectors (like Java's ZGC or Shenandoah, and Go's concurrent GC) have made massive strides in reducing pause times, they are fundamentally built around a "Stop-The-World" (STW) phase. Even concurrent collectors require brief pauses to scan thread stacks or synchronize memory barriers.
+
+In a system targeting sub-millisecond latency, a 5-millisecond GC pause is catastrophic. If an order book ticks and the JVM decides to run a minor collection, that tick is queued, processed late, and the trading algorithm makes decisions based on stale data.
+
+## 2. Mitigation Strategy: Zero-Allocation
+
+As discussed in the LMAX Disruptor chapters, the standard way to bypass the GC problem in Java is to adopt a **Zero-Allocation** architecture.
+
+- Pre-allocate all necessary objects at application startup (e.g., filling a Ring Buffer).
+- Instead of creating new objects, mutate the fields of existing, pre-allocated objects.
+- Use primitive arrays instead of collections of objects to avoid object headers and pointer chasing.
+
+**The Trade-off:** Zero-allocation in Java is unnatural. It forces developers to write code that looks more like C than idiomatic Java. It breaks encapsulation, relies heavily on mutable state, and makes the codebase harder to maintain and test.
+
+## 3. The Ownership Alternative (Rust)
+
+A completely different approach to memory management has gained immense popularity in system programming: **Ownership**, as implemented by Rust.
+
+Rust provides memory safety without a garbage collector. It achieves this through a strict set of compile-time rules enforced by the Borrow Checker:
+1. Each value in Rust has an *owner*.
+2. There can only be one owner at a time.
+3. When the owner goes out of scope, the value is automatically and deterministically dropped (memory is freed).
+
+### Why Ownership Excels in Real-Time Systems
+
+1. **Deterministic Latency:** Memory is freed exactly when an object goes out of scope. There is no background thread running, no stop-the-world pauses, and no heuristic-driven memory sweeps. The CPU cost of deallocation is spread evenly and predictably.
+2. **Idiomatic Code:** Unlike Zero-Allocation in Java, developers using Rust do not have to resort to object pooling or mutable global arrays. They can write idiomatic, ergonomic code, allocate objects when needed, and trust the compiler to insert the exact `free()` calls at the right time.
+3. **Data Race Freedom:** A side effect of the Ownership model is that the compiler can statically guarantee the absence of data races at compile time. You cannot accidentally share mutable state between threads.
+
+### The Shift in High-Frequency Trading
+
+Historically, HFT systems were written in C or C++ to avoid GC pauses. However, C/C++ require manual memory management (`malloc`/`free`), leading to notorious bugs like use-after-free, double-free, and memory leaks.
+
+Languages with Ownership models provide the deterministic performance of C++ without the catastrophic memory safety bugs, making them an increasingly popular choice for bridging high-performance and modern software engineering practices.
 
 <div class="page-break"></div>
 
@@ -5473,13 +5750,120 @@ Similar to Hexagonal Architecture, Clean Architecture places the domain logic an
 
 <div class="page-break"></div>
 
-# Chapter 5.6: Citation & Reference Deep-Dives for Module 5
+# Chapter 5.6: Functional Reactive Programming (FRP) and State Management
+
+## SECTION 1 — PRIMER ON THE BASICS
+
+Before diving into complex user interface architectures, it is crucial to understand how modern applications handle asynchronous data streams over time. Traditional imperative programming struggles with complex event handling, race conditions, and state synchronization. Functional Reactive Programming (FRP) offers a declarative solution.
+
+### The Problem: Callbacks and Shared Mutable State
+
+In a typical UI, multiple events occur asynchronously: user clicks, network responses, and WebSocket messages. In an imperative model, developers often rely on callbacks or shared mutable state to coordinate these events. This leads to "Callback Hell" and unpredictable state mutations, making the system hard to reason about and test.
+
+### The Reactive Solution: Data as Streams
+
+Functional Reactive Programming models all data and events as continuous **Observables** or **Streams**. Instead of pulling data when needed or mutating state in callbacks, FRP allows you to declare how data should flow and transform over time using functional operators (like `map`, `filter`, `reduce`).
+
+By linking backend event streams (like those from an LMAX Disruptor or Kafka topic) directly into frontend observables, developers can create UIs that deterministically react to state changes without manual DOM manipulation or shared state bugs.
+
+### Real-World Examples & Modern Implementations
+
+### 1. TypeScript / JavaScript (RxJS)
+
+**The Problem (Imperative Event Handling):**
+```typescript
+// TypeScript - Imperative callback approach
+let clickCount = 0;
+document.getElementById('myButton').addEventListener('click', () => {
+    clickCount++;
+    if (clickCount >= 3) {
+        console.log('Triple click threshold reached');
+    }
+});
+```
+
+**The Modern Solution (Reactive Streams):**
+```typescript
+// TypeScript - Reactive approach using RxJS
+import { fromEvent } from 'rxjs';
+import { scan, filter } from 'rxjs/operators';
+
+const button = document.getElementById('myButton');
+const clicks$ = fromEvent(button, 'click');
+
+clicks$.pipe(
+    scan(count => count + 1, 0),
+    filter(count => count >= 3)
+).subscribe(count => {
+    console.log(`Threshold reached. Count: ${count}`);
+});
+```
+
+### 2. Java (Project Reactor)
+
+**The Problem:**
+```java
+// Java - Blocking data fetching
+public List<User> getActiveUsers() {
+    List<User> users = database.getUsers(); // Blocks thread
+    List<User> active = new ArrayList<>();
+    for(User u : users) {
+        if(u.isActive()) active.add(u);
+    }
+    return active;
+}
+```
+
+**The Modern Solution:**
+```java
+// Java - Reactive Streams with Project Reactor
+public Flux<User> getActiveUsers() {
+    return database.getUsersStream() // Non-blocking stream
+        .filter(User::isActive);
+}
+```
+
+### 3. Python (RxPY)
+
+**The Modern Solution:**
+```python
+import rx
+from rx import operators as ops
+
+# Python - Processing a stream of events reactively
+events = rx.from_list([1, 2, 3, 4, 5])
+
+events.pipe(
+    ops.filter(lambda x: x % 2 == 0),
+    ops.map(lambda x: x * 10)
+).subscribe(
+    on_next=lambda i: print(f"Processed: {i}")
+)
+```
+
+## SECTION 2 — VERBATIM TEXT
+
+> **VERBATIM SOURCE**  
+> Functional Reactive Programming, Conal Elliott and Paul Hudak, ICFP, 1997  
+> *This text is represented here as a placeholder for educational study.*
+
+(In a full realization of this book, the verbatim text of seminal papers or articles on FRP would be inserted here, allowing readers to study the formal definitions of behaviors and events.)
+
+## SECTION 3 — CITATION & REFERENCE DEEP-DIVES
+
+### FRP vs. Observer Pattern
+
+While both deal with reacting to changes, the Observer pattern is simply a mechanism for notifying subscribers of state changes. FRP is a paradigm that treats those changes as first-class collections over time. It provides a robust algebra (functional operators) to compose, combine, and transform these streams without managing the underlying subscriptions and state manually.
+
+<div class="page-break"></div>
+
+# Chapter 5.7: Citation & Reference Deep-Dives — Module 5
 
 This chapter provides standalone research profiles, architectural pattern taxonomy, and engineering strategies for all major citations across Module 5.
 
 ---
 
-## Deep-Dive 4.6.1: The Model-View-Controller (MVC) Architectural Lineage
+## Deep-Dive 5.7.1: The Model-View-Controller (MVC) Architectural Lineage
 
 ```text
 Smalltalk-80 (1979) ──▶ Desktop GUI Era (1990s) ──▶ Web Framework Era (2000s)
@@ -5499,7 +5883,7 @@ Smalltalk-80 (1979) ──▶ Desktop GUI Era (1990s) ──▶ Web Framework Er
 
 ---
 
-## Deep-Dive 4.6.2: Micro-Frontend Runtime Integration Mechanics
+## Deep-Dive 5.7.2: Micro-Frontend Runtime Integration Mechanics
 
 ### Webpack 5 Module Federation Architecture
 Module Federation allows a container shell application to load remote bundles over the network at runtime without shared build steps.
@@ -5519,7 +5903,7 @@ Module Federation allows a container shell application to load remote bundles ov
 
 ---
 
-## Deep-Dive 4.6.3: Serverless Function Execution Lifecycle & Cold Start Mitigation
+## Deep-Dive 5.7.3: Serverless Function Execution Lifecycle & Cold Start Mitigation
 
 Function-as-a-Service (FaaS) environments (such as AWS Lambda, Google Cloud Functions, and Azure Functions) manage microservice execution by dynamically spinning up isolated micro-VM containers (e.g. AWS Firecracker) upon incoming HTTP events.
 
@@ -5540,7 +5924,7 @@ Function-as-a-Service (FaaS) environments (such as AWS Lambda, Google Cloud Func
 
 ---
 
-## Deep-Dive 4.6.4: Feature Toggle Debt Lifecycle & Canary Release Pipelines
+## Deep-Dive 5.7.4: Feature Toggle Debt Lifecycle & Canary Release Pipelines
 
 Feature flags provide powerful deployment flexibility, but unmanaged toggles create toxic technical debt ("Flag Rot").
 
@@ -5565,7 +5949,7 @@ Feature flags provide powerful deployment flexibility, but unmanaged toggles cre
 
 ---
 
-## Deep-Dive 4.6.5: Summary of Cited Works for Module 5
+## Deep-Dive 5.7.5: Summary of Cited Works for Module 5
 
 - [20] M. Fowler, "GUI Architectures," MartinFowler.com, 2006. Available: https://martinfowler.com/eaaDev/uiArchs.html
 - [21] M. Fowler, "Presentation Domain Separation," MartinFowler.com, 2001/06. Available: https://martinfowler.com/eaaDev/SeparatedPresentation.html
@@ -5577,15 +5961,123 @@ Feature flags provide powerful deployment flexibility, but unmanaged toggles cre
 - [27] P. Hodgson and M. Fowler, "Feature Toggles," MartinFowler.com, 2017. Available: https://martinfowler.com/articles/feature-toggles.html
 
 **Subject Index Cross-References:**
-- Feature Toggles ..... Ch 4.3
-- Micro Frontends ..... Ch 4.2
-- MVC ................. Ch 4.1, Ch 4.4
-- Presentation Domain Separation ........ Ch 4.1, Ch 4.4, Ch 4.5
-- Serverless .......... Ch 4.3
+- Feature Toggles ..... Ch 5.3
+- Functional Reactive Programming (FRP) .. Ch 5.6
+- Micro Frontends ..... Ch 5.2
+- MVC ................. Ch 5.1, Ch 5.4
+- Presentation Domain Separation ........ Ch 5.1, Ch 5.4, Ch 5.5
+- Serverless .......... Ch 5.3
 
 <div class="page-break"></div>
 
-# Chapter 6.1: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
+# Chapter 6.1: Testing Strategies and Test-Driven Development (TDD)
+
+## SECTION 1 — PRIMER ON THE BASICS
+
+Before exploring advanced refactoring patterns, it is absolutely essential to establish a prerequisite: **Refactoring without a comprehensive test suite is not refactoring; it is just changing code and hoping it works.** To evolve code safely, we need automated tests.
+
+### The Safety Net of Testing
+
+Refactoring is defined as a change made to the internal structure of software to make it easier to understand and cheaper to modify without changing its observable behavior. The only way to guarantee that observable behavior has not changed is to run an automated suite of tests that verify the behavior before and after the structural change.
+
+### Test-Driven Development (TDD)
+
+Test-Driven Development (TDD) is a software development process introduced by Kent Beck. It relies on a very short, repeating development cycle known as Red-Green-Refactor:
+
+1. **Red:** Write a failing test for a desired feature or improvement.
+2. **Green:** Write the simplest, ugliest code possible to make the test pass.
+3. **Refactor:** Clean up the code you just wrote, confident that the test will catch any regressions.
+
+By writing tests first, TDD ensures that the codebase is naturally testable and that test coverage is inherently high, providing the perfect foundation for continuous refactoring.
+
+### Real-World Examples & Modern Implementations
+
+### 1. Java
+
+**TDD Cycle Example (JUnit):**
+```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CalculatorTest {
+
+    // 1. RED: Write a failing test first
+    @Test
+    public void testAddition() {
+        Calculator calc = new Calculator();
+        assertEquals(5, calc.add(2, 3));
+    }
+}
+
+// 2. GREEN: Write the simplest code to pass
+class Calculator {
+    public int add(int a, int b) {
+        return a + b; // Simplest implementation
+    }
+}
+
+// 3. REFACTOR: Refactor the code or tests if necessary, ensuring tests still pass.
+```
+
+### 2. JavaScript / TypeScript
+
+**TDD Cycle Example (Jest):**
+```typescript
+// 1. RED: Write the failing test
+import { calculateDiscount } from './pricing';
+
+test('applies 10% discount for VIP customers', () => {
+    expect(calculateDiscount(100, 'VIP')).toBe(90);
+});
+
+// 2. GREEN: Write the implementation
+export function calculateDiscount(price: number, status: string): number {
+    if (status === 'VIP') {
+        return price * 0.9;
+    }
+    return price;
+}
+
+// 3. REFACTOR: Evolve the implementation while tests pass
+```
+
+### 3. Python
+
+**TDD Cycle Example (pytest):**
+```python
+# 1. RED: Write a failing test
+def test_string_reversal():
+    assert reverse_string("hello") == "olleh"
+
+# 2. GREEN: Make it pass
+def reverse_string(s: str) -> str:
+    return s[::-1]
+
+# 3. REFACTOR: Optimize or clean up, knowing the test guarantees correctness.
+```
+
+## SECTION 2 — VERBATIM TEXT
+
+> **VERBATIM SOURCE**  
+> Test-Driven Development: By Example, Kent Beck, Addison-Wesley, 2002.  
+> *This text is represented here as a placeholder for educational study.*
+
+(In a full realization of this book, selections from Kent Beck's foundational texts on TDD would be included to illustrate the discipline of test-driven design.)
+
+## SECTION 3 — CITATION & REFERENCE DEEP-DIVES
+
+### The Test Pyramid
+
+When discussing testing strategies, the concept of the Test Pyramid (often attributed to Mike Cohn) is critical. It suggests that a healthy test suite consists of:
+- **A large base of Unit Tests:** Fast, isolated tests that check individual components.
+- **A middle layer of Integration Tests:** Slower tests that verify components working together.
+- **A small peak of End-to-End (E2E) UI Tests:** Slow, brittle tests that check the entire system from the user's perspective.
+
+Refactoring heavily relies on the fast feedback loop provided by the wide base of unit tests.
+
+<div class="page-break"></div>
+
+# Chapter 6.2: Refactoring Fundamentals & Preparatory Refactoring (Martin Fowler)
 
 ---
 
@@ -5953,7 +6445,7 @@ The mechanics of refactoring rely on a catalogue of precise, behavior-preserving
 
 <div class="page-break"></div>
 
-# Chapter 6.2: Refactoring a JavaScript Video Store (Martin Fowler)
+# Chapter 6.3: Refactoring a JavaScript Video Store (Martin Fowler, 2016)
 
 ---
 
@@ -6221,7 +6713,7 @@ As the refactoring progresses, the example demonstrates the transition from comp
 
 <div class="page-break"></div>
 
-# Chapter 6.3: Advanced & Specialized Refactoring Patterns (Martin Fowler)
+# Chapter 6.4: Advanced & Specialized Refactoring Patterns (Martin Fowler)
 
 ---
 
@@ -6404,7 +6896,7 @@ A key objective of advanced refactoring is guiding the codebase toward establish
 
 <div class="page-break"></div>
 
-# Chapter 6.4: Refactoring with Loops and Collection Pipelines (Martin Fowler)
+# Chapter 6.5: Refactoring with Loops and Collection Pipelines (Martin Fowler, 2015)
 
 ---
 
@@ -6574,7 +7066,7 @@ By transitioning to pipelines, developers naturally adopt immutability and reduc
 
 <div class="page-break"></div>
 
-# Chapter 6.5: Refactoring to an Adaptive Model (Martin Fowler)
+# Chapter 6.6: Refactoring to an Adaptive Model (Martin Fowler)
 
 ---
 
@@ -6796,7 +7288,7 @@ A robust adaptive model relies heavily on rapid feedback loops, primarily provid
 
 <div class="page-break"></div>
 
-# Chapter 6.6: Refactoring Code that Accesses External Services (Martin Fowler)
+# Chapter 6.7: Refactoring Code that Accesses External Services (Martin Fowler)
 
 ---
 
@@ -7070,13 +7562,13 @@ Refactoring integrations often involves formalizing how the system handles trans
 
 <div class="page-break"></div>
 
-# Chapter 6.3: Citation & Reference Deep-Dives — Module 6
+# Chapter 6.8: Citation & Reference Deep-Dives — Module 6
 
 This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 6.
 
 ---
 
-## Deep-Dive 5.3.1: Complete Profile of Martin Fowler's Refactoring Works
+## Deep-Dive 6.8.1: Complete Profile of Martin Fowler's Refactoring Works
 
 ### 1. *Refactoring: Improving the Design of Existing Code* (1st Edition, 1999)
 - **Primary Focus**: Formally introducing the practice of refactoring to the mainstream software industry using Java.
@@ -7089,7 +7581,7 @@ This chapter provides standalone research profiles, detailed mechanics, and arch
 
 ---
 
-## Deep-Dive 5.3.2: Detailed Mechanics of Key Refactoring Patterns
+## Deep-Dive 6.8.2: Detailed Mechanics of Key Refactoring Patterns
 
 ### 1. Extract Method / Function
 - **Motivation**: A long function or method is hard to read, test, and reuse. By grouping cohesive lines of code and extracting them into a named method, the caller becomes self-documenting.
@@ -7112,7 +7604,7 @@ This chapter provides standalone research profiles, detailed mechanics, and arch
 
 ---
 
-## Deep-Dive 5.3.3: SOLID Principles in Refactoring Context
+## Deep-Dive 6.8.3: SOLID Principles in Refactoring Context
 
 The SOLID principles guide the target structure of refactoring efforts:
 
@@ -7124,7 +7616,7 @@ The SOLID principles guide the target structure of refactoring efforts:
 
 ---
 
-## Deep-Dive 5.3.4: Complete IEEE Bibliography for Module 6
+## Deep-Dive 6.8.4: Complete IEEE Bibliography for Module 6
 
 [28] M. Fowler, "An Example of Preparatory Refactoring," MartinFowler.com, 2014. Available: https://martinfowler.com/articles/preparatory-refactoring-example.html
 [29] M. Fowler, "Refactoring Code to Load a Document," MartinFowler.com, 2016.
@@ -7143,16 +7635,19 @@ The SOLID principles guide the target structure of refactoring efforts:
 [S14] M. C. Feathers, *Working Effectively with Legacy Code*, Upper Saddle River, NJ: Prentice Hall, 2004.
 
 **Subject Index Cross-References:**
-- Collection Pipelines .......... Ch 5.2, Ch 5.2b
-- Dependency Inversion .......... Ch 5.2, Ch 5.3
-- Gateway Pattern ..... Ch 5.2d, Ch 5.3
-- Notification Pattern .......... Ch 5.1, Ch 5.2
-- Preparatory Refactoring ......... Ch 5.1
-- Refactoring ......... Ch 5.1, Ch 5.1b, Ch 5.2, Ch 5.2b, Ch 5.2c, Ch 5.2d
+- Collection Pipelines .......... Ch 6.5
+- Dependency Inversion .......... Ch 6.4, Ch 6.7
+- Gateway Pattern ............... Ch 6.7
+- Notification Pattern .......... Ch 6.2, Ch 6.4
+- Preparatory Refactoring ....... Ch 6.2
+- Refactoring ................... Ch 6.2, Ch 6.3, Ch 6.4, Ch 6.5, Ch 6.6, Ch 6.7
+- TDD & Testing Strategies ...... Ch 6.1
 
 <div class="page-break"></div>
 
 # Module 7: Bibliography and Index
+
+## Chapter 7.1: Complete IEEE Bibliography & Subject Index
 
 ## Part A: Complete Bibliography
 
