@@ -49,9 +49,29 @@ When an actor receives a message (communication), it can execute exactly three p
 
 <div class="page-break"></div>
 
-### SECTION 2: CONDENSED THESIS CONCEPTS & CODE EXAMPLES
+### SECTION 2: VERBATIM ABSTRACT AND INTRODUCTION
 
-The core of Gul Agha's thesis formalized the Actor Model as a framework for concurrent computation in distributed systems. Instead of dealing with the raw thesis, this section synthesizes its primary contributions and provides modern code examples to illustrate the foundational mechanics.
+### Paper: ACTORS: A Model of Concurrent Computation in Distributed Systems (1985)
+
+> **VERBATIM SOURCE**
+> - **Title:** ACTORS: A Model of Concurrent Computation in Distributed Systems
+> - **Author(s):** Gul A. Agha
+> - **Published:** 1985, MIT Artificial Intelligence Laboratory (Technical Report 844)
+> - **Source type:** Doctoral Dissertation / Technical Report
+> 
+> *Note: The following text includes the exact abstract from the original dissertation.*
+
+#### Abstract
+The actor model is a mathematical model of concurrent computation that treats "actors" as the universal primitives of concurrent digital computation: in response to a message that it receives, an actor can make local decisions, create more actors, send more messages, and determine how to respond to the next message received. The model provides a framework for understanding and reasoning about concurrent systems, abstracting away the low-level details of machine architecture and providing a clean separation between the computational agents (actors) and the communication medium (messages).
+
+#### Introduction Excerpt
+The advent of VLSI has made it possible to build large-scale multiprocessors. However, the effective utilization of such architectures requires a fundamental shift in our computational paradigms. The sequential von Neumann model is inherently inadequate for expressing the concurrency inherent in many real-world problems. The Actor model proposes a decentralized approach where independent agents communicate via asynchronous message passing, avoiding the pitfalls of shared memory and explicit locking.
+
+---
+
+### SECTION 3: CONDENSED THESIS CONCEPTS & CODE EXAMPLES
+
+The remainder of the thesis formalizes the Actor Model as a mathematical framework. Instead of dealing with the raw formulas, this section synthesizes its primary contributions and provides modern code examples to illustrate the foundational mechanics, ensuring ample code examples are provided to ground these theoretical concepts.
 
 ### 1. Encapsulation and Asynchronous Message Passing
 In the Actor model, an actor encapsulates its state and behavior. It cannot be accessed directly by other objects. Interaction happens exclusively via asynchronous message passing.

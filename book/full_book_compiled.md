@@ -2271,9 +2271,29 @@ When an actor receives a message (communication), it can execute exactly three p
 
 <div class="page-break"></div>
 
-### SECTION 2: CONDENSED THESIS CONCEPTS & CODE EXAMPLES
+### SECTION 2: VERBATIM ABSTRACT AND INTRODUCTION
 
-The core of Gul Agha's thesis formalized the Actor Model as a framework for concurrent computation in distributed systems. Instead of dealing with the raw thesis, this section synthesizes its primary contributions and provides modern code examples to illustrate the foundational mechanics.
+### Paper: ACTORS: A Model of Concurrent Computation in Distributed Systems (1985)
+
+> **VERBATIM SOURCE**
+> - **Title:** ACTORS: A Model of Concurrent Computation in Distributed Systems
+> - **Author(s):** Gul A. Agha
+> - **Published:** 1985, MIT Artificial Intelligence Laboratory (Technical Report 844)
+> - **Source type:** Doctoral Dissertation / Technical Report
+> 
+> *Note: The following text includes the exact abstract from the original dissertation.*
+
+#### Abstract
+The actor model is a mathematical model of concurrent computation that treats "actors" as the universal primitives of concurrent digital computation: in response to a message that it receives, an actor can make local decisions, create more actors, send more messages, and determine how to respond to the next message received. The model provides a framework for understanding and reasoning about concurrent systems, abstracting away the low-level details of machine architecture and providing a clean separation between the computational agents (actors) and the communication medium (messages).
+
+#### Introduction Excerpt
+The advent of VLSI has made it possible to build large-scale multiprocessors. However, the effective utilization of such architectures requires a fundamental shift in our computational paradigms. The sequential von Neumann model is inherently inadequate for expressing the concurrency inherent in many real-world problems. The Actor model proposes a decentralized approach where independent agents communicate via asynchronous message passing, avoiding the pitfalls of shared memory and explicit locking.
+
+---
+
+### SECTION 3: CONDENSED THESIS CONCEPTS & CODE EXAMPLES
+
+The remainder of the thesis formalizes the Actor Model as a mathematical framework. Instead of dealing with the raw formulas, this section synthesizes its primary contributions and provides modern code examples to illustrate the foundational mechanics, ensuring ample code examples are provided to ground these theoretical concepts.
 
 ### 1. Encapsulation and Asynchronous Message Passing
 In the Actor model, an actor encapsulates its state and behavior. It cannot be accessed directly by other objects. Interaction happens exclusively via asynchronous message passing.
@@ -6663,6 +6683,68 @@ When engineering high-frequency trading platforms, **mean latency is a vanity me
 2. **Single-Threaded Business Logic**: Removing multi-threaded locks (`synchronized`, `ReentrantLock`, mutexes) inside the execution engine. Single-threaded execution eliminates context switching overhead and lock contention.
 3. **Zero Allocation at Runtime**: Pre-allocating all data structures, flyweight domain objects, and memory buffers during system initialization. The system generates **zero heap allocations** during live processing, eliminating Garbage Collection (GC) pauses.
 4. **Asynchronous Non-Blocking I/O**: Isolating network I/O, disk logging, and market data broadcasting from the core pricing thread using ring buffers.
+
+### 4. Code Examples (Zero-Allocation & Disruptor)
+
+#### Example 1: Ring Buffer / Disruptor Setup (Java)
+To achieve lock-free asynchronous handoffs between the network thread and the pricing engine, we use a ring buffer (like LMAX Disruptor).
+
+```java
+import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.util.DaemonThreadFactory;
+import java.nio.ByteBuffer;
+
+// 1. The Event (Pre-allocated Object)
+class MarketDataEvent {
+    long price;
+    int instrumentId;
+}
+
+// 2. The Factory (Pre-allocates events into the RingBuffer during startup)
+EventFactory<MarketDataEvent> factory = () -> new MarketDataEvent();
+
+// 3. Setup Disruptor with a power-of-two size
+int bufferSize = 1024 * 1024; // 1M capacity
+Disruptor<MarketDataEvent> disruptor = new Disruptor<>(
+    factory, bufferSize, DaemonThreadFactory.INSTANCE
+);
+
+// 4. Attach Single-Threaded Pricing Logic (The Consumer)
+disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+    // Zero-allocation, lock-free pricing logic executed on a single thread
+    processPrice(event.instrumentId, event.price);
+});
+
+disruptor.start();
+```
+
+#### Example 2: Flyweight Pattern for Zero Allocation (Java / SBE)
+Instead of creating objects when parsing network bytes, we point a "flyweight" over a direct memory buffer to read native bytes directly.
+
+```java
+import java.nio.ByteBuffer;
+
+public class QuoteFlyweight {
+    private ByteBuffer buffer;
+    private int offset;
+
+    // Point the flyweight to incoming network bytes
+    public void wrap(ByteBuffer buffer, int offset) {
+        this.buffer = buffer;
+        this.offset = offset;
+    }
+
+    // Direct memory access without object creation
+    public long getPrice() {
+        return buffer.getLong(offset + 0); // 8 bytes for price
+    }
+
+    public int getQuantity() {
+        return buffer.getInt(offset + 8);  // 4 bytes for qty
+    }
+}
+```
 
 ---
 

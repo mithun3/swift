@@ -65,6 +65,154 @@ When engineering high-frequency trading platforms, **mean latency is a vanity me
 3. **Zero Allocation at Runtime**: Pre-allocating all data structures, flyweight domain objects, and memory buffers during system initialization. The system generates **zero heap allocations** during live processing, eliminating Garbage Collection (GC) pauses.
 4. **Asynchronous Non-Blocking I/O**: Isolating network I/O, disk logging, and market data broadcasting from the core pricing thread using ring buffers.
 
+### 4. Code Examples (Zero-Allocation & Disruptor)
+
+#### Example 1: Ring Buffer / Disruptor Setup (Java, TypeScript, Python)
+To achieve lock-free asynchronous handoffs between the network thread and the pricing engine, we use a ring buffer (like LMAX Disruptor).
+
+##### Java Implementation
+```java
+import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.util.DaemonThreadFactory;
+import java.nio.ByteBuffer;
+
+// 1. The Event (Pre-allocated Object)
+class MarketDataEvent {
+    long price;
+    int instrumentId;
+}
+
+// 2. The Factory (Pre-allocates events into the RingBuffer during startup)
+EventFactory<MarketDataEvent> factory = () -> new MarketDataEvent();
+
+// 3. Setup Disruptor with a power-of-two size
+int bufferSize = 1024 * 1024; // 1M capacity
+Disruptor<MarketDataEvent> disruptor = new Disruptor<>(
+    factory, bufferSize, DaemonThreadFactory.INSTANCE
+);
+
+// 4. Attach Single-Threaded Pricing Logic (The Consumer)
+disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+    // Zero-allocation, lock-free pricing logic executed on a single thread
+    processPrice(event.instrumentId, event.price);
+});
+
+disruptor.start();
+```
+
+##### TypeScript Implementation (SharedArrayBuffer & Atomic Ring Buffer)
+```typescript
+// Shared memory lock-free ring buffer in Node.js / Browser
+class TypeScriptRingBuffer {
+    private buffer: BigInt64Array;
+    private mask: bigint;
+    private head: BigInt64Array; // Sequence index
+
+    constructor(capacityPowerOfTwo: number) {
+        const capacity = 1 << capacityPowerOfTwo;
+        this.mask = BigInt(capacity - 1);
+        const sab = new SharedArrayBuffer(capacity * 8 + 8);
+        this.buffer = new BigInt64Array(sab, 0, capacity);
+        this.head = new BigInt64Array(sab, capacity * 8, 1);
+    }
+
+    public offer(priceRaw: bigint): boolean {
+        const seq = Atomics.add(this.head, 0, 1n);
+        const index = Number(seq & this.mask);
+        this.buffer[index] = priceRaw;
+        return true;
+    }
+}
+```
+
+##### Python Implementation (`mmap` & `struct` Zero-Copy Buffer)
+```python
+import mmap
+import struct
+
+class PythonRingBufferFlyweight:
+    """Zero-allocation zero-copy memory ring buffer in Python using mmap."""
+    def __init__(self, size_bytes: int = 1024 * 1024):
+        self.mem = mmap.mmap(-1, size_bytes) # Anonymous shared memory
+        
+    def write_quote(self, offset: int, price: int, quantity: int) -> None:
+        # Pack 8-byte long price + 4-byte int qty into native buffer
+        struct.pack_into("<qi", self.mem, offset, price, quantity)
+
+    def read_quote(self, offset: int) -> tuple[int, int]:
+        # Unpack directly without creating intermediate dict objects
+        return struct.unpack_from("<qi", self.mem, offset)
+```
+
+#### Example 2: Flyweight Pattern for Zero Allocation (Java / SBE, TypeScript, Python)
+Instead of creating objects when parsing network bytes, we point a "flyweight" over a direct memory buffer to read native bytes directly.
+
+##### Java Implementation
+```java
+import java.nio.ByteBuffer;
+
+public class QuoteFlyweight {
+    private ByteBuffer buffer;
+    private int offset;
+
+    // Point the flyweight to incoming network bytes
+    public void wrap(ByteBuffer buffer, int offset) {
+        this.buffer = buffer;
+        this.offset = offset;
+    }
+
+    // Direct memory access without object creation
+    public long getPrice() {
+        return buffer.getLong(offset + 0); // 8 bytes for price
+    }
+
+    public int getQuantity() {
+        return buffer.getInt(offset + 8);  // 4 bytes for qty
+    }
+}
+```
+
+##### TypeScript Implementation (DataView Zero-Allocation Flyweight)
+```typescript
+export class TypeScriptQuoteFlyweight {
+    private view!: DataView;
+    private offset: number = 0;
+
+    public wrap(buffer: ArrayBuffer, offset: number): void {
+        this.view = new DataView(buffer);
+        this.offset = offset;
+    }
+
+    public getPrice(): bigint {
+        return this.view.getBigInt64(this.offset, true); // Little endian
+    }
+
+    public getQuantity(): number {
+        return this.view.getInt32(this.offset + 8, true);
+    }
+}
+```
+
+##### Python Implementation (`memoryview` Zero-Allocation Flyweight)
+```python
+class PythonQuoteFlyweight:
+    """Flyweight reusing a memoryview over binary payload."""
+    def __init__(self):
+        self._mv: memoryview | None = None
+        self._offset: int = 0
+
+    def wrap(self, buffer: bytes | bytearray | memoryview, offset: int = 0) -> None:
+        self._mv = memoryview(buffer)
+        self._offset = offset
+
+    def get_price(self) -> int:
+        return int.from_bytes(self._mv[self._offset : self._offset + 8], byteorder='little', signed=True)
+
+    def get_quantity(self) -> int:
+        return int.from_bytes(self._mv[self._offset + 8 : self._offset + 12], byteorder='little', signed=True)
+```
+
 ---
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS

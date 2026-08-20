@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 5.7: Citation & Reference Deep-Dives for Module 5
+# Chapter 5.3: Citation & Reference Deep-Dives — Module 5
 
 This chapter provides standalone research profiles, detailed mechanics, and architectural context for all major citations across Module 5.
 

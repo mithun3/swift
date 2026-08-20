@@ -770,7 +770,12 @@ Actor?</a></li>
 Characteristics of the Actor Paradigm</a></li>
 <li><a href="#actors-vs.-csp-communicating-sequential-processes" id="toc-actors-vs.-csp-communicating-sequential-processes">3. Actors
 vs. CSP (Communicating Sequential Processes)</a></li>
-<li><a href="#section-2-condensed-thesis-concepts-code-examples" id="toc-section-2-condensed-thesis-concepts-code-examples">SECTION 2:
+<li><a href="#section-2-verbatim-abstract-and-introduction" id="toc-section-2-verbatim-abstract-and-introduction">SECTION 2:
+VERBATIM ABSTRACT AND INTRODUCTION</a></li>
+<li><a href="#paper-actors-a-model-of-concurrent-computation-in-distributed-systems-1985" id="toc-paper-actors-a-model-of-concurrent-computation-in-distributed-systems-1985">Paper:
+ACTORS: A Model of Concurrent Computation in Distributed Systems
+(1985)</a></li>
+<li><a href="#section-3-condensed-thesis-concepts-code-examples" id="toc-section-3-condensed-thesis-concepts-code-examples">SECTION 3:
 CONDENSED THESIS CONCEPTS &amp; CODE EXAMPLES</a></li>
 <li><a href="#encapsulation-and-asynchronous-message-passing" id="toc-encapsulation-and-asynchronous-message-passing">1. Encapsulation
 and Asynchronous Message Passing</a></li>
@@ -1261,6 +1266,8 @@ High-Frequency Foreign Exchange (FX) Pipeline Topology</a></li>
 Latency SLAs &amp; Jitter Elimination</a></li>
 <li><a href="#core-architectural-principles-of-real-time-trading-engines" id="toc-core-architectural-principles-of-real-time-trading-engines">3.
 Core Architectural Principles of Real-Time Trading Engines</a></li>
+<li><a href="#code-examples-zero-allocation-disruptor" id="toc-code-examples-zero-allocation-disruptor">4. Code Examples
+(Zero-Allocation &amp; Disruptor)</a></li>
 </ul></li>
 <li><a href="#section-2-verbatim-research-texts-3" id="toc-section-2-verbatim-research-texts-3">SECTION 2: VERBATIM &amp;
 RESEARCH TEXTS</a>
@@ -3209,14 +3216,14 @@ documentation does not mean any arbitrary codebase is good
 documentation. Programmers must actively invest cognitive effort to
 craft readable, intention-revealing code.</p>
 <pre><code>                  SOFTWARE DOCUMENTATION SPECTRUM
-┌─────────────────────────────────────────────────────────────────┐
-│ Gibberish UML Diagrams / Outdated Specs  --&gt; Poor Understanding  │
-├─────────────────────────────────────────────────────────────────┤
-│ Unreadable, Obfuscated Source Code       --&gt; Poor Understanding  │
-├─────────────────────────────────────────────────────────────────┤
+┌───────────────────────────────────────────────────────────────────┐
+│ Gibberish UML Diagrams / Outdated Specs  --&gt; Poor Understanding   │
+├───────────────────────────────────────────────────────────────────┤
+│ Unreadable, Obfuscated Source Code       --&gt; Poor Understanding   │
+├───────────────────────────────────────────────────────────────────┤
 │ Expressive, Well-Refactored Source Code  --&gt; Clear Primary Design │
 │ + Concise High-Level Auxiliary Diagrams  --&gt; Complete System View │
-└─────────────────────────────────────────────────────────────────┘</code></pre>
+└───────────────────────────────────────────────────────────────────┘</code></pre>
 <h3 id="how-to-make-code-act-as-documentation">3. How to Make Code Act
 as Documentation</h3>
 <p>Fowler highlights key practices that turn source code into clear
@@ -3389,15 +3396,15 @@ volume. When an external consultant or architect delivered an exhaustive
 design document, it arrived in massive physical binders. Dropping it on
 a desk produced a heavy, physical <strong>“Thud”</strong>.</p>
 <pre><code>                           THE &quot;THUD&quot; FAILURE CYCLE
-┌────────────────────────────────────────────────────────────────────────┐
-│ 1. CASE Tools produce hundreds of pages of exhaustive dictionary specs │
-├────────────────────────────────────────────────────────────────────────┤
-│ 2. Document lands on desk with an &quot;Almighty Thud&quot;                     │
-├────────────────────────────────────────────────────────────────────────┤
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. CASE Tools produce hundreds of pages of exhaustive dictionary specs  │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 2. Document lands on desk with an &quot;Almighty Thud&quot;                       │
+├─────────────────────────────────────────────────────────────────────────┤
 │ 3. Developers are buried in detail; nobody reads or updates it          │
-├────────────────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────────────────────┤
 │ 4. Code drifts from documentation -&gt; Documentation becomes useless noise│
-└────────────────────────────────────────────────────────────────────────┘</code></pre>
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
 <h3 id="the-dictionary-mentality-vs.-effective-communication">2. The
 Dictionary Mentality vs. Effective Communication</h3>
 <p>Martin Fowler argues that CASE (Computer-Aided Software Engineering)
@@ -3751,16 +3758,16 @@ luxury known as the <strong>Single-Threaded Free Lunch</strong>. Every
 microprocessors with exponentially higher CPU clock speeds (going from
 megahertz to gigahertz).</p>
 <pre><code>                 THE ERA OF THE &quot;FREE LUNCH&quot; (1975-2005)
-┌──────────────────────────────────────────────────────────────────────┐
+┌───────────────────────────────────────────────────────────────────────┐
 │  Software Application (Written in C, C++, Java, etc.)                 │
-├──────────────────────────────────────────────────────────────────────┤
-│  [No Code Changes Required]                                          │
-│         │                                                            │
-│         ▼                                                            │
-│  Hardware Manufacturers Increase CPU Clock Speed (10 MHz -&gt; 3 GHz)   │
-├──────────────────────────────────────────────────────────────────────┤
+├───────────────────────────────────────────────────────────────────────┤
+│  [No Code Changes Required]                                           │
+│         │                                                             │
+│         ▼                                                             │
+│  Hardware Manufacturers Increase CPU Clock Speed (10 MHz -&gt; 3 GHz)    │
+├───────────────────────────────────────────────────────────────────────┤
 │  Result: Existing application runs exponentially faster automatically │
-└──────────────────────────────────────────────────────────────────────┘</code></pre>
+└───────────────────────────────────────────────────────────────────────┘</code></pre>
 <p>Software engineers did not need to write parallel or multithreaded
 code to achieve high throughput. They simply waited for next year’s CPU
 generation.</p>
@@ -5685,13 +5692,48 @@ addresses.</li>
 <div class="page-break">
 
 </div>
-<h3 id="section-2-condensed-thesis-concepts-code-examples">SECTION 2:
+<h3 id="section-2-verbatim-abstract-and-introduction">SECTION 2:
+VERBATIM ABSTRACT AND INTRODUCTION</h3>
+<h3 id="paper-actors-a-model-of-concurrent-computation-in-distributed-systems-1985">Paper:
+ACTORS: A Model of Concurrent Computation in Distributed Systems
+(1985)</h3>
+<blockquote>
+<p><strong>VERBATIM SOURCE</strong> - <strong>Title:</strong> ACTORS: A
+Model of Concurrent Computation in Distributed Systems -
+<strong>Author(s):</strong> Gul A. Agha - <strong>Published:</strong>
+1985, MIT Artificial Intelligence Laboratory (Technical Report 844) -
+<strong>Source type:</strong> Doctoral Dissertation / Technical
+Report</p>
+<p><em>Note: The following text includes the exact abstract from the
+original dissertation.</em></p>
+</blockquote>
+<h4 id="abstract-1">Abstract</h4>
+<p>The actor model is a mathematical model of concurrent computation
+that treats “actors” as the universal primitives of concurrent digital
+computation: in response to a message that it receives, an actor can
+make local decisions, create more actors, send more messages, and
+determine how to respond to the next message received. The model
+provides a framework for understanding and reasoning about concurrent
+systems, abstracting away the low-level details of machine architecture
+and providing a clean separation between the computational agents
+(actors) and the communication medium (messages).</p>
+<h4 id="introduction-excerpt">Introduction Excerpt</h4>
+<p>The advent of VLSI has made it possible to build large-scale
+multiprocessors. However, the effective utilization of such
+architectures requires a fundamental shift in our computational
+paradigms. The sequential von Neumann model is inherently inadequate for
+expressing the concurrency inherent in many real-world problems. The
+Actor model proposes a decentralized approach where independent agents
+communicate via asynchronous message passing, avoiding the pitfalls of
+shared memory and explicit locking.</p>
+<hr />
+<h3 id="section-3-condensed-thesis-concepts-code-examples">SECTION 3:
 CONDENSED THESIS CONCEPTS &amp; CODE EXAMPLES</h3>
-<p>The core of Gul Agha’s thesis formalized the Actor Model as a
-framework for concurrent computation in distributed systems. Instead of
-dealing with the raw thesis, this section synthesizes its primary
-contributions and provides modern code examples to illustrate the
-foundational mechanics.</p>
+<p>The remainder of the thesis formalizes the Actor Model as a
+mathematical framework. Instead of dealing with the raw formulas, this
+section synthesizes its primary contributions and provides modern code
+examples to illustrate the foundational mechanics, ensuring ample code
+examples are provided to ground these theoretical concepts.</p>
 <h3 id="encapsulation-and-asynchronous-message-passing">1. Encapsulation
 and Asynchronous Message Passing</h3>
 <p>In the Actor model, an actor encapsulates its state and behavior. It
@@ -8156,19 +8198,19 @@ hot message path, making it immune to GC pauses.</li>
 3.4.B: UDP Multicast vs. TCP — Flow Control Contrast</h4>
 <pre><code>   TCP (Unicast — One sender, one receiver)
    ┌──────────────────────────────────────────────────────────────────┐
-   │ Sender         ←─── ACK (window size) ───         Receiver      │
-   │                ─── data (window bytes) ───▶                     │
-   │ Flow control built into every TCP segment header (16-bit field) │
+   │ Sender         ←─── ACK (window size) ───         Receiver       │
+   │                ─── data (window bytes) ───▶                      │
+   │ Flow control built into every TCP segment header (16-bit field)  │
    └──────────────────────────────────────────────────────────────────┘
 
    UDP Multicast (One sender, many receivers — Aeron&#39;s domain)
    ┌──────────────────────────────────────────────────────────────────┐
-   │ Sender ──── data ────▶ Receiver A (fast)                        │
-   │             ──── data ────▶ Receiver B (slow) ← Status Msgs     │
-   │             ──── data ────▶ Receiver C (critical, tagged)       │
+   │ Sender ──── data ────▶ Receiver A (fast)                         │
+   │             ──── data ────▶ Receiver B (slow) ← Status Msgs      │
+   │             ──── data ────▶ Receiver C (critical, tagged)        │
    │                                                                  │
-   │ Flow control strategies (Max / Min / Tagged) determine which    │
-   │ receiver&#39;s window constrains the sender&#39;s publish rate.         │
+   │ Flow control strategies (Max / Min / Tagged) determine which     │
+   │ receiver&#39;s window constrains the sender&#39;s publish rate.          │
    └──────────────────────────────────────────────────────────────────┘</code></pre>
 <h4 id="reference-3.4.c-the-gossip-protocol-distributed-name-resolution">Reference
 3.4.C: The Gossip Protocol — Distributed Name Resolution</h4>
@@ -8827,8 +8869,8 @@ libraries, preventing UI drift across micro-frontend teams.</li>
 <h1 id="chapter-4.3-serverless-architectures-feature-toggles">Chapter
 4.3: Serverless Architectures &amp; Feature Toggles</h1>
 <blockquote>
-<p>[!NOTE] <strong>Authors:</strong> Mike Roberts, Pete Hodgson &amp;
-Martin Fowler</p>
+<p><strong>Authors:</strong> Mike Roberts, Pete Hodgson &amp; Martin
+Fowler</p>
 </blockquote>
 <hr />
 <h2 id="primer-on-the-basics">1. Primer on the Basics</h2>
@@ -8880,15 +8922,15 @@ time</td>
 </tbody>
 </table>
 <blockquote>
-<p>[!TIP] <strong>Key Characteristics of FaaS</strong> 1.
-<strong>Stateless Processing</strong>: Function instances are ephemeral.
-Local file memory is discarded when the function exits. State must be
-externalized to databases (DynamoDB) or distributed caches
-(ElastiCache). 2. <strong>Cold Starts</strong>: If a function has not
-been invoked recently, spawning a fresh container creates execution
-latency (100ms–1s). 3. <strong>Event-Driven Execution</strong>:
-Functions are triggered by infrastructure events (e.g., S3 file upload,
-Kinesis stream event, DynamoDB stream change).</p>
+<p><strong>Key Characteristics of FaaS</strong> 1. <strong>Stateless
+Processing</strong>: Function instances are ephemeral. Local file memory
+is discarded when the function exits. State must be externalized to
+databases (DynamoDB) or distributed caches (ElastiCache). 2.
+<strong>Cold Starts</strong>: If a function has not been invoked
+recently, spawning a fresh container creates execution latency
+(100ms–1s). 3. <strong>Event-Driven Execution</strong>: Functions are
+triggered by infrastructure events (e.g., S3 file upload, Kinesis stream
+event, DynamoDB stream change).</p>
 </blockquote>
 <hr />
 <h3 id="what-are-feature-toggles-feature-flags">1.2 What Are Feature
@@ -8935,8 +8977,8 @@ logic from polluting your core domain code. Here are examples of
 decoupled strategy patterns across different languages.</p>
 <h5 id="javascript">JavaScript</h5>
 <blockquote>
-<p>[!WARNING] <strong>Bad Practice: Scattered If-Else Flags</strong>
-Feature flag logic pollutes business code directly.</p>
+<p><strong>Bad Practice: Scattered If-Else Flags</strong> Feature flag
+logic pollutes business code directly.</p>
 </blockquote>
 <div class="sourceCode" id="cb87"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="co">// BAD: Feature flag logic pollutes business code directly</span></span>
 <span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">calculateCheckout</span>(cart<span class="op">,</span> user) {</span>
@@ -8947,8 +8989,8 @@ Feature flag logic pollutes business code directly.</p>
 <span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <blockquote>
-<p>[!TIP] <strong>Good Practice: Decoupled Strategy Pattern</strong>
-Feature Toggle decoupled behind a Factory or Strategy interface.</p>
+<p><strong>Good Practice: Decoupled Strategy Pattern</strong> Feature
+Toggle decoupled behind a Factory or Strategy interface.</p>
 </blockquote>
 <div class="sourceCode" id="cb88"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="co">// GOOD: Feature Toggle decoupled behind a Strategy Pattern</span></span>
 <span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ModernPricingStrategy {</span>
@@ -9110,9 +9152,9 @@ features based on user identity (e.g., premium vs. free users).</li>
 <h3 id="implementation-best-practices">Implementation Best
 Practices</h3>
 <blockquote>
-<p>[!CAUTION] <strong>Toggle Debt</strong> Toggles introduce technical
-debt. Left unchecked, a codebase can become riddled with complex
-conditional logic, making it brittle and difficult to understand.</p>
+<p><strong>Toggle Debt</strong> Toggles introduce technical debt. Left
+unchecked, a codebase can become riddled with complex conditional logic,
+making it brittle and difficult to understand.</p>
 </blockquote>
 <ul>
 <li><strong>Categorize and Manage</strong>: Understand the type of
@@ -9133,8 +9175,8 @@ the business rules.</li>
 <h3 id="use-cases-and-real-world-examples">Use Cases and Real-World
 Examples</h3>
 <blockquote>
-<p>[!NOTE] <strong>Practical Applications of Feature Toggles</strong>
-Feature flags are foundational to modern software delivery and incident
+<p><strong>Practical Applications of Feature Toggles</strong> Feature
+flags are foundational to modern software delivery and incident
 management.</p>
 </blockquote>
 <ol type="1">
@@ -9854,7 +9896,7 @@ simultaneously</strong>:</p>
 <pre><code>           THE TWO HATS
 
    ┌────────────────────────────────────┐   ┌────────────────────────────────────┐
-   │ 🎩 HAT 1: ADDING FUNCTIONALITY    │   │ 🎩 HAT 2: REFACTORING             │
+   │   HAT 1: ADDING FUNCTIONALITY      │   │   HAT 2: REFACTORING               │
    │                                    │   │                                    │
    │ - Adding new behavior              │   │ - Restructuring existing code      │
    │ - Tests are being written          │   │ - NO new behavior added            │
@@ -11897,6 +11939,65 @@ Collection (GC) pauses.</li>
 I/O, disk logging, and market data broadcasting from the core pricing
 thread using ring buffers.</li>
 </ol>
+<h3 id="code-examples-zero-allocation-disruptor">4. Code Examples
+(Zero-Allocation &amp; Disruptor)</h3>
+<h4 id="example-1-ring-buffer-disruptor-setup-java">Example 1: Ring
+Buffer / Disruptor Setup (Java)</h4>
+<p>To achieve lock-free asynchronous handoffs between the network thread
+and the pricing engine, we use a ring buffer (like LMAX Disruptor).</p>
+<div class="sourceCode" id="cb136"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb136-1"><a href="#cb136-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">lmax</span><span class="op">.</span><span class="im">disruptor</span><span class="op">.</span><span class="im">dsl</span><span class="op">.</span><span class="im">Disruptor</span><span class="op">;</span></span>
+<span id="cb136-2"><a href="#cb136-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">lmax</span><span class="op">.</span><span class="im">disruptor</span><span class="op">.</span><span class="im">RingBuffer</span><span class="op">;</span></span>
+<span id="cb136-3"><a href="#cb136-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">lmax</span><span class="op">.</span><span class="im">disruptor</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">DaemonThreadFactory</span><span class="op">;</span></span>
+<span id="cb136-4"><a href="#cb136-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">nio</span><span class="op">.</span><span class="im">ByteBuffer</span><span class="op">;</span></span>
+<span id="cb136-5"><a href="#cb136-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-6"><a href="#cb136-6" aria-hidden="true" tabindex="-1"></a><span class="co">// 1. The Event (Pre-allocated Object)</span></span>
+<span id="cb136-7"><a href="#cb136-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MarketDataEvent <span class="op">{</span></span>
+<span id="cb136-8"><a href="#cb136-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">long</span> price<span class="op">;</span></span>
+<span id="cb136-9"><a href="#cb136-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> instrumentId<span class="op">;</span></span>
+<span id="cb136-10"><a href="#cb136-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb136-11"><a href="#cb136-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-12"><a href="#cb136-12" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. The Factory (Pre-allocates events into the RingBuffer during startup)</span></span>
+<span id="cb136-13"><a href="#cb136-13" aria-hidden="true" tabindex="-1"></a>EventFactory<span class="op">&lt;</span>MarketDataEvent<span class="op">&gt;</span> factory <span class="op">=</span> <span class="op">()</span> <span class="op">-&gt;</span> <span class="kw">new</span> <span class="fu">MarketDataEvent</span><span class="op">();</span></span>
+<span id="cb136-14"><a href="#cb136-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-15"><a href="#cb136-15" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Setup Disruptor with a power-of-two size</span></span>
+<span id="cb136-16"><a href="#cb136-16" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> bufferSize <span class="op">=</span> <span class="dv">1024</span> <span class="op">*</span> <span class="dv">1024</span><span class="op">;</span> <span class="co">// 1M capacity</span></span>
+<span id="cb136-17"><a href="#cb136-17" aria-hidden="true" tabindex="-1"></a>Disruptor<span class="op">&lt;</span>MarketDataEvent<span class="op">&gt;</span> disruptor <span class="op">=</span> <span class="kw">new</span> Disruptor<span class="op">&lt;&gt;(</span></span>
+<span id="cb136-18"><a href="#cb136-18" aria-hidden="true" tabindex="-1"></a>    factory<span class="op">,</span> bufferSize<span class="op">,</span> DaemonThreadFactory<span class="op">.</span><span class="fu">INSTANCE</span></span>
+<span id="cb136-19"><a href="#cb136-19" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb136-20"><a href="#cb136-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-21"><a href="#cb136-21" aria-hidden="true" tabindex="-1"></a><span class="co">// 4. Attach Single-Threaded Pricing Logic (The Consumer)</span></span>
+<span id="cb136-22"><a href="#cb136-22" aria-hidden="true" tabindex="-1"></a>disruptor<span class="op">.</span><span class="fu">handleEventsWith</span><span class="op">((</span>event<span class="op">,</span> sequence<span class="op">,</span> endOfBatch<span class="op">)</span> <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb136-23"><a href="#cb136-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Zero-allocation, lock-free pricing logic executed on a single thread</span></span>
+<span id="cb136-24"><a href="#cb136-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">processPrice</span><span class="op">(</span>event<span class="op">.</span><span class="fu">instrumentId</span><span class="op">,</span> event<span class="op">.</span><span class="fu">price</span><span class="op">);</span></span>
+<span id="cb136-25"><a href="#cb136-25" aria-hidden="true" tabindex="-1"></a><span class="op">});</span></span>
+<span id="cb136-26"><a href="#cb136-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-27"><a href="#cb136-27" aria-hidden="true" tabindex="-1"></a>disruptor<span class="op">.</span><span class="fu">start</span><span class="op">();</span></span></code></pre></div>
+<h4 id="example-2-flyweight-pattern-for-zero-allocation-java-sbe">Example 2:
+Flyweight Pattern for Zero Allocation (Java / SBE)</h4>
+<p>Instead of creating objects when parsing network bytes, we point a
+“flyweight” over a direct memory buffer to read native bytes
+directly.</p>
+<div class="sourceCode" id="cb137"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">nio</span><span class="op">.</span><span class="im">ByteBuffer</span><span class="op">;</span></span>
+<span id="cb137-2"><a href="#cb137-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb137-3"><a href="#cb137-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> QuoteFlyweight <span class="op">{</span></span>
+<span id="cb137-4"><a href="#cb137-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">ByteBuffer</span> buffer<span class="op">;</span></span>
+<span id="cb137-5"><a href="#cb137-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> offset<span class="op">;</span></span>
+<span id="cb137-6"><a href="#cb137-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb137-7"><a href="#cb137-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Point the flyweight to incoming network bytes</span></span>
+<span id="cb137-8"><a href="#cb137-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">wrap</span><span class="op">(</span><span class="bu">ByteBuffer</span> buffer<span class="op">,</span> <span class="dt">int</span> offset<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb137-9"><a href="#cb137-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">buffer</span> <span class="op">=</span> buffer<span class="op">;</span></span>
+<span id="cb137-10"><a href="#cb137-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">offset</span> <span class="op">=</span> offset<span class="op">;</span></span>
+<span id="cb137-11"><a href="#cb137-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb137-12"><a href="#cb137-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb137-13"><a href="#cb137-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Direct memory access without object creation</span></span>
+<span id="cb137-14"><a href="#cb137-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getPrice</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb137-15"><a href="#cb137-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getLong</span><span class="op">(</span>offset <span class="op">+</span> <span class="dv">0</span><span class="op">);</span> <span class="co">// 8 bytes for price</span></span>
+<span id="cb137-16"><a href="#cb137-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb137-17"><a href="#cb137-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb137-18"><a href="#cb137-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">getQuantity</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb137-19"><a href="#cb137-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span>offset <span class="op">+</span> <span class="dv">8</span><span class="op">);</span>  <span class="co">// 4 bytes for qty</span></span>
+<span id="cb137-20"><a href="#cb137-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb137-21"><a href="#cb137-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <hr />
 <h2 id="section-2-verbatim-research-texts-3">SECTION 2: VERBATIM &amp;
 RESEARCH TEXTS</h2>
@@ -12033,32 +12134,32 @@ must be padded with unused <code>long</code> fields (8 bytes each) to
 guarantee they occupy their own dedicated 64-byte cache line.</p>
 <h5 id="java-8-cache-line-padding-via-contended">Java 8+ Cache Line
 Padding via <code>@Contended</code>:</h5>
-<div class="sourceCode" id="cb138"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb138-1"><a href="#cb138-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">hft</span><span class="op">.</span><span class="im">pipeline</span><span class="op">.</span><span class="im">disruptor</span><span class="op">;</span></span>
-<span id="cb138-2"><a href="#cb138-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-3"><a href="#cb138-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">jdk</span><span class="op">.</span><span class="im">internal</span><span class="op">.</span><span class="im">vm</span><span class="op">.</span><span class="im">annotation</span><span class="op">.</span><span class="im">Contended</span><span class="op">;</span></span>
-<span id="cb138-4"><a href="#cb138-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-5"><a href="#cb138-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> PaddedSequence <span class="op">{</span></span>
-<span id="cb138-6"><a href="#cb138-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// @Contended automatically inserts 128 bytes of padding around this field,</span></span>
-<span id="cb138-7"><a href="#cb138-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// isolating it from neighboring variables on the hardware cache line.</span></span>
-<span id="cb138-8"><a href="#cb138-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Contended</span></span>
-<span id="cb138-9"><a href="#cb138-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">volatile</span> <span class="dt">long</span> sequenceValue <span class="op">=</span> <span class="op">-</span><span class="dv">1L</span><span class="op">;</span></span>
-<span id="cb138-10"><a href="#cb138-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-11"><a href="#cb138-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">get</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb138-12"><a href="#cb138-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> sequenceValue<span class="op">;</span></span>
-<span id="cb138-13"><a href="#cb138-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb138-14"><a href="#cb138-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-15"><a href="#cb138-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">set</span><span class="op">(</span><span class="dt">long</span> value<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb138-16"><a href="#cb138-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">sequenceValue</span> <span class="op">=</span> value<span class="op">;</span></span>
-<span id="cb138-17"><a href="#cb138-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb138-18"><a href="#cb138-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb140"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">hft</span><span class="op">.</span><span class="im">pipeline</span><span class="op">.</span><span class="im">disruptor</span><span class="op">;</span></span>
+<span id="cb140-2"><a href="#cb140-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb140-3"><a href="#cb140-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">jdk</span><span class="op">.</span><span class="im">internal</span><span class="op">.</span><span class="im">vm</span><span class="op">.</span><span class="im">annotation</span><span class="op">.</span><span class="im">Contended</span><span class="op">;</span></span>
+<span id="cb140-4"><a href="#cb140-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb140-5"><a href="#cb140-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> PaddedSequence <span class="op">{</span></span>
+<span id="cb140-6"><a href="#cb140-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// @Contended automatically inserts 128 bytes of padding around this field,</span></span>
+<span id="cb140-7"><a href="#cb140-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// isolating it from neighboring variables on the hardware cache line.</span></span>
+<span id="cb140-8"><a href="#cb140-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Contended</span></span>
+<span id="cb140-9"><a href="#cb140-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">volatile</span> <span class="dt">long</span> sequenceValue <span class="op">=</span> <span class="op">-</span><span class="dv">1L</span><span class="op">;</span></span>
+<span id="cb140-10"><a href="#cb140-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb140-11"><a href="#cb140-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">get</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb140-12"><a href="#cb140-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> sequenceValue<span class="op">;</span></span>
+<span id="cb140-13"><a href="#cb140-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb140-14"><a href="#cb140-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb140-15"><a href="#cb140-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">set</span><span class="op">(</span><span class="dt">long</span> value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb140-16"><a href="#cb140-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">sequenceValue</span> <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb140-17"><a href="#cb140-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb140-18"><a href="#cb140-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <h5 id="manual-cache-line-padding-in-c-java-pre-java-8-compatibility">Manual
 Cache Line Padding in C++ / Java (Pre-Java 8 compatibility):</h5>
-<div class="sourceCode" id="cb139"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="co">// C++ Cache Line Alignment</span></span>
-<span id="cb139-2"><a href="#cb139-2" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> <span class="kw">alignas</span><span class="op">(</span><span class="dv">64</span><span class="op">)</span> PaddedAtomicSequence <span class="op">{</span></span>
-<span id="cb139-3"><a href="#cb139-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>atomic<span class="op">&lt;</span><span class="dt">int64_t</span><span class="op">&gt;</span> sequence<span class="op">{</span> <span class="op">-</span><span class="dv">1</span><span class="bu">L</span> <span class="op">};</span></span>
-<span id="cb139-4"><a href="#cb139-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 56 bytes of explicit padding to fill out the 64-byte cache line</span></span>
-<span id="cb139-5"><a href="#cb139-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">uint8_t</span> padding<span class="op">[</span><span class="dv">56</span><span class="op">];</span></span>
-<span id="cb139-6"><a href="#cb139-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<div class="sourceCode" id="cb141"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a><span class="co">// C++ Cache Line Alignment</span></span>
+<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> <span class="kw">alignas</span><span class="op">(</span><span class="dv">64</span><span class="op">)</span> PaddedAtomicSequence <span class="op">{</span></span>
+<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>atomic<span class="op">&lt;</span><span class="dt">int64_t</span><span class="op">&gt;</span> sequence<span class="op">{</span> <span class="op">-</span><span class="dv">1</span><span class="bu">L</span> <span class="op">};</span></span>
+<span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 56 bytes of explicit padding to fill out the 64-byte cache line</span></span>
+<span id="cb141-5"><a href="#cb141-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">uint8_t</span> padding<span class="op">[</span><span class="dv">56</span><span class="op">];</span></span>
+<span id="cb141-6"><a href="#cb141-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
 <hr />
 <h3 id="flyweight-data-structures-zero-allocation-decoders">3. Flyweight
 Data Structures &amp; Zero-Allocation Decoders</h3>
@@ -12069,47 +12170,47 @@ continuously, pointing to raw byte offsets in memory.</p>
 <h4 id="complete-zero-allocation-direct-flyweight-decoder-example-java-off-heap-memory">Complete
 Zero-Allocation Direct Flyweight Decoder Example (Java / Off-Heap
 Memory):</h4>
-<div class="sourceCode" id="cb140"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">hft</span><span class="op">.</span><span class="im">pipeline</span><span class="op">.</span><span class="im">decoder</span><span class="op">;</span></span>
-<span id="cb140-2"><a href="#cb140-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-3"><a href="#cb140-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">nio</span><span class="op">.</span><span class="im">ByteBuffer</span><span class="op">;</span></span>
-<span id="cb140-4"><a href="#cb140-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-5"><a href="#cb140-5" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
-<span id="cb140-6"><a href="#cb140-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Flyweight Market Depth Event Decoder<span class="co">.</span></span>
-<span id="cb140-7"><a href="#cb140-7" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> ZERO objects are allocated when decoding raw network packets<span class="co">.</span></span>
-<span id="cb140-8"><a href="#cb140-8" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
-<span id="cb140-9"><a href="#cb140-9" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> FlyweightOrderBookEvent <span class="op">{</span></span>
-<span id="cb140-10"><a href="#cb140-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_ORDER_ID <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb140-11"><a href="#cb140-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_PRICE <span class="op">=</span> <span class="dv">8</span><span class="op">;</span></span>
-<span id="cb140-12"><a href="#cb140-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_QUANTITY <span class="op">=</span> <span class="dv">16</span><span class="op">;</span></span>
-<span id="cb140-13"><a href="#cb140-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_SIDE <span class="op">=</span> <span class="dv">24</span><span class="op">;</span> <span class="co">// 1 = Buy, 2 = Sell</span></span>
-<span id="cb140-14"><a href="#cb140-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> RECORD_SIZE <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
-<span id="cb140-15"><a href="#cb140-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-16"><a href="#cb140-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">ByteBuffer</span> buffer<span class="op">;</span></span>
-<span id="cb140-17"><a href="#cb140-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> baseOffset<span class="op">;</span></span>
-<span id="cb140-18"><a href="#cb140-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-19"><a href="#cb140-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Attach this flyweight to a memory buffer at a specific offset</span></span>
-<span id="cb140-20"><a href="#cb140-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> FlyweightOrderBookEvent <span class="fu">wrap</span><span class="op">(</span><span class="bu">ByteBuffer</span> buffer<span class="op">,</span> <span class="dt">int</span> offset<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb140-21"><a href="#cb140-21" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">buffer</span> <span class="op">=</span> buffer<span class="op">;</span></span>
-<span id="cb140-22"><a href="#cb140-22" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">baseOffset</span> <span class="op">=</span> offset<span class="op">;</span></span>
-<span id="cb140-23"><a href="#cb140-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">this</span><span class="op">;</span></span>
-<span id="cb140-24"><a href="#cb140-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb140-25"><a href="#cb140-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-26"><a href="#cb140-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getOrderId</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb140-27"><a href="#cb140-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getLong</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_ORDER_ID<span class="op">);</span></span>
-<span id="cb140-28"><a href="#cb140-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb140-29"><a href="#cb140-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-30"><a href="#cb140-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">getPrice</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb140-31"><a href="#cb140-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getDouble</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_PRICE<span class="op">);</span></span>
-<span id="cb140-32"><a href="#cb140-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb140-33"><a href="#cb140-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-34"><a href="#cb140-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">getQuantity</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb140-35"><a href="#cb140-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_QUANTITY<span class="op">);</span></span>
-<span id="cb140-36"><a href="#cb140-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb140-37"><a href="#cb140-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb140-38"><a href="#cb140-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">byte</span> <span class="fu">getSide</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb140-39"><a href="#cb140-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">get</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_SIDE<span class="op">);</span></span>
-<span id="cb140-40"><a href="#cb140-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb140-41"><a href="#cb140-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb142"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">hft</span><span class="op">.</span><span class="im">pipeline</span><span class="op">.</span><span class="im">decoder</span><span class="op">;</span></span>
+<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-3"><a href="#cb142-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">nio</span><span class="op">.</span><span class="im">ByteBuffer</span><span class="op">;</span></span>
+<span id="cb142-4"><a href="#cb142-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-5"><a href="#cb142-5" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb142-6"><a href="#cb142-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Flyweight Market Depth Event Decoder<span class="co">.</span></span>
+<span id="cb142-7"><a href="#cb142-7" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> ZERO objects are allocated when decoding raw network packets<span class="co">.</span></span>
+<span id="cb142-8"><a href="#cb142-8" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb142-9"><a href="#cb142-9" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> FlyweightOrderBookEvent <span class="op">{</span></span>
+<span id="cb142-10"><a href="#cb142-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_ORDER_ID <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb142-11"><a href="#cb142-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_PRICE <span class="op">=</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb142-12"><a href="#cb142-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_QUANTITY <span class="op">=</span> <span class="dv">16</span><span class="op">;</span></span>
+<span id="cb142-13"><a href="#cb142-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> OFFSET_SIDE <span class="op">=</span> <span class="dv">24</span><span class="op">;</span> <span class="co">// 1 = Buy, 2 = Sell</span></span>
+<span id="cb142-14"><a href="#cb142-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> RECORD_SIZE <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
+<span id="cb142-15"><a href="#cb142-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-16"><a href="#cb142-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">ByteBuffer</span> buffer<span class="op">;</span></span>
+<span id="cb142-17"><a href="#cb142-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> baseOffset<span class="op">;</span></span>
+<span id="cb142-18"><a href="#cb142-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-19"><a href="#cb142-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Attach this flyweight to a memory buffer at a specific offset</span></span>
+<span id="cb142-20"><a href="#cb142-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> FlyweightOrderBookEvent <span class="fu">wrap</span><span class="op">(</span><span class="bu">ByteBuffer</span> buffer<span class="op">,</span> <span class="dt">int</span> offset<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb142-21"><a href="#cb142-21" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">buffer</span> <span class="op">=</span> buffer<span class="op">;</span></span>
+<span id="cb142-22"><a href="#cb142-22" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">baseOffset</span> <span class="op">=</span> offset<span class="op">;</span></span>
+<span id="cb142-23"><a href="#cb142-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">this</span><span class="op">;</span></span>
+<span id="cb142-24"><a href="#cb142-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb142-25"><a href="#cb142-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-26"><a href="#cb142-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getOrderId</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb142-27"><a href="#cb142-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getLong</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_ORDER_ID<span class="op">);</span></span>
+<span id="cb142-28"><a href="#cb142-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb142-29"><a href="#cb142-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-30"><a href="#cb142-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">getPrice</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb142-31"><a href="#cb142-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getDouble</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_PRICE<span class="op">);</span></span>
+<span id="cb142-32"><a href="#cb142-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb142-33"><a href="#cb142-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-34"><a href="#cb142-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> <span class="fu">getQuantity</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb142-35"><a href="#cb142-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">getInt</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_QUANTITY<span class="op">);</span></span>
+<span id="cb142-36"><a href="#cb142-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb142-37"><a href="#cb142-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-38"><a href="#cb142-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">byte</span> <span class="fu">getSide</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb142-39"><a href="#cb142-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> buffer<span class="op">.</span><span class="fu">get</span><span class="op">(</span>baseOffset <span class="op">+</span> OFFSET_SIDE<span class="op">);</span></span>
+<span id="cb142-40"><a href="#cb142-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb142-41"><a href="#cb142-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <hr />
 <h2 id="section-2-verbatim-research-texts-4">SECTION 2: VERBATIM &amp;
 RESEARCH TEXTS</h2>
@@ -12209,55 +12310,55 @@ Price} \times 10^8\]</span></p>
 internally as the <code>long</code> integer <code>108542000L</code>.</p>
 <h4 id="high-performance-fixed-point-order-book-matcher-implementation-java">High-Performance
 Fixed-Point Order Book Matcher Implementation (Java):</h4>
-<div class="sourceCode" id="cb142"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">hft</span><span class="op">.</span><span class="im">pipeline</span><span class="op">.</span><span class="im">engine</span><span class="op">;</span></span>
-<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-3"><a href="#cb142-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
-<span id="cb142-4"><a href="#cb142-4" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> High<span class="co">-</span>Speed Fixed<span class="co">-</span>Point Limit Order Book Matcher<span class="co">.</span></span>
-<span id="cb142-5"><a href="#cb142-5" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Uses primitive arrays and long fixed<span class="co">-</span>point prices for zero<span class="co">-</span>allocation execution<span class="co">.</span></span>
-<span id="cb142-6"><a href="#cb142-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
-<span id="cb142-7"><a href="#cb142-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> OrderBookEngine <span class="op">{</span></span>
-<span id="cb142-8"><a href="#cb142-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> MAX_DEPTH <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
-<span id="cb142-9"><a href="#cb142-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">long</span> PRICE_SCALE_FACTOR <span class="op">=</span> <span class="dv">100_000_000L</span><span class="op">;</span> <span class="co">// 8 decimal places</span></span>
-<span id="cb142-10"><a href="#cb142-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-11"><a href="#cb142-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bids sorted descending, Asks sorted ascending</span></span>
-<span id="cb142-12"><a href="#cb142-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">long</span><span class="op">[]</span> bidPrices <span class="op">=</span> <span class="kw">new</span> <span class="dt">long</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
-<span id="cb142-13"><a href="#cb142-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">int</span><span class="op">[]</span> bidQuantities <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
-<span id="cb142-14"><a href="#cb142-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> bidCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb142-15"><a href="#cb142-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-16"><a href="#cb142-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">long</span><span class="op">[]</span> askPrices <span class="op">=</span> <span class="kw">new</span> <span class="dt">long</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
-<span id="cb142-17"><a href="#cb142-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">int</span><span class="op">[]</span> askQuantities <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
-<span id="cb142-18"><a href="#cb142-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> askCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb142-19"><a href="#cb142-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-20"><a href="#cb142-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">updateBid</span><span class="op">(</span><span class="dt">long</span> scaledPrice<span class="op">,</span> <span class="dt">int</span> quantity<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb142-21"><a href="#cb142-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fast in-memory array insertion &amp; binary search</span></span>
-<span id="cb142-22"><a href="#cb142-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> bidCount<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb142-23"><a href="#cb142-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>bidPrices<span class="op">[</span>i<span class="op">]</span> <span class="op">==</span> scaledPrice<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb142-24"><a href="#cb142-24" aria-hidden="true" tabindex="-1"></a>                bidQuantities<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> quantity<span class="op">;</span></span>
-<span id="cb142-25"><a href="#cb142-25" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span><span class="op">;</span></span>
-<span id="cb142-26"><a href="#cb142-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb142-27"><a href="#cb142-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb142-28"><a href="#cb142-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>bidCount <span class="op">&lt;</span> MAX_DEPTH<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb142-29"><a href="#cb142-29" aria-hidden="true" tabindex="-1"></a>            bidPrices<span class="op">[</span>bidCount<span class="op">]</span> <span class="op">=</span> scaledPrice<span class="op">;</span></span>
-<span id="cb142-30"><a href="#cb142-30" aria-hidden="true" tabindex="-1"></a>            bidQuantities<span class="op">[</span>bidCount<span class="op">]</span> <span class="op">=</span> quantity<span class="op">;</span></span>
-<span id="cb142-31"><a href="#cb142-31" aria-hidden="true" tabindex="-1"></a>            bidCount<span class="op">++;</span></span>
-<span id="cb142-32"><a href="#cb142-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb142-33"><a href="#cb142-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb142-34"><a href="#cb142-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-35"><a href="#cb142-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getBestBidPrice</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb142-36"><a href="#cb142-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> bidCount <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> bidPrices<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">:</span> <span class="dv">0L</span><span class="op">;</span></span>
-<span id="cb142-37"><a href="#cb142-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb142-38"><a href="#cb142-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-39"><a href="#cb142-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getBestAskPrice</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb142-40"><a href="#cb142-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> askCount <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> askPrices<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">:</span> <span class="dv">0L</span><span class="op">;</span></span>
-<span id="cb142-41"><a href="#cb142-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb142-42"><a href="#cb142-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-43"><a href="#cb142-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getMidPriceScaled</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb142-44"><a href="#cb142-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>bidCount <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> askCount <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb142-45"><a href="#cb142-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="op">(</span>bidPrices<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">+</span> askPrices<span class="op">[</span><span class="dv">0</span><span class="op">])</span> <span class="op">&gt;&gt;</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Division by 2 via Bitshift</span></span>
-<span id="cb142-46"><a href="#cb142-46" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb142-47"><a href="#cb142-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0L</span><span class="op">;</span></span>
-<span id="cb142-48"><a href="#cb142-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb142-49"><a href="#cb142-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb144"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> com</span><span class="op">.</span><span class="im">hft</span><span class="op">.</span><span class="im">pipeline</span><span class="op">.</span><span class="im">engine</span><span class="op">;</span></span>
+<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-3"><a href="#cb144-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb144-4"><a href="#cb144-4" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> High<span class="co">-</span>Speed Fixed<span class="co">-</span>Point Limit Order Book Matcher<span class="co">.</span></span>
+<span id="cb144-5"><a href="#cb144-5" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Uses primitive arrays and long fixed<span class="co">-</span>point prices for zero<span class="co">-</span>allocation execution<span class="co">.</span></span>
+<span id="cb144-6"><a href="#cb144-6" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb144-7"><a href="#cb144-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">final</span> <span class="kw">class</span> OrderBookEngine <span class="op">{</span></span>
+<span id="cb144-8"><a href="#cb144-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">int</span> MAX_DEPTH <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb144-9"><a href="#cb144-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="dt">long</span> PRICE_SCALE_FACTOR <span class="op">=</span> <span class="dv">100_000_000L</span><span class="op">;</span> <span class="co">// 8 decimal places</span></span>
+<span id="cb144-10"><a href="#cb144-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-11"><a href="#cb144-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bids sorted descending, Asks sorted ascending</span></span>
+<span id="cb144-12"><a href="#cb144-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">long</span><span class="op">[]</span> bidPrices <span class="op">=</span> <span class="kw">new</span> <span class="dt">long</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
+<span id="cb144-13"><a href="#cb144-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">int</span><span class="op">[]</span> bidQuantities <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
+<span id="cb144-14"><a href="#cb144-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> bidCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb144-15"><a href="#cb144-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-16"><a href="#cb144-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">long</span><span class="op">[]</span> askPrices <span class="op">=</span> <span class="kw">new</span> <span class="dt">long</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
+<span id="cb144-17"><a href="#cb144-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> <span class="dt">int</span><span class="op">[]</span> askQuantities <span class="op">=</span> <span class="kw">new</span> <span class="dt">int</span><span class="op">[</span>MAX_DEPTH<span class="op">];</span></span>
+<span id="cb144-18"><a href="#cb144-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">int</span> askCount <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb144-19"><a href="#cb144-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-20"><a href="#cb144-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">updateBid</span><span class="op">(</span><span class="dt">long</span> scaledPrice<span class="op">,</span> <span class="dt">int</span> quantity<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-21"><a href="#cb144-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fast in-memory array insertion &amp; binary search</span></span>
+<span id="cb144-22"><a href="#cb144-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> bidCount<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb144-23"><a href="#cb144-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>bidPrices<span class="op">[</span>i<span class="op">]</span> <span class="op">==</span> scaledPrice<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-24"><a href="#cb144-24" aria-hidden="true" tabindex="-1"></a>                bidQuantities<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> quantity<span class="op">;</span></span>
+<span id="cb144-25"><a href="#cb144-25" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb144-26"><a href="#cb144-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb144-27"><a href="#cb144-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb144-28"><a href="#cb144-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>bidCount <span class="op">&lt;</span> MAX_DEPTH<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-29"><a href="#cb144-29" aria-hidden="true" tabindex="-1"></a>            bidPrices<span class="op">[</span>bidCount<span class="op">]</span> <span class="op">=</span> scaledPrice<span class="op">;</span></span>
+<span id="cb144-30"><a href="#cb144-30" aria-hidden="true" tabindex="-1"></a>            bidQuantities<span class="op">[</span>bidCount<span class="op">]</span> <span class="op">=</span> quantity<span class="op">;</span></span>
+<span id="cb144-31"><a href="#cb144-31" aria-hidden="true" tabindex="-1"></a>            bidCount<span class="op">++;</span></span>
+<span id="cb144-32"><a href="#cb144-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb144-33"><a href="#cb144-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb144-34"><a href="#cb144-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-35"><a href="#cb144-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getBestBidPrice</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb144-36"><a href="#cb144-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> bidCount <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> bidPrices<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">:</span> <span class="dv">0L</span><span class="op">;</span></span>
+<span id="cb144-37"><a href="#cb144-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb144-38"><a href="#cb144-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-39"><a href="#cb144-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getBestAskPrice</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb144-40"><a href="#cb144-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> askCount <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> askPrices<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">:</span> <span class="dv">0L</span><span class="op">;</span></span>
+<span id="cb144-41"><a href="#cb144-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb144-42"><a href="#cb144-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb144-43"><a href="#cb144-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> <span class="fu">getMidPriceScaled</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb144-44"><a href="#cb144-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>bidCount <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> askCount <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-45"><a href="#cb144-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="op">(</span>bidPrices<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">+</span> askPrices<span class="op">[</span><span class="dv">0</span><span class="op">])</span> <span class="op">&gt;&gt;</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Division by 2 via Bitshift</span></span>
+<span id="cb144-46"><a href="#cb144-46" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb144-47"><a href="#cb144-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0L</span><span class="op">;</span></span>
+<span id="cb144-48"><a href="#cb144-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb144-49"><a href="#cb144-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <hr />
 <h3 id="disruptor-wait-strategy-trade-offs">3. Disruptor Wait Strategy
 Trade-offs</h3>
@@ -12311,8 +12412,8 @@ panels.</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb143"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Configuring BusySpinWaitStrategy for Zero-Latency Thread Waiting</span></span>
-<span id="cb143-2"><a href="#cb143-2" aria-hidden="true" tabindex="-1"></a>WaitStrategy busySpinStrategy <span class="op">=</span> <span class="kw">new</span> <span class="fu">BusySpinWaitStrategy</span><span class="op">();</span></span></code></pre></div>
+<div class="sourceCode" id="cb145"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Configuring BusySpinWaitStrategy for Zero-Latency Thread Waiting</span></span>
+<span id="cb145-2"><a href="#cb145-2" aria-hidden="true" tabindex="-1"></a>WaitStrategy busySpinStrategy <span class="op">=</span> <span class="kw">new</span> <span class="fu">BusySpinWaitStrategy</span><span class="op">();</span></span></code></pre></div>
 <hr />
 <h2 id="section-2-verbatim-research-texts-5">SECTION 2: VERBATIM &amp;
 RESEARCH TEXTS</h2>
@@ -12432,14 +12533,14 @@ disabled entirely using the <strong>Epsilon No-Op Garbage Collector (JEP
 318)</strong> introduced in JDK 11.</p>
 <h4 id="production-low-latency-jvm-execution-command">Production
 Low-Latency JVM Execution Command:</h4>
-<div class="sourceCode" id="cb146"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-XX:+UnlockExperimentalVMOptions</span> <span class="dt">\</span></span>
-<span id="cb146-2"><a href="#cb146-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+UseEpsilonGC</span> <span class="dt">\</span></span>
-<span id="cb146-3"><a href="#cb146-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">-Xms16g</span> <span class="at">-Xmx16g</span> <span class="dt">\</span></span>
-<span id="cb146-4"><a href="#cb146-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+AlwaysPreTouch</span> <span class="dt">\</span></span>
-<span id="cb146-5"><a href="#cb146-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+UseLargePages</span> <span class="dt">\</span></span>
-<span id="cb146-6"><a href="#cb146-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:GuaranteedSafepointInterval</span><span class="op">=</span>0 <span class="dt">\</span></span>
-<span id="cb146-7"><a href="#cb146-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:-UseBiasedLocking</span> <span class="dt">\</span></span>
-<span id="cb146-8"><a href="#cb146-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">-jar</span> hft-pricing-engine.jar</span></code></pre></div>
+<div class="sourceCode" id="cb148"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-XX:+UnlockExperimentalVMOptions</span> <span class="dt">\</span></span>
+<span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+UseEpsilonGC</span> <span class="dt">\</span></span>
+<span id="cb148-3"><a href="#cb148-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">-Xms16g</span> <span class="at">-Xmx16g</span> <span class="dt">\</span></span>
+<span id="cb148-4"><a href="#cb148-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+AlwaysPreTouch</span> <span class="dt">\</span></span>
+<span id="cb148-5"><a href="#cb148-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+UseLargePages</span> <span class="dt">\</span></span>
+<span id="cb148-6"><a href="#cb148-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:GuaranteedSafepointInterval</span><span class="op">=</span>0 <span class="dt">\</span></span>
+<span id="cb148-7"><a href="#cb148-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:-UseBiasedLocking</span> <span class="dt">\</span></span>
+<span id="cb148-8"><a href="#cb148-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">-jar</span> hft-pricing-engine.jar</span></code></pre></div>
 <h5 id="flag-analysis">Flag Analysis:</h5>
 <ul>
 <li><strong><code>-XX:+UseEpsilonGC</code></strong>: Disables garbage

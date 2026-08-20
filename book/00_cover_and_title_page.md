@@ -20,7 +20,8 @@ Module 2 — Hardware Evolution, Concurrency & Memory Models
 Module 3 — High-Performance Architecture, Actor Model & LMAX Disruptor  
 Module 4 — Software & UI Architecture Patterns  
 Module 5 — Code Evolution & Refactoring Patterns  
-Module 6 — Complete Bibliography & Subject Index
+Module 6 — Complete Bibliography & Subject Index  
+Module 7 — Real-Time Implementations (Case Study)
 
 ---
 
