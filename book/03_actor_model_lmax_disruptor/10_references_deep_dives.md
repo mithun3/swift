@@ -1,6 +1,6 @@
 <div class="page-break"></div>
 
-# Chapter 3.9: Citation & Reference Deep-Dives — Module 3
+# Chapter 3.10: Citation & Reference Deep-Dives — Module 3
 
 This chapter provides standalone research profiles, mathematical formalisms, hardware memory fence mechanics, and lock-free data structure implementations for all major citations across Module 3.
 
@@ -110,17 +110,35 @@ Hardware memory reordering forces low-latency lock-free data structures (like th
 [S9] C. Hewitt, P. Bishop, and R. Steiger, "A Universal Modular ACTOR Formalism for Artificial Intelligence," IJCAI'73, 1973.
 [S10] M. Barker, "Bad Concurrency: Flow Control in Aeron & I Heard a Rumour," bad-concurrency.blogspot.com, 2020.
 
+**Chapter 3.9 — Reactive Paradigm Citations**
+[R20] J. Bonér, D. Farley, R. Kuhn, and M. Thompson, "The Reactive Manifesto," v2.0, 2014. Available: https://www.reactivemanifesto.org/
+[R21] E. Meijer, "Subject/Observer is Dual to Iterator," Microsoft Research, 2010. Available: https://csl.cornell.edu/~jnfoster/cs6113/papers/meijer.pdf
+[R22] Reactive Streams Initiative, "Reactive Streams Specification for the JVM," 2014. Available: https://www.reactive-streams.org/
+[R23] VMware/Broadcom, "Project Reactor — reactor-core," GitHub. Available: https://github.com/reactor/reactor-core
+[R24] OpenJDK, "JEP 266: More Concurrency Updates — java.util.concurrent.Flow," Java 9, 2017.
+[R25] OpenJDK, "JEP 444: Virtual Threads (GA)," Java 21, 2023. Available: https://openjdk.org/jeps/444
+[R26] Ben Hale et al., "R2DBC — Reactive Relational Database Connectivity Specification," r2dbc.io, 2018. Available: https://r2dbc.io/
+
 **Subject Index Cross-References:**
 - Actor Model ......... Ch 3.1, Ch 3.4
+- Backpressure ........ Ch 3.9
 - Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4
 - CAS (Compare-And-Swap) ........ Ch 3.2, Ch 3.4, Ch 2.4
+- CQRS ................ Ch 3.7
+- CSP ................. Ch 3.8
 - Disruptor ........... Ch 3.2, Ch 3.4
-- Event Sourcing ...... Ch 3.2
+- Event Sourcing ...... Ch 3.2, Ch 3.7
 - False Sharing ....... Ch 2.4, Ch 3.2, Ch 3.4
-- LMAX Disruptor ...... Ch 3.2, Ch 3.4
-- Mechanical Sympathy . Ch 3.2, Ch 3.4
+- Flux<T> / Mono<T> .. Ch 3.9
+- LMAX Disruptor ...... Ch 3.2, Ch 3.4, Ch 3.5
+- Mechanical Sympathy . Ch 3.2, Ch 3.4, Ch 3.6
 - Memory Barriers ..... Ch 2.3, Ch 2.4, Ch 3.4
-- Ring Buffer ......... Ch 3.2, Ch 3.4
+- Project Reactor ..... Ch 3.9
+- Reactive Manifesto .. Ch 3.9
+- Reactive Streams .... Ch 3.9
+- Ring Buffer ......... Ch 3.2, Ch 3.4, Ch 3.5
 - Single-Writer Principle ......... Ch 3.2, Ch 3.4
-- TDD ................. Ch 5.1, Ch 3.3
+- Spring WebFlux ...... Ch 3.9
+- TDD ................. Ch 6.1, Ch 3.3
+- Virtual Threads ...... Ch 3.9
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4

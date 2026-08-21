@@ -1012,8 +1012,8 @@ Kafka</a></li>
 Reactive Paradigm — The Low-Latency Verdict</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#chapter-3.9-citation-reference-deep-dives-module-3" id="toc-chapter-3.9-citation-reference-deep-dives-module-3">Chapter 3.9:
-Citation &amp; Reference Deep-Dives — Module 3</a>
+<li><a href="#chapter-3.10-citation-reference-deep-dives-module-3" id="toc-chapter-3.10-citation-reference-deep-dives-module-3">Chapter
+3.10: Citation &amp; Reference Deep-Dives — Module 3</a>
 <ul>
 <li><a href="#deep-dive-3.5.1-carl-hewitts-original-actor-formalism-1973-vs-1985" id="toc-deep-dive-3.5.1-carl-hewitts-original-actor-formalism-1973-vs-1985">Deep-Dive
 3.5.1: Carl Hewitt’s Original Actor Formalism (1973 vs 1985)</a>
@@ -1551,9 +1551,9 @@ Philosophy</a></li>
 Concurrency Memory</a></li>
 <li><a href="#module-3-actor-model-and-lmax-disruptor" id="toc-module-3-actor-model-and-lmax-disruptor">Module 3: Actor Model
 and LMAX Disruptor</a></li>
-<li><a href="#module-4-software-ui-architecture" id="toc-module-4-software-ui-architecture">Module 4: Software UI
+<li><a href="#module-5-software-ui-architecture" id="toc-module-5-software-ui-architecture">Module 5: Software UI
 Architecture</a></li>
-<li><a href="#module-5-code-evolution-refactoring" id="toc-module-5-code-evolution-refactoring">Module 5: Code Evolution
+<li><a href="#module-6-code-evolution-refactoring" id="toc-module-6-code-evolution-refactoring">Module 6: Code Evolution
 Refactoring</a></li>
 </ul></li>
 <li><a href="#part-b-subject-index" id="toc-part-b-subject-index">Part
@@ -10253,8 +10253,8 @@ Disruptor at the core, Project Reactor at the boundary.</p>
 <div class="page-break">
 
 </div>
-<h1 id="chapter-3.9-citation-reference-deep-dives-module-3">Chapter 3.9:
-Citation &amp; Reference Deep-Dives — Module 3</h1>
+<h1 id="chapter-3.10-citation-reference-deep-dives-module-3">Chapter
+3.10: Citation &amp; Reference Deep-Dives — Module 3</h1>
 <p>This chapter provides standalone research profiles, mathematical
 formalisms, hardware memory fence mechanics, and lock-free data
 structure implementations for all major citations across Module 3.</p>
@@ -10399,14 +10399,33 @@ and R. Steiger, “A Universal Modular ACTOR Formalism for Artificial
 Intelligence,” IJCAI’73, 1973. [S10] M. Barker, “Bad Concurrency: Flow
 Control in Aeron &amp; I Heard a Rumour,” bad-concurrency.blogspot.com,
 2020.</p>
+<p><strong>Chapter 3.9 — Reactive Paradigm Citations</strong> [R20] J.
+Bonér, D. Farley, R. Kuhn, and M. Thompson, “The Reactive Manifesto,”
+v2.0, 2014. Available: https://www.reactivemanifesto.org/ [R21] E.
+Meijer, “Subject/Observer is Dual to Iterator,” Microsoft Research,
+2010. Available:
+https://csl.cornell.edu/~jnfoster/cs6113/papers/meijer.pdf [R22]
+Reactive Streams Initiative, “Reactive Streams Specification for the
+JVM,” 2014. Available: https://www.reactive-streams.org/ [R23]
+VMware/Broadcom, “Project Reactor — reactor-core,” GitHub. Available:
+https://github.com/reactor/reactor-core [R24] OpenJDK, “JEP 266: More
+Concurrency Updates — java.util.concurrent.Flow,” Java 9, 2017. [R25]
+OpenJDK, “JEP 444: Virtual Threads (GA),” Java 21, 2023. Available:
+https://openjdk.org/jeps/444 [R26] Ben Hale et al., “R2DBC — Reactive
+Relational Database Connectivity Specification,” r2dbc.io, 2018.
+Available: https://r2dbc.io/</p>
 <p><strong>Subject Index Cross-References:</strong> - Actor Model ……… Ch
-3.1, Ch 3.4 - Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4 - CAS
-(Compare-And-Swap) …….. Ch 3.2, Ch 3.4, Ch 2.4 - Disruptor ……….. Ch 3.2,
-Ch 3.4 - Event Sourcing …… Ch 3.2 - False Sharing ……. Ch 2.4, Ch 3.2, Ch
-3.4 - LMAX Disruptor …… Ch 3.2, Ch 3.4 - Mechanical Sympathy . Ch 3.2,
-Ch 3.4 - Memory Barriers ….. Ch 2.3, Ch 2.4, Ch 3.4 - Ring Buffer ……… Ch
-3.2, Ch 3.4 - Single-Writer Principle ……… Ch 3.2, Ch 3.4 - TDD ……………..
-Ch 5.1, Ch 3.3 - Volatile ………… Ch 2.3, Ch 2.4, Ch 3.4</p>
+3.1, Ch 3.4 - Backpressure …….. Ch 3.9 - Cache Line Padding .. Ch 2.4,
+Ch 3.2, Ch 3.4 - CAS (Compare-And-Swap) …….. Ch 3.2, Ch 3.4, Ch 2.4 -
+CQRS ……………. Ch 3.7 - CSP …………….. Ch 3.8 - Disruptor ……….. Ch 3.2, Ch 3.4
+- Event Sourcing …… Ch 3.2, Ch 3.7 - False Sharing ……. Ch 2.4, Ch 3.2,
+Ch 3.4 - Flux<T> / Mono<T> .. Ch 3.9 - LMAX Disruptor …… Ch 3.2, Ch 3.4,
+Ch 3.5 - Mechanical Sympathy . Ch 3.2, Ch 3.4, Ch 3.6 - Memory Barriers
+….. Ch 2.3, Ch 2.4, Ch 3.4 - Project Reactor ….. Ch 3.9 - Reactive
+Manifesto .. Ch 3.9 - Reactive Streams …. Ch 3.9 - Ring Buffer ……… Ch
+3.2, Ch 3.4, Ch 3.5 - Single-Writer Principle ……… Ch 3.2, Ch 3.4 -
+Spring WebFlux …… Ch 3.9 - TDD …………….. Ch 6.1, Ch 3.3 - Virtual Threads
+…… Ch 3.9 - Volatile ………… Ch 2.3, Ch 2.4, Ch 3.4</p>
 <div class="page-break">
 
 </div>
@@ -10455,7 +10474,7 @@ lock-free, zero-allocation event loop architecture</strong>.</p>
                                       ▼
 ┌───────────────────────────────────────────────────────────────────────────┐
 │                      OUTBOUND BROADCAST &amp; LOGGING                         │
-│   Async Asynchronous Journaler + Network UDP Multicast Market Data Engine │
+│   Asynchronous Journaler + Network UDP Multicast Market Data Engine │
 └───────────────────────────────────────────────────────────────────────────┘</code></pre>
 <hr />
 <h3 id="microsecond-latency-slas-jitter-elimination">2. Microsecond
@@ -11227,7 +11246,8 @@ Low-Latency JVM Execution Command:</h4>
 <span id="cb125-5"><a href="#cb125-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:+UseLargePages</span> <span class="dt">\</span></span>
 <span id="cb125-6"><a href="#cb125-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:GuaranteedSafepointInterval</span><span class="op">=</span>0 <span class="dt">\</span></span>
 <span id="cb125-7"><a href="#cb125-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">-XX:-UseBiasedLocking</span> <span class="dt">\</span></span>
-<span id="cb125-8"><a href="#cb125-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">-jar</span> hft-pricing-engine.jar</span></code></pre></div>
+<span id="cb125-8"><a href="#cb125-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">-jar</span> hft-pricing-engine.jar</span>
+<span id="cb125-9"><a href="#cb125-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: -XX:-UseBiasedLocking was removed in Java 21 (JEP 374). Omit this flag on Java 21+.</span></span></code></pre></div>
 <h5 id="flag-analysis">Flag Analysis:</h5>
 <ul>
 <li><strong><code>-XX:+UseEpsilonGC</code></strong>: Disables garbage
@@ -12703,19 +12723,20 @@ Examples &amp; Modern Implementations</h3>
 <span id="cb149-2"><a href="#cb149-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rx <span class="im">import</span> operators <span class="im">as</span> ops</span>
 <span id="cb149-3"><a href="#cb149-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb149-4"><a href="#cb149-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Python - Processing a stream of events reactively</span></span>
-<span id="cb149-5"><a href="#cb149-5" aria-hidden="true" tabindex="-1"></a>events <span class="op">=</span> rx.from_list([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>])</span>
-<span id="cb149-6"><a href="#cb149-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb149-7"><a href="#cb149-7" aria-hidden="true" tabindex="-1"></a>events.pipe(</span>
-<span id="cb149-8"><a href="#cb149-8" aria-hidden="true" tabindex="-1"></a>    ops.<span class="bu">filter</span>(<span class="kw">lambda</span> x: x <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>),</span>
-<span id="cb149-9"><a href="#cb149-9" aria-hidden="true" tabindex="-1"></a>    ops.<span class="bu">map</span>(<span class="kw">lambda</span> x: x <span class="op">*</span> <span class="dv">10</span>)</span>
-<span id="cb149-10"><a href="#cb149-10" aria-hidden="true" tabindex="-1"></a>).subscribe(</span>
-<span id="cb149-11"><a href="#cb149-11" aria-hidden="true" tabindex="-1"></a>    on_next<span class="op">=</span><span class="kw">lambda</span> i: <span class="bu">print</span>(<span class="ss">f&quot;Processed: </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb149-12"><a href="#cb149-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb149-5"><a href="#cb149-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: rx.of(*items) is the correct RxPY 4.x API (rx.from_list was removed)</span></span>
+<span id="cb149-6"><a href="#cb149-6" aria-hidden="true" tabindex="-1"></a>events <span class="op">=</span> rx.of(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>)</span>
+<span id="cb149-7"><a href="#cb149-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb149-8"><a href="#cb149-8" aria-hidden="true" tabindex="-1"></a>events.pipe(</span>
+<span id="cb149-9"><a href="#cb149-9" aria-hidden="true" tabindex="-1"></a>    ops.<span class="bu">filter</span>(<span class="kw">lambda</span> x: x <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>),</span>
+<span id="cb149-10"><a href="#cb149-10" aria-hidden="true" tabindex="-1"></a>    ops.<span class="bu">map</span>(<span class="kw">lambda</span> x: x <span class="op">*</span> <span class="dv">10</span>)</span>
+<span id="cb149-11"><a href="#cb149-11" aria-hidden="true" tabindex="-1"></a>).subscribe(</span>
+<span id="cb149-12"><a href="#cb149-12" aria-hidden="true" tabindex="-1"></a>    on_next<span class="op">=</span><span class="kw">lambda</span> i: <span class="bu">print</span>(<span class="ss">f&quot;Processed: </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb149-13"><a href="#cb149-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <h2 id="section-2-verbatim-text-3">SECTION 2 — VERBATIM TEXT</h2>
 <blockquote>
 <p><strong>VERBATIM SOURCE</strong><br />
-Functional Reactive Programming, Conal Elliott and Paul Hudak, ICFP,
-1997<br />
+<em>Functional Reactive Animation</em>, Conal Elliott and Paul Hudak,
+Haskell Workshop (co-located with ICFP), 1997<br />
 <em>This text is represented here as a placeholder for educational
 study.</em></p>
 </blockquote>
@@ -14863,8 +14884,22 @@ al., “First Impressions of Testing at LMAX,” LMAX Blog, 2023. [17] J.
 Byatt, “Why I Don’t Do Work in Constructors,” LMAX Blog, 2024. [18] J.
 Byatt, “Coverage Can Only Show You What to Delete,” LMAX Blog, 2023.
 [19] LMAX Blog, “The Impossible NullPointerException,” 2022. Available:
-https://www.lmax.com/blog/staff-blogs/2022/06/15/the-impossible-nullpointerexception/</p>
-<h3 id="module-4-software-ui-architecture">Module 4: Software UI
+https://www.lmax.com/blog/staff-blogs/2022/06/15/the-impossible-nullpointerexception/
+[R20] J. Bonér, D. Farley, R. Kuhn, and M. Thompson, “The Reactive
+Manifesto,” v2.0, 2014. Available: https://www.reactivemanifesto.org/
+[R21] E. Meijer, “Subject/Observer is Dual to Iterator,” Microsoft
+Research, 2010. Available:
+https://csl.cornell.edu/~jnfoster/cs6113/papers/meijer.pdf [R22]
+Reactive Streams Initiative, “Reactive Streams Specification for the
+JVM,” 2014. Available: https://www.reactive-streams.org/ [R23]
+VMware/Broadcom, “Project Reactor — reactor-core,” GitHub. Available:
+https://github.com/reactor/reactor-core [R24] OpenJDK, “JEP 266: More
+Concurrency Updates — java.util.concurrent.Flow,” Java 9, 2017. [R25]
+OpenJDK, “JEP 444: Virtual Threads (GA),” Java 21, 2023. Available:
+https://openjdk.org/jeps/444 [R26] Ben Hale et al., “R2DBC — Reactive
+Relational Database Connectivity Specification,” r2dbc.io, 2018.
+Available: https://r2dbc.io/</p>
+<h3 id="module-5-software-ui-architecture">Module 5: Software UI
 Architecture</h3>
 <p>[20] M. Fowler, “GUI Architectures,” MartinFowler.com, 2006.
 Available: https://martinfowler.com/eaaDev/uiArchs.html [21] M. Fowler,
@@ -14882,7 +14917,7 @@ M. Fowler, “Serverless Architectures,” MartinFowler.com, 2018.
 Available: https://martinfowler.com/articles/serverless.html [27] P.
 Hodgson and M. Fowler, “Feature Toggles,” MartinFowler.com, 2017.
 Available: https://martinfowler.com/articles/feature-toggles.html</p>
-<h3 id="module-5-code-evolution-refactoring">Module 5: Code Evolution
+<h3 id="module-6-code-evolution-refactoring">Module 6: Code Evolution
 Refactoring</h3>
 <p>[28] M. Fowler, “An Example of Preparatory Refactoring,”
 MartinFowler.com, 2014. Available:
@@ -14908,36 +14943,44 @@ https://martinfowler.com/articles/refactoring-external-service.html</p>
 <ul>
 <li>Actor Model ……… Ch 3.1, Ch 3.4</li>
 <li>Amdahl’s Law …….. Ch 2.1, Ch 2.4</li>
+<li>Backpressure …….. Ch 3.9</li>
 <li>Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4</li>
 <li>CAS (Compare-And-Swap) …….. Ch 3.2, Ch 3.4, Ch 2.4</li>
-<li>Collection Pipelines ………. Ch 5.2, Ch 5.2b</li>
+<li>Collection Pipelines ………. Ch 6.5</li>
+<li>CQRS ……………. Ch 3.7</li>
+<li>CSP …………….. Ch 3.8</li>
 <li>Dark Silicon …….. Ch 2.1, Ch 2.2</li>
 <li>Dependency Inversion ………. Ch 5.2, Ch 5.3</li>
 <li>Disruptor ……….. Ch 3.2, Ch 3.4</li>
 <li>Double-Checked Locking …….. Ch 2.3, Ch 2.4</li>
-<li>Event Sourcing …… Ch 3.2</li>
+<li>Event Sourcing …… Ch 3.2, Ch 3.7</li>
 <li>False Sharing ……. Ch 2.4, Ch 3.2, Ch 3.4</li>
-<li>Feature Toggles ….. Ch 4.3</li>
-<li>Gateway Pattern ….. Ch 5.2d, Ch 5.3</li>
+<li>Feature Toggles ….. Ch 5.3</li>
+<li>Flux<T> / Mono<T> .. Ch 3.9</li>
+<li>Gateway Pattern ….. Ch 6.2d, Ch 6.3</li>
 <li>Happens-Before …… Ch 2.3, Ch 2.4</li>
 <li>Java Memory Model … Ch 2.3, Ch 2.4</li>
 <li>LMAX Disruptor …… Ch 3.2, Ch 3.4</li>
 <li>Mechanical Sympathy . Ch 3.2, Ch 3.4</li>
 <li>Memory Barriers ….. Ch 2.3, Ch 2.4, Ch 3.4</li>
-<li>Micro Frontends ….. Ch 4.2</li>
+<li>Micro Frontends ….. Ch 5.2</li>
 <li>Moore’s Law ……… Ch 2.1, Ch 2.2</li>
-<li>MVC …………….. Ch 4.1, Ch 4.4</li>
-<li>Notification Pattern ………. Ch 5.1, Ch 5.2</li>
+<li>MVC …………….. Ch 5.1, Ch 5.4</li>
+<li>Notification Pattern ………. Ch 6.1, Ch 6.2</li>
 <li>Null References (Billion Dollar Mistake) ….. Ch 1.5</li>
-<li>Presentation Domain Separation …….. Ch 4.1, Ch 4.4, Ch 4.5</li>
-<li>Preparatory Refactoring ……… Ch 5.1</li>
-<li>Refactoring ……… Ch 5.1, Ch 5.1b, Ch 5.2, Ch 5.2b, Ch 5.2c, Ch
-5.2d</li>
+<li>Presentation Domain Separation …….. Ch 5.1, Ch 5.4, Ch 5.5</li>
+<li>Preparatory Refactoring ……… Ch 6.2</li>
+<li>Project Reactor ….. Ch 3.9</li>
+<li>Reactive Manifesto .. Ch 3.9</li>
+<li>Reactive Streams …. Ch 3.9</li>
+<li>Refactoring ……… Ch 6.2, Ch 6.3, Ch 6.4, Ch 6.5, Ch 6.6, Ch 6.7</li>
 <li>Ring Buffer ……… Ch 3.2, Ch 3.4</li>
-<li>Serverless ………. Ch 4.3</li>
+<li>Serverless ………. Ch 5.3</li>
 <li>Single-Writer Principle ……… Ch 3.2, Ch 3.4</li>
-<li>Software Design ….. Ch 1.1, Ch 1.1b</li>
-<li>TDD …………….. Ch 5.1, Ch 3.3</li>
+<li>Software Design ….. Ch 1.1, Ch 1.2</li>
+<li>Spring WebFlux …… Ch 3.9</li>
+<li>TDD …………….. Ch 6.1, Ch 3.3</li>
+<li>Virtual Threads …… Ch 3.9</li>
 <li>Volatile ………… Ch 2.3, Ch 2.4, Ch 3.4</li>
 </ul>
 <h2 id="part-c-author-index">Part C: Author Index</h2>
@@ -15007,6 +15050,12 @@ https://martinfowler.com/articles/refactoring-adaptive-model.html</li>
 https://martinfowler.com/articles/refactoring-external-service.html</li>
 <li>Martin Fowler (PD Data Layering):
 https://martinfowler.com/bliki/PresentationDomainDataLayering.html</li>
+<li>Reactive Manifesto: https://www.reactivemanifesto.org/</li>
+<li>Reactive Streams Specification:
+https://www.reactive-streams.org/</li>
+<li>Project Reactor: https://github.com/reactor/reactor-core</li>
+<li>JEP 444 (Virtual Threads): https://openjdk.org/jeps/444</li>
+<li>R2DBC Specification: https://r2dbc.io/</li>
 </ul>
 </body>
 </html>

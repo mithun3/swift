@@ -32,8 +32,15 @@
 [17] J. Byatt, "Why I Don't Do Work in Constructors," LMAX Blog, 2024.
 [18] J. Byatt, "Coverage Can Only Show You What to Delete," LMAX Blog, 2023.
 [19] LMAX Blog, "The Impossible NullPointerException," 2022. Available: https://www.lmax.com/blog/staff-blogs/2022/06/15/the-impossible-nullpointerexception/
+[R20] J. Bonér, D. Farley, R. Kuhn, and M. Thompson, "The Reactive Manifesto," v2.0, 2014. Available: https://www.reactivemanifesto.org/
+[R21] E. Meijer, "Subject/Observer is Dual to Iterator," Microsoft Research, 2010. Available: https://csl.cornell.edu/~jnfoster/cs6113/papers/meijer.pdf
+[R22] Reactive Streams Initiative, "Reactive Streams Specification for the JVM," 2014. Available: https://www.reactive-streams.org/
+[R23] VMware/Broadcom, "Project Reactor — reactor-core," GitHub. Available: https://github.com/reactor/reactor-core
+[R24] OpenJDK, "JEP 266: More Concurrency Updates — java.util.concurrent.Flow," Java 9, 2017.
+[R25] OpenJDK, "JEP 444: Virtual Threads (GA)," Java 21, 2023. Available: https://openjdk.org/jeps/444
+[R26] Ben Hale et al., "R2DBC — Reactive Relational Database Connectivity Specification," r2dbc.io, 2018. Available: https://r2dbc.io/
 
-### Module 4: Software UI Architecture
+### Module 5: Software UI Architecture
 [20] M. Fowler, "GUI Architectures," MartinFowler.com, 2006. Available: https://martinfowler.com/eaaDev/uiArchs.html
 [21] M. Fowler, "Presentation Domain Separation," MartinFowler.com, 2001/06. Available: https://martinfowler.com/eaaDev/SeparatedPresentation.html
 [22] M. Fowler, "Separated Presentation," MartinFowler.com, 2006. Available: https://martinfowler.com/eaaDev/SeparatedPresentation.html
@@ -43,7 +50,7 @@
 [26] M. Roberts and M. Fowler, "Serverless Architectures," MartinFowler.com, 2018. Available: https://martinfowler.com/articles/serverless.html
 [27] P. Hodgson and M. Fowler, "Feature Toggles," MartinFowler.com, 2017. Available: https://martinfowler.com/articles/feature-toggles.html
 
-### Module 5: Code Evolution Refactoring
+### Module 6: Code Evolution Refactoring
 [28] M. Fowler, "An Example of Preparatory Refactoring," MartinFowler.com, 2014. Available: https://martinfowler.com/articles/preparatory-refactoring-example.html
 [29] M. Fowler, "Refactoring Code to Load a Document," MartinFowler.com, 2016.
 [30] M. Fowler, "Refactoring: This Class is Too Large," MartinFowler.com, 2015.
@@ -57,35 +64,44 @@
 ## Part B: Subject Index
 - Actor Model ......... Ch 3.1, Ch 3.4
 - Amdahl's Law ........ Ch 2.1, Ch 2.4
+- Backpressure ........ Ch 3.9
 - Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4
 - CAS (Compare-And-Swap) ........ Ch 3.2, Ch 3.4, Ch 2.4
-- Collection Pipelines .......... Ch 5.2, Ch 5.2b
+- Collection Pipelines .......... Ch 6.5
+- CQRS ................ Ch 3.7
+- CSP ................. Ch 3.8
 - Dark Silicon ........ Ch 2.1, Ch 2.2
 - Dependency Inversion .......... Ch 5.2, Ch 5.3
 - Disruptor ........... Ch 3.2, Ch 3.4
 - Double-Checked Locking ........ Ch 2.3, Ch 2.4
-- Event Sourcing ...... Ch 3.2
+- Event Sourcing ...... Ch 3.2, Ch 3.7
 - False Sharing ....... Ch 2.4, Ch 3.2, Ch 3.4
-- Feature Toggles ..... Ch 4.3
-- Gateway Pattern ..... Ch 5.2d, Ch 5.3
+- Feature Toggles ..... Ch 5.3
+- Flux<T> / Mono<T> .. Ch 3.9
+- Gateway Pattern ..... Ch 6.2d, Ch 6.3
 - Happens-Before ...... Ch 2.3, Ch 2.4
 - Java Memory Model ... Ch 2.3, Ch 2.4
 - LMAX Disruptor ...... Ch 3.2, Ch 3.4
 - Mechanical Sympathy . Ch 3.2, Ch 3.4
 - Memory Barriers ..... Ch 2.3, Ch 2.4, Ch 3.4
-- Micro Frontends ..... Ch 4.2
+- Micro Frontends ..... Ch 5.2
 - Moore's Law ......... Ch 2.1, Ch 2.2
-- MVC ................. Ch 4.1, Ch 4.4
-- Notification Pattern .......... Ch 5.1, Ch 5.2
+- MVC ................. Ch 5.1, Ch 5.4
+- Notification Pattern .......... Ch 6.1, Ch 6.2
 - Null References (Billion Dollar Mistake) ..... Ch 1.5
-- Presentation Domain Separation ........ Ch 4.1, Ch 4.4, Ch 4.5
-- Preparatory Refactoring ......... Ch 5.1
-- Refactoring ......... Ch 5.1, Ch 5.1b, Ch 5.2, Ch 5.2b, Ch 5.2c, Ch 5.2d
+- Presentation Domain Separation ........ Ch 5.1, Ch 5.4, Ch 5.5
+- Preparatory Refactoring ......... Ch 6.2
+- Project Reactor ..... Ch 3.9
+- Reactive Manifesto .. Ch 3.9
+- Reactive Streams .... Ch 3.9
+- Refactoring ......... Ch 6.2, Ch 6.3, Ch 6.4, Ch 6.5, Ch 6.6, Ch 6.7
 - Ring Buffer ......... Ch 3.2, Ch 3.4
-- Serverless .......... Ch 4.3
+- Serverless .......... Ch 5.3
 - Single-Writer Principle ......... Ch 3.2, Ch 3.4
-- Software Design ..... Ch 1.1, Ch 1.1b
-- TDD ................. Ch 5.1, Ch 3.3
+- Software Design ..... Ch 1.1, Ch 1.2
+- Spring WebFlux ...... Ch 3.9
+- TDD ................. Ch 6.1, Ch 3.3
+- Virtual Threads ...... Ch 3.9
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
 
 ## Part C: Author Index
@@ -134,3 +150,8 @@
 - Martin Fowler (Adaptive Model): https://martinfowler.com/articles/refactoring-adaptive-model.html
 - Martin Fowler (External Service): https://martinfowler.com/articles/refactoring-external-service.html
 - Martin Fowler (PD Data Layering): https://martinfowler.com/bliki/PresentationDomainDataLayering.html
+- Reactive Manifesto: https://www.reactivemanifesto.org/
+- Reactive Streams Specification: https://www.reactive-streams.org/
+- Project Reactor: https://github.com/reactor/reactor-core
+- JEP 444 (Virtual Threads): https://openjdk.org/jeps/444
+- R2DBC Specification: https://r2dbc.io/

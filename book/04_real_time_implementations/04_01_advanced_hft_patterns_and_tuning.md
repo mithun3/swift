@@ -68,6 +68,7 @@ java -XX:+UnlockExperimentalVMOptions \
      -XX:GuaranteedSafepointInterval=0 \
      -XX:-UseBiasedLocking \
      -jar hft-pricing-engine.jar
+# Note: -XX:-UseBiasedLocking was removed in Java 21 (JEP 374). Omit this flag on Java 21+.
 ```
 
 ##### Flag Analysis:

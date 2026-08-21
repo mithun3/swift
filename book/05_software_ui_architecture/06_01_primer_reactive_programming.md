@@ -81,7 +81,8 @@ import rx
 from rx import operators as ops
 
 # Python - Processing a stream of events reactively
-events = rx.from_list([1, 2, 3, 4, 5])
+# Note: rx.of(*items) is the correct RxPY 4.x API (rx.from_list was removed)
+events = rx.of(1, 2, 3, 4, 5)
 
 events.pipe(
     ops.filter(lambda x: x % 2 == 0),
@@ -94,7 +95,7 @@ events.pipe(
 ## SECTION 2 — VERBATIM TEXT
 
 > **VERBATIM SOURCE**  
-> Functional Reactive Programming, Conal Elliott and Paul Hudak, ICFP, 1997  
+> *Functional Reactive Animation*, Conal Elliott and Paul Hudak, Haskell Workshop (co-located with ICFP), 1997  
 > *This text is represented here as a placeholder for educational study.*
 
 (In a full realization of this book, the verbatim text of seminal papers or articles on FRP would be inserted here, allowing readers to study the formal definitions of behaviors and events.)

@@ -36,7 +36,7 @@ Traditional multi-tiered enterprise web applications—relying on database locks
                                       ▼
 ┌───────────────────────────────────────────────────────────────────────────┐
 │                      OUTBOUND BROADCAST & LOGGING                         │
-│   Async Asynchronous Journaler + Network UDP Multicast Market Data Engine │
+│   Asynchronous Journaler + Network UDP Multicast Market Data Engine │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
