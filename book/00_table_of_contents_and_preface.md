@@ -42,7 +42,8 @@
 - [Chapter 3.6: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/06_01_primer_mechanical_sympathy.md)
 - [Chapter 3.7: Deep Dive: CQRS and Event Sourcing](./03_actor_model_lmax_disruptor/07_01_primer_cqrs_and_event_sourcing.md)
 - [Chapter 3.8: Deep Dive: CSP vs. Actor Model](./03_actor_model_lmax_disruptor/08_01_primer_csp_vs_actor_model.md)
-- [Chapter 3.9: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/09_references_deep_dives.md)
+- [Chapter 3.9: The Reactive Paradigm — Project Reactor, Java's Native Reactive Model & the Low-Latency Fit](./03_actor_model_lmax_disruptor/09_01_primer_reactive_paradigm_project_reactor.md)
+- [Chapter 3.10: Citation & Reference Deep-Dives — Module 3](./03_actor_model_lmax_disruptor/10_references_deep_dives.md)
 
 ---
 
@@ -173,12 +174,12 @@ This compendium follows three principles:
 | :--- | :--- | :---: |
 | **1** | Core Foundations of Software Engineering & Design Philosophy | 7 |
 | **2** | Hardware Evolution, Concurrency & Memory Models | 4 |
-| **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 9 |
+| **3** | High-Performance Architecture, Actor Model & LMAX Disruptor | 10 |
 | **4** | Real-Time Implementations (Case Study) | 5 |
 | **5** | Software & UI Architecture Patterns | 7 |
 | **6** | Code Evolution & Refactoring Patterns | 8 |
 | **7** | Bibliography & Subject Index | 1 |
-| **Total** | | **41** |
+| **Total** | | **42** |
 
 ### Sources Used in This Volume
 
