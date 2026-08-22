@@ -39,6 +39,7 @@
 - [Chapter 3.3: LMAX Technology Blog — Scale, Testing, Constructors, Coverage & The Impossible NullPointerException](./03_actor_model_lmax_disruptor/03_01_primer_and_verbatim_lmax_engineering_blogs.md)
 - [Chapter 3.4: Bad Concurrency — Mechanical Sympathy & Lock-Free Systems (Michael Barker)](./03_actor_model_lmax_disruptor/04_01_primer_and_verbatim_barker_bad_concurrency.md)
 - [Chapter 3.5: Deep Dive: Concepts of the LMAX Disruptor](./03_actor_model_lmax_disruptor/05_01_primer_lmax_disruptor_concepts.md)
+- [Chapter 3.5.B: The LMAX Disruptor in Day-to-Day Engineering — Applicability, Advantages & Disadvantages](./03_actor_model_lmax_disruptor/05_02_disruptor_applicability_day_to_day.md)
 - [Chapter 3.6: Deep Dive: Mechanical Sympathy](./03_actor_model_lmax_disruptor/06_01_primer_mechanical_sympathy.md)
 - [Chapter 3.7: Deep Dive: CQRS and Event Sourcing](./03_actor_model_lmax_disruptor/07_01_primer_cqrs_and_event_sourcing.md)
 - [Chapter 3.8: Deep Dive: CSP vs. Actor Model](./03_actor_model_lmax_disruptor/08_01_primer_csp_vs_actor_model.md)

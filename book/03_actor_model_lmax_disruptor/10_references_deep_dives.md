@@ -109,6 +109,9 @@ Hardware memory reordering forces low-latency lock-free data structures (like th
 **Supplementary Readings**
 [S9] C. Hewitt, P. Bishop, and R. Steiger, "A Universal Modular ACTOR Formalism for Artificial Intelligence," IJCAI'73, 1973.
 [S10] M. Barker, "Bad Concurrency: Flow Control in Aeron & I Heard a Rumour," bad-concurrency.blogspot.com, 2020.
+[S11] Apache Logging Services, "Log4j 2 Performance — Asynchronous Loggers," logging.apache.org. Available: https://logging.apache.org/log4j/2.x/performance.html
+[S12] D. Lea, "java.util.concurrent.ArrayBlockingQueue," OpenJDK. Available: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
+[S13] OpenJDK Project Valhalla, "Value Types for Java," 2023. Available: https://openjdk.org/projects/valhalla/
 
 **Chapter 3.9 — Reactive Paradigm Citations**
 [R20] J. Bonér, D. Farley, R. Kuhn, and M. Thompson, "The Reactive Manifesto," v2.0, 2014. Available: https://www.reactivemanifesto.org/
@@ -122,23 +125,32 @@ Hardware memory reordering forces low-latency lock-free data structures (like th
 **Subject Index Cross-References:**
 - Actor Model ......... Ch 3.1, Ch 3.4
 - Backpressure ........ Ch 3.9
-- Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4
-- CAS (Compare-And-Swap) ........ Ch 3.2, Ch 3.4, Ch 2.4
+- Batching Effect ..... Ch 3.5, Ch 3.5.B
+- Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4, Ch 3.5.B
+- CAS (Compare-And-Swap) ........ Ch 3.2, Ch 3.4, Ch 2.4, Ch 3.5.B
 - CQRS ................ Ch 3.7
 - CSP ................. Ch 3.8
+- Decision Framework .. Ch 3.5.B
 - Disruptor ........... Ch 3.2, Ch 3.4
+- Disruptor Applicability ....... Ch 3.5.B
+- Disruptor Disadvantages ....... Ch 3.5.B
 - Event Sourcing ...... Ch 3.2, Ch 3.7
 - False Sharing ....... Ch 2.4, Ch 3.2, Ch 3.4
 - Flux<T> / Mono<T> .. Ch 3.9
-- LMAX Disruptor ...... Ch 3.2, Ch 3.4, Ch 3.5
-- Mechanical Sympathy . Ch 3.2, Ch 3.4, Ch 3.6
+- GC Pressure ......... Ch 3.5.B
+- J-Curve Latency ..... Ch 3.5.B
+- LMAX Disruptor ...... Ch 3.2, Ch 3.4, Ch 3.5, Ch 3.5.B
+- Log4j2 Async Logger . Ch 3.5, Ch 3.5.B
+- Mechanical Sympathy . Ch 3.2, Ch 3.4, Ch 3.6, Ch 3.5.B
 - Memory Barriers ..... Ch 2.3, Ch 2.4, Ch 3.4
+- Object Pooling ....... Ch 3.5.B
 - Project Reactor ..... Ch 3.9
 - Reactive Manifesto .. Ch 3.9
 - Reactive Streams .... Ch 3.9
 - Ring Buffer ......... Ch 3.2, Ch 3.4, Ch 3.5
-- Single-Writer Principle ......... Ch 3.2, Ch 3.4
+- Single-Writer Principle ......... Ch 3.2, Ch 3.4, Ch 3.5.B
 - Spring WebFlux ...... Ch 3.9
 - TDD ................. Ch 6.1, Ch 3.3
-- Virtual Threads ...... Ch 3.9
+- Virtual Threads ...... Ch 3.9, Ch 3.5.B
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
+- Wait Strategies ..... Ch 3.5, Ch 3.5.B
