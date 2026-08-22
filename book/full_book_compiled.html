@@ -1873,7 +1873,14 @@ covered in the primer, and cross-references to other chapters.</p>
 the above pattern. Its Section 3 carries an <strong>Editorial
 Commentary</strong> in direct response to a question raised by Reeves
 within his verbatim text — specifically, whether software development is
-an engineering discipline or not. The citation and reference deep-dives
+an engineering discipline or not. The commentary includes an analysis of
+the case for and against the engineering label (§§3–5), and in §4.6
+presents a dedicated examination of <strong>B. Jacobs’ (“Tablizer”) 2005
+essay</strong> <em>“Software, Science, and Math”</em> — which argues
+that neither “Computer Science” nor “Software Engineering” is accurately
+labelled, and that software design is more properly understood as
+applied mathematics operating on internally consistent virtual worlds,
+unconstrained by physical laws. The citation and reference deep-dives
 for Module 1 are consolidated in Chapter 1.7.</p>
 </blockquote>
 <h3 id="code-examples">Code Examples</h3>
@@ -2906,6 +2913,16 @@ correctness</em> — not bureaucratic process management</p>
 <p>Both men — arguably the two greatest computer scientists of the 20th
 century — pushed back against the engineering label, each from a
 different angle.</p>
+<p>This “software as mathematics” intuition was independently elaborated
+and sharpened by the practitioner essayist <strong>B. Jacobs
+(“Tablizer”)</strong> in his 2005 web essay <em>“Software, Science, and
+Math”</em>. Where Dijkstra argued from the perspective of formal rigor,
+Jacobs argued from the practical absence of objective discriminators: if
+software creates internally consistent but physically unconstrained
+virtual worlds — much as mathematics constructs internally consistent
+formal systems — then the standard tools of engineering (empirical
+testing against physical reality, reproducible measurement) simply do
+not apply. See §4.6 below.</p>
 <h4 id="lack-of-mandatory-licensing-and-accountability">4.4 Lack of
 Mandatory Licensing and Accountability</h4>
 <p>In civil or structural engineering: - A licensed Professional
@@ -2938,6 +2955,127 @@ structural engineering.</p>
 paper above: the build/test cycle exists precisely <em>because</em>
 software design is so fluid that formal upfront validation is
 economically and practically infeasible.</p>
+<h4 id="the-tablizer-thesis-software-as-mathematics-and-virtual-world-creation">4.6
+The Tablizer Thesis: Software as Mathematics and Virtual World
+Creation</h4>
+<blockquote>
+<p><strong>Source:</strong> B. Jacobs (“Tablizer”), <em>“Software,
+Science, and Math”</em> (subtitle: <em>“Computer Science is Not Science
+and Software Engineering is Not Engineering”</em>), Findy Services,
+updated 3 March 2005. Archived:
+https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm</p>
+</blockquote>
+<p>In a tightly argued practitioner essay, B. Jacobs advances one of the
+most direct statements of the “software is not engineering” position.
+Its core logic runs as follows:</p>
+<p><strong>The engineering analogy fails at the foundation.</strong>
+Physical engineering — bridge design, aeronautics, chemical plants — is
+ultimately <em>applied science</em>: models are tested against physical
+reality and corrected when they diverge. The engineer is, as Jacobs puts
+it, <em>“married to the laws [of physics] whether he/she wants to be or
+not.”</em> Software has no such marriage. The only hard constraint on a
+software design is that it must produce the specified outputs; how it
+does so internally is subject to no external physical law.</p>
+<p><strong>Turing Completeness eliminates the objective
+discriminator.</strong> Virtually all competing paradigms, languages,
+and design approaches are <em>Turing-complete</em> — meaning they are
+all, in principle, capable of implementing any well-specified algorithm.
+This has a devastating epistemological consequence:</p>
+<blockquote>
+<p><em>“The bottom line is that delivering the required results is not a
+distinguishing factor; they can all do it.”</em> — B. Jacobs,
+<em>Software, Science, and Math</em>, 2005</p>
+</blockquote>
+<p>Since correctness of output cannot distinguish between approaches,
+the debate between OOP vs Relational, structured vs goto-based, or any
+other paradigm war cannot be settled by the outcome criterion alone.
+What remains — performance, maintainability, readability, team
+productivity — are metrics that resist rigorous, reproducible
+measurement in real-world conditions.</p>
+<p><strong>The empirical science void.</strong> Jacobs catalogs the
+actual content of “Computer Science” literature:</p>
+<ul>
+<li><strong>Boolean Algebra</strong> — useful math, not science; makes
+no falsifiable empirical predictions about real-world software
+quality</li>
+<li><strong>Object-Oriented Programming</strong> — a design idiom, not a
+scientific theory; its benefits are asserted but not reproducibly
+measured</li>
+<li><strong>Data structures and Algorithms</strong> — the one area with
+genuine empirical grounding is computational <em>performance</em> (Big-O
+notation), but performance is only one of many contested metrics</li>
+<li><strong>Relational Theory, Set Theory, Type Theory</strong> — formal
+mathematical systems with internal consistency as the criterion, not
+physical-world accuracy</li>
+</ul>
+<blockquote>
+<p><em>“All that CS writing and very little of it gives any useful,
+objective tools to answer ‘which is better?’”</em> — B. Jacobs,
+ibid.</p>
+</blockquote>
+<p>The body of CS literature, Jacobs argues, follows the structure of
+mathematics: state axioms/givens, derive consequences, show examples,
+suggest related topics. This is not the structure of empirical
+science.</p>
+<p><strong>Software as virtual world creation — the structural reason
+objectivity fails.</strong> Jacobs’ most original contribution is his
+explanation of <em>why</em> objective design evaluation is so
+intractable:</p>
+<blockquote>
+<p><em>“Software is a lot like math, and perhaps is math according to
+some definitions. The fact that we can use software to create
+alternative realities is manifested in the gaming world… The only
+limitation is the imagination of the creator of the virtual world (and
+perhaps the pesky limitations of computer resources). As long as they
+can define the rules clearly, they can make a universe that follows
+those rules.”</em> — B. Jacobs, ibid.</p>
+</blockquote>
+<p>Unlike a bridge, which must exist <em>in</em> the physical world,
+software creates its own internal world. There is no external physical
+reality to which it must ultimately answer (beyond the input/output
+specification). This <em>“nearly infinite flexibility”</em> is precisely
+why objective software design evaluation is so elusive: multiple
+self-consistent virtual worlds can all satisfy the specification, and
+choosing between them becomes a matter of human cognitive preference
+rather than physical necessity.</p>
+<p>This argument, which Jacobs summarises as <em>“we might as well be a
+bunch of loonies in the mental hospital arguing over which one of us is
+the real Napoleon — except that in cyberspace, we can all be
+Napoleon”</em>, points to the field’s deepest epistemological
+challenge.</p>
+<p><strong>The productivity measurement problem.</strong> Jacobs notes
+the near-complete absence of controlled empirical studies on developer
+productivity across paradigms:</p>
+<blockquote>
+<p><em>“The bottom line is that empirical science is sorely lacking in
+our field.”</em></p>
+</blockquote>
+<p>The closest available evidence — including observations drawn from
+Edward Yourdon’s studies — suggests that the paradigm or language a
+developer is <em>most comfortable with</em> is the one that makes them
+most productive; a finding that deflects rather than settles paradigm
+debates.</p>
+<p><strong>Conclusion and label critique.</strong> Jacobs’ bottom line
+is unambiguous:</p>
+<blockquote>
+<p><em>“The bottom line is that as things now stand, Computer Science is
+not science and Software Engineering is not engineering. Don’t get me
+wrong, I am not suggesting those works are all useless. Not being
+science or engineering does not automatically make them useless. My
+complaint is mostly that they are mislabeled and that leaving them
+mislabeled is misleading and perhaps intellectually dishonest. They are
+idioms…”</em> — B. Jacobs, ibid.</p>
+</blockquote>
+<p><strong>Relationship to Reeves.</strong> Jacobs’ essay is
+complementary to, but distinct from, Reeves’ 1992 argument. Reeves
+argues that source code <em>is</em> the design document — thereby
+elevating programming to a design (and, implicitly, engineering)
+activity. Jacobs argues that the design process itself lacks the
+external physical constraints that would make it a <em>science or
+engineering</em> activity in the traditional sense. Both observations
+can be held simultaneously: programming <em>is</em> design (Reeves), and
+software design operates more like applied mathematics than applied
+physics (Jacobs).</p>
 <hr />
 <h3 id="synthesis-the-nuanced-position">5. Synthesis: The Nuanced
 Position</h3>
@@ -3046,6 +3184,14 @@ could be made provably correct</td>
 <td>Source code <em>is</em> the design; programming <em>is</em> a design
 activity — closer to engineering than craft if done rigorously</td>
 </tr>
+<tr>
+<td><strong>B. Jacobs (“Tablizer”)</strong></td>
+<td>Against both labels</td>
+<td><em>“Software, Science, and Math”</em> (2005); software is closer to
+applied mathematics than to science or engineering; CS idioms lack the
+empirical grounding required of science, and software lacks the
+physical-law constraints required of engineering</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -3079,7 +3225,10 @@ Donald E. Knuth (1968–present) - SWEBOK v3.0 — IEEE Computer Society
 Engineering: A Practitioner’s Approach</em> — Roger S. Pressman - Agile
 Manifesto — Beck et al. (2001), agilemanifesto.org - DO-178C — Software
 Considerations in Airborne Systems Certification (RTCA) - IEC 62304 —
-Medical Device Software Lifecycle Processes</p>
+Medical Device Software Lifecycle Processes - B. Jacobs (“Tablizer”),
+<em>“Software, Science, and Math”</em> (updated 3 March 2005), Findy
+Services — archived at
+https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm</p>
 </blockquote>
 <div class="page-break">
 
@@ -4665,14 +4814,21 @@ Available: https://agilemanifesto.org/ [E8] RTCA, <em>DO-178C: Software
 Considerations in Airborne Systems and Equipment Certification</em>,
 RTCA Inc., 2011. [E9] IEC, <em>IEC 62304: Medical Device Software —
 Software Life Cycle Processes</em>, International Electrotechnical
-Commission, 2006 (Ed. 1.1, 2015).</p>
+Commission, 2006 (Ed. 1.1, 2015). [E10] B. Jacobs (“Tablizer”),
+“Software, Science, and Math” (subtitle: “Computer Science is Not
+Science and Software Engineering is Not Engineering”), Findy Services,
+updated 3 March 2005. Archived:
+https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm</p>
 <p><strong>Subject Index Cross-References:</strong> - Agile Manifesto
 …….. Ch 1.1 (§3) - Code as Documentation .. Ch 1.3 - Engineering
 Discipline (debate) …. Ch 1.1 (§3) - Formal Methods ……… Ch 1.1 (§3) -
 Information Hiding ….. Ch 1.6 - Modular Decomposition .. Ch 1.6 - NATO
 1968 Conference … Ch 1.1 (§3) - Null References …….. Ch 1.5 - Software
+as Mathematics / Virtual World Thesis …….. Ch 1.1 (§4.6) - Software
 Crisis (1960s) ………. Ch 1.1 (§3) - Software Design …….. Ch 1.1, Ch 1.2 -
-SWEBOK …………….. Ch 1.1 (§3) - UML as Sketch ………. Ch 1.4</p>
+SWEBOK …………….. Ch 1.1 (§3) - Tablizer Thesis (B. Jacobs, 2005) ……………….
+Ch 1.1 (§4.6) - Turing Completeness (epistemological limits of) …… Ch
+1.1 (§4.6) - UML as Sketch ………. Ch 1.4</p>
 <div class="page-break">
 
 </div>
@@ -16090,7 +16246,11 @@ Available: https://agilemanifesto.org/ [E8] RTCA, <em>DO-178C: Software
 Considerations in Airborne Systems and Equipment Certification</em>,
 RTCA Inc., 2011. [E9] IEC, <em>IEC 62304: Medical Device Software —
 Software Life Cycle Processes</em>, International Electrotechnical
-Commission, 2006 (Ed. 1.1, 2015).</p>
+Commission, 2006 (Ed. 1.1, 2015). [E10] B. Jacobs (“Tablizer”),
+“Software, Science, and Math” (subtitle: “Computer Science is Not
+Science and Software Engineering is Not Engineering”), Findy Services,
+updated 3 March 2005. Archived:
+https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm</p>
 <h3 id="module-2-hardware-concurrency-memory">Module 2: Hardware
 Concurrency Memory</h3>
 <p>[6] H. Sutter, “Welcome to the Jungle,” HerbSutter.com, 2011.
@@ -16220,11 +16380,16 @@ https://martinfowler.com/articles/refactoring-external-service.html</p>
 <li>Ring Buffer ……… Ch 3.2, Ch 3.4</li>
 <li>Serverless ………. Ch 5.3</li>
 <li>Single-Writer Principle ……… Ch 3.2, Ch 3.4</li>
+<li>Software as Mathematics / Virtual World Thesis …….. Ch 1.1
+(§4.6)</li>
 <li>Software Crisis (1960s) ……… Ch 1.1 (§3)</li>
 <li>Software Design ….. Ch 1.1, Ch 1.2</li>
 <li>Spring WebFlux …… Ch 3.9</li>
 <li>SWEBOK ………….. Ch 1.1 (§3)</li>
+<li>Tablizer Thesis (B. Jacobs, 2005) …….. Ch 1.1 (§4.6)</li>
 <li>TDD …………….. Ch 6.1, Ch 3.3</li>
+<li>Turing Completeness (epistemological limits of) …… Ch 1.1
+(§4.6)</li>
 <li>Virtual Threads …… Ch 3.9</li>
 <li>Volatile ………… Ch 2.3, Ch 2.4, Ch 3.4</li>
 </ul>
@@ -16242,6 +16407,7 @@ https://martinfowler.com/articles/refactoring-external-service.html</p>
 <li>IEC …………………….. [E9]</li>
 <li>Intel …………………… [8]</li>
 <li>C. Jackson ………………. [24]</li>
+<li>B. Jacobs (“Tablizer”) …….. [E10]</li>
 <li>IEEE Computer Society ……… [E4]</li>
 <li>D. E. Knuth ……………… [E3]</li>
 <li>D. Lea ………………….. [9]</li>
@@ -16314,6 +16480,9 @@ https://www.reactive-streams.org/</li>
 <li>IEEE SWEBOK v3.0:
 https://www.computer.org/education/bodies-of-knowledge/software-engineering</li>
 <li>Agile Manifesto: https://agilemanifesto.org/</li>
+<li>Tablizer (B. Jacobs) — “Software, Science, and Math” (Wayback
+Machine archive):
+https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm</li>
 </ul>
 </body>
 </html>
