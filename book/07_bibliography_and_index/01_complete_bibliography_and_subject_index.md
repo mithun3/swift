@@ -14,6 +14,17 @@
 [5] M. Fowler, "The Almighty Thud," MartinFowler.com, 1997. Available: https://martinfowler.com/ (archive)
 [37] C. A. R. Hoare, "Null References: The Billion Dollar Mistake," QCon London, 2009. Available: https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/
 
+*Editorial Commentary References — Ch 1.1, Section 3 (Is Software Development an Engineering Discipline?):*
+[E1] P. Naur and B. Randell, Eds., *Software Engineering: Report of a conference sponsored by the NATO Science Committee*, NATO Scientific Affairs Division, Brussels, 1969.
+[E2] F. P. Brooks Jr., *The Mythical Man-Month: Essays on Software Engineering*, Addison-Wesley, 1975 (20th Anniversary Ed. 1995).
+[E3] D. E. Knuth, *The Art of Computer Programming*, vols. 1–4B, Addison-Wesley, 1968–present.
+[E4] IEEE Computer Society, *Guide to the Software Engineering Body of Knowledge (SWEBOK v3.0)*, IEEE, 2014. Available: https://www.computer.org/education/bodies-of-knowledge/software-engineering
+[E5] Standish Group, *CHAOS Report*, Standish Group International, 2013–2020.
+[E6] R. S. Pressman and B. Maxim, *Software Engineering: A Practitioner's Approach*, 9th ed., McGraw-Hill, 2019.
+[E7] K. Beck et al., "Manifesto for Agile Software Development," 2001. Available: https://agilemanifesto.org/
+[E8] RTCA, *DO-178C: Software Considerations in Airborne Systems and Equipment Certification*, RTCA Inc., 2011.
+[E9] IEC, *IEC 62304: Medical Device Software — Software Life Cycle Processes*, International Electrotechnical Commission, 2006 (Ed. 1.1, 2015).
+
 ### Module 2: Hardware Concurrency Memory
 [6] H. Sutter, "Welcome to the Jungle," HerbSutter.com, 2011. Available: https://herbsutter.com/welcome-to-the-jungle/
 [7] R. Schaller, "Moore's Law: Past, Present, Future," IEEE Spectrum, 1997. DOI: 10.1109/6.591665
@@ -63,6 +74,7 @@
 
 ## Part B: Subject Index
 - Actor Model ......... Ch 3.1, Ch 3.4
+- Agile Manifesto ..... Ch 1.1 (§3)
 - Amdahl's Law ........ Ch 2.1, Ch 2.4
 - Backpressure ........ Ch 3.9
 - Cache Line Padding .. Ch 2.4, Ch 3.2, Ch 3.4
@@ -73,13 +85,17 @@
 - Dark Silicon ........ Ch 2.1, Ch 2.2
 - Dependency Inversion .......... Ch 5.2, Ch 5.3
 - Disruptor ........... Ch 3.2, Ch 3.4
+- DO-178C ............. Ch 1.1 (§3)
 - Double-Checked Locking ........ Ch 2.3, Ch 2.4
+- Engineering Discipline (debate) .......... Ch 1.1 (§3)
 - Event Sourcing ...... Ch 3.2, Ch 3.7
 - False Sharing ....... Ch 2.4, Ch 3.2, Ch 3.4
 - Feature Toggles ..... Ch 5.3
+- Formal Methods ...... Ch 1.1 (§3)
 - Flux<T> / Mono<T> .. Ch 3.9
 - Gateway Pattern ..... Ch 6.2d, Ch 6.3
 - Happens-Before ...... Ch 2.3, Ch 2.4
+- IEC 62304 ........... Ch 1.1 (§3)
 - Java Memory Model ... Ch 2.3, Ch 2.4
 - LMAX Disruptor ...... Ch 3.2, Ch 3.4
 - Mechanical Sympathy . Ch 3.2, Ch 3.4
@@ -87,6 +103,7 @@
 - Micro Frontends ..... Ch 5.2
 - Moore's Law ......... Ch 2.1, Ch 2.2
 - MVC ................. Ch 5.1, Ch 5.4
+- NATO 1968 Conference .......... Ch 1.1 (§3)
 - Notification Pattern .......... Ch 6.1, Ch 6.2
 - Null References (Billion Dollar Mistake) ..... Ch 1.5
 - Presentation Domain Separation ........ Ch 5.1, Ch 5.4, Ch 5.5
@@ -98,8 +115,10 @@
 - Ring Buffer ......... Ch 3.2, Ch 3.4
 - Serverless .......... Ch 5.3
 - Single-Writer Principle ......... Ch 3.2, Ch 3.4
+- Software Crisis (1960s) ......... Ch 1.1 (§3)
 - Software Design ..... Ch 1.1, Ch 1.2
 - Spring WebFlux ...... Ch 3.9
+- SWEBOK .............. Ch 1.1 (§3)
 - TDD ................. Ch 6.1, Ch 3.3
 - Virtual Threads ...... Ch 3.9
 - Volatile ............ Ch 2.3, Ch 2.4, Ch 3.4
@@ -107,20 +126,30 @@
 ## Part C: Author Index
 - G. A. Agha ................... [12]
 - M. Barker .................... [11]
+- K. Beck et al. ............... [E7]
+- F. P. Brooks Jr. ............. [E2]
 - J. Byatt ..................... [17], [18]
+- E. W. Dijkstra ............... [E1] (cited in Ch 1.1 §3)
 - M. Fowler .................... [4], [5], [13], [20]-[24], [26]-[36]
 - C. A. R. Hoare ................ [37]
 - P. Hodgson ................... [27]
+- IEC .......................... [E9]
 - Intel ........................ [8]
 - C. Jackson ................... [24]
+- IEEE Computer Society ......... [E4]
+- D. E. Knuth .................. [E3]
 - D. Lea ....................... [9]
 - LMAX Blog .................... [19]
+- P. Naur and B. Randell ........ [E1]
 - A. Osmani .................... [25]
 - Povoliashko et al. ........... [16]
+- R. S. Pressman ............... [E6]
 - W. Pugh et al. ............... [10]
 - J. W. Reeves ................. [1], [2], [3]
 - M. Roberts ................... [26]
+- RTCA ......................... [E8]
 - R. Schaller .................. [7]
+- Standish Group ............... [E5]
 - H. Sutter .................... [6]
 - M. Thompson et al. ........... [14]
 - S. Warren .................... [15]
@@ -155,3 +184,5 @@
 - Project Reactor: https://github.com/reactor/reactor-core
 - JEP 444 (Virtual Threads): https://openjdk.org/jeps/444
 - R2DBC Specification: https://r2dbc.io/
+- IEEE SWEBOK v3.0: https://www.computer.org/education/bodies-of-knowledge/software-engineering
+- Agile Manifesto: https://agilemanifesto.org/

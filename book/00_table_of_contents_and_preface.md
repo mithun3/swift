@@ -124,6 +124,8 @@ The verbatim text is not paraphrased, edited, or summarised. What you read is ex
 
 This section provides standalone research profiles for every cited work, person, and concept mentioned in the source paper. Each deep-dive includes publication history, mathematical or architectural detail not covered in the primer, and cross-references to other chapters.
 
+> **Note on Chapter 1.1:** This chapter is an exception to the above pattern. Its Section 3 carries an **Editorial Commentary** in direct response to a question raised by Reeves within his verbatim text — specifically, whether software development is an engineering discipline or not. The citation and reference deep-dives for Module 1 are consolidated in Chapter 1.7.
+
 ### Code Examples
 
 All technical code examples are presented in three languages:

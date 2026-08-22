@@ -194,3 +194,261 @@ Object oriented techniques, and C++ in particular, seem to be taking the softwar
  - Software development is still more a craft than an engineering discipline. This is primarily because of a lack of rigor in the critical processes of validating and improving a design. 
  - Ultimately, real advances in software development depend upon advances in programming techniques, which in turn mean advances in programming languages. C++ is such an advance. It has exploded in popularity because it is a mainstream programming language that directly supports better software design.
  - C++ is a step in the right direction, but still more advances are needed.
+
+---
+
+<div class="page-break"></div>
+
+### SECTION 3: EDITORIAL COMMENTARY
+
+> **Editorial Note:** The following section is the editor's own analysis and research — it is not part of Reeves' original 1992 paper. It is presented here in direct response to a specific observation Reeves makes early in the verbatim text above.
+
+---
+
+### On the Question Reeves Left Open: Is Software Development an Engineering Discipline?
+
+Early in his essay, Reeves writes:
+
+> *"Years ago I was attending a seminar where the question came up of whether software development is an engineering discipline or not. While I do not remember the resulting discussion, I do remember how it catalyzed my own thinking..."*
+>
+> — Jack W. Reeves, *What Is Software Design?*, C++ Journal, Fall 1992
+
+Reeves never answers the question directly. He uses it as a launching pad for his central thesis about software design and source code. But the question itself deserves a full answer — one that decades of subsequent scholarship, empirical data, and professional debate have shaped significantly. What follows is that answer.
+
+---
+
+### 1. Historical Origins: Where the Debate Was Born
+
+#### 1.1 The "Software Crisis" (1960s)
+
+By the mid-1960s, computers were doubling in capability almost yearly, but the software written for them was becoming catastrophically unreliable. Projects routinely:
+
+- Ran vastly over budget and schedule
+- Delivered products that failed to meet user requirements
+- Produced software that was nearly impossible to maintain
+- Demonstrated that programming capability could not keep pace with hardware advancement
+
+This period was called the **"Software Crisis"** — the term that would define the field's adolescence.
+
+#### 1.2 The 1968 NATO Conference: Birth of the Term
+
+The pivotal moment came at the **1968 NATO Software Engineering Conference** in Garmisch, Germany. Key facts:
+
+- **Fritz Bauer** is credited with coining "software engineering" as the conference title
+- **Peter Naur** and **Brian Randell** edited the official report: *Software Engineering: Report of a conference sponsored by the NATO Science Committee*
+- The term was chosen **deliberately provocatively** — it was an aspiration, not a description of current practice
+- The goal was to signal that software needed to adopt the systematic, disciplined, and quantifiable approaches of traditional engineering
+
+> *"The phrase 'software engineering' was chosen deliberately to be provocative."*
+> — NATO 1968 Conference retrospective accounts
+
+The conference acknowledged a painful truth: programming as then practiced was ad hoc, artistic, and ungovernable at scale. The word "engineering" was an aspirational target — not a fait accompli. Reeves' 1992 essay was written within that same context: a field still searching for its identity.
+
+---
+
+### 2. What Makes Something an Engineering Discipline?
+
+Before evaluating software, we need criteria. A discipline is generally recognised as *engineering* when it meets most of the following:
+
+| Criterion | Description |
+|---|---|
+| **Systematic Methodology** | Structured, repeatable processes — not ad hoc trial-and-error |
+| **Scientific/Mathematical Foundation** | Grounded in established science and mathematics |
+| **Life-Cycle Management** | Manages design, build, operation, and decommissioning |
+| **Standards & Best Practices** | Codified standards, codes of practice, and professional ethics |
+| **Accreditation & Regulation** | Formal certification bodies, licensing, and accountability |
+| **Predictability & Reliability** | Reliable predictions about outcomes can be made and met |
+| **Safety Obligation** | Professional accountability for public health, safety, and welfare |
+
+---
+
+### 3. The Case FOR: Software Development Is an Engineering Discipline
+
+#### 3.1 An Established Body of Knowledge
+
+The **Software Engineering Body of Knowledge (SWEBOK)**, published by the IEEE Computer Society, formally defines and organises the accepted knowledge within the discipline — covering requirements, design, construction, testing, maintenance, configuration management, process, quality, and professional practice. This mirrors what the ASCE does for civil engineering or what IEEE standards bodies do for electrical engineering.
+
+#### 3.2 Systematic Methodologies
+
+Software engineering employs the classic engineering paradigm across its full lifecycle:
+
+- **Analysis** → Requirements engineering, feasibility analysis
+- **Design** → Architecture, design patterns (SOLID, DRY, KISS), system modelling (UML)
+- **Build** → Structured coding with version control (Git), CI/CD pipelines
+- **Test** → Unit, integration, system, acceptance testing — automated and repeatable
+- **Maintain** → Monitoring, refactoring, dependency management
+
+These are codified, teachable, and repeatable — the hallmarks of engineering process.
+
+#### 3.3 Mathematical and Scientific Foundations
+
+Software engineering rests on:
+
+- **Discrete mathematics**: set theory, graph theory, formal logic
+- **Formal methods**: Hoare-style correctness proofs, model checking, theorem proving (TLA+, Coq, Lean)
+- **Algorithm theory**: computational complexity, Big-O analysis
+- **Type theory**: formal type systems as correctness guarantees
+
+In safety-critical domains — aerospace, medical devices, nuclear control systems — **formal verification is mandatory**. Engineers must mathematically *prove* that a system meets its specification. This is as rigorous as any structural analysis in civil engineering.
+
+#### 3.4 Mission-Critical Applications Demand Engineering Rigour
+
+In the following domains, software operates with zero tolerance for failure:
+
+- **Aerospace**: Flight control systems (DO-178C certification)
+- **Medical devices**: Pacemakers, infusion pumps, surgical robots (IEC 62304)
+- **Nuclear facilities**: Reactor control and safety systems
+- **Financial infrastructure**: Trading clearinghouses, payment systems
+
+The **Therac-25** radiation therapy machine (1985–87) — killed multiple patients due to software race conditions — is a permanent reminder that software failures produce physical consequences identical to structural engineering failures.
+
+#### 3.5 Professional Recognition and Academic Accreditation
+
+- **ABET** accredits Software Engineering programmes in the US
+- **IEEE** and **ACM** have dedicated professional divisions for the field
+- In Canada, software engineers may hold **P.Eng** (Professional Engineer) designations under provincial engineering acts
+- The **NCEES** introduced a PE exam specifically for Software Engineering in 2013
+- Dedicated degree programmes exist globally: BSc/MEng Software Engineering
+
+#### 3.6 Software Engineering Analogues to Traditional Engineering
+
+| Traditional Engineering | Software Engineering Equivalent |
+|---|---|
+| Material strength testing | Unit/integration testing, fuzzing |
+| Safety factors (over-engineering) | Defensive programming, redundancy, fault-tolerance |
+| Architectural blueprints | System architecture diagrams (UML, C4 model) |
+| Building codes | MISRA-C, OWASP, CERT coding standards |
+| Peer design review | Code review, pair programming |
+| Decommissioning plan | Deprecation strategy, end-of-life planning |
+
+---
+
+### 4. The Case AGAINST: Software Development Is NOT (Fully) an Engineering Discipline
+
+This side of the debate is equally serious and must not be dismissed.
+
+#### 4.1 No Physical Laws to Constrain It
+
+The most fundamental objection: software is **purely abstract and intangible**.
+
+Traditional engineering disciplines are constrained by immutable physical laws — gravity, thermodynamics, material fatigue. These laws act as an objective referee: a bridge design that violates them *will* collapse. Nature enforces correctness.
+
+Software has **no such external referee**. Its constraints — performance, memory, concurrency — are real, but they are human-defined and negotiable. A poorly designed system may run for years before its flaws become catastrophically apparent. Software can grow in complexity in ways physically impossible for any physical structure, producing *unmanageable complexity* as its unique pathology.
+
+#### 4.2 The Stubborn Problem of Unpredictability
+
+Traditional engineering can predict outcomes with high confidence. A civil engineer can calculate, within tight tolerances, whether a beam will bear a load. Software projects routinely fail on basic metrics of engineering predictability.
+
+**Standish Group CHAOS Report data (c. 2013–2020):**
+
+| Outcome | Agile Projects | Waterfall Projects |
+|---|---|---|
+| Successful | ~42% | ~13% |
+| Challenged | ~47% | ~28% |
+| Failed | ~11% | ~59% |
+
+Even with modern Agile practices, fewer than half of software projects are classified as fully successful. No other mature engineering discipline operates with such endemic unpredictability. A 13% success rate would be unacceptable in bridge-building.
+
+#### 4.3 The "Craft" Perspective: Knuth, Dijkstra, and the Dissenters
+
+**Donald Knuth** titled his foundational work *The Art of Computer Programming* deliberately. For Knuth, programming requires:
+- Creative judgment and aesthetic sensibility beyond what any methodology can systematise
+- Individual skill and ingenuity — the element of beauty that separates elegant code from mere functional code
+
+**Edsger W. Dijkstra** was more pointed. He described software engineering derisively as *"how to program when you cannot."* He believed:
+- True programming is a **branch of mathematics**, not engineering
+- The engineering label was a corporate fiction adopted to manage mediocre practitioners
+- Systematic methodologies were crutches substituting process for intellectual mastery
+- The field should be pursuing *formal mathematical correctness* — not bureaucratic process management
+
+Both men — arguably the two greatest computer scientists of the 20th century — pushed back against the engineering label, each from a different angle.
+
+#### 4.4 Lack of Mandatory Licensing and Accountability
+
+In civil or structural engineering:
+- A licensed Professional Engineer (PE) must stamp and sign designs
+- The PE is personally and legally liable if the structure fails
+- Licensure requires formal education, years of supervised experience, and examination
+
+In software development:
+- There is **no mandatory licensing** for the vast majority of software roles
+- The **US PE exam for Software Engineering was discontinued in 2019** due to near-zero adoption
+- A self-taught developer can write safety-critical firmware with no formal accountability
+- When software fails, accountability is typically corporate, not individual — unlike any mature engineering profession
+
+#### 4.5 The Volatility of Requirements: A Unique Challenge
+
+Physical engineering projects are defined by relatively stable requirements. A bridge must span X metres, carry Y load, last Z years. These requirements rarely change radically mid-construction.
+
+Software requirements are notoriously volatile:
+- User needs evolve as they interact with working prototypes
+- Market conditions shift during multi-year projects
+- Technology platforms change, invalidating earlier decisions
+- Stakeholders often cannot fully articulate requirements until they see working software
+
+The **Agile Manifesto** (2001) was a formal acknowledgment that software development cannot — and should not — be treated like physical construction. Responding to change was elevated *above* following a plan; a stance that would be untenable in structural engineering.
+
+This also resonates directly with Reeves' own observation in the paper above: the build/test cycle exists precisely *because* software design is so fluid that formal upfront validation is economically and practically infeasible.
+
+---
+
+### 5. Synthesis: The Nuanced Position
+
+#### 5.1 Software Engineering vs. Software Development
+
+A critical distinction often lost in this debate:
+
+| Dimension | Software Development | Software Engineering |
+|---|---|---|
+| **Scope** | Implementing specific features/applications | Entire system lifecycle: architecture, build, test, maintain |
+| **Approach** | Creative, iterative, task-oriented | Systematic, principled, engineering-disciplined |
+| **Goal** | Delivering functional software | Ensuring reliability, scalability, maintainability, safety |
+
+Most experts view software development as a **subset** of software engineering. A developer builds the "house"; a software engineer designs the "blueprints," the "foundation," and ensures it withstands long-term demands.
+
+#### 5.2 A Spectrum, Not a Binary
+
+The degree to which software development *is* engineering depends on the context in which it is practised:
+
+```
+Full Engineering Discipline ←————————————————→ Pure Craft
+  Avionics firmware (DO-178C)    Enterprise apps    Indie game dev
+  Medical device code (IEC 62304) Consumer web apps  Weekend hackathon
+```
+
+The same engineer can operate in full engineering mode in the morning (certifying avionics firmware) and in craft mode in the evening (building a personal project).
+
+#### 5.3 Notable Voices and Their Positions
+
+| Figure | Position | Basis |
+|---|---|---|
+| **Fritz Bauer** | Pro-engineering | Coined "software engineering" at NATO 1968 as a disciplinary aspiration |
+| **Edsger Dijkstra** | Against engineering label | *"Software engineering is how to program when you cannot"*; programming is a branch of mathematics |
+| **Donald Knuth** | Art/craft framing | *The Art of Computer Programming*; programming requires aesthetic judgment beyond systematisation |
+| **Fred Brooks** | Nuanced | *The Mythical Man-Month* (1975); software complexity is inherent — no "silver bullet" |
+| **David Parnas** | Pro-engineering | Advocated formal specifications and modular design as proper engineering practice |
+| **Tony Hoare** | Mathematical foundations | Developed Hoare logic for program correctness; believed software could be made provably correct |
+| **Jack W. Reeves** | Emerging discipline | Source code *is* the design; programming *is* a design activity — closer to engineering than craft if done rigorously |
+
+---
+
+### 6. Final Verdict
+
+> **Software development, when practised with systematic methodology, mathematical rigour, lifecycle management, and accountability, constitutes a genuine — if young and still-maturing — engineering discipline.**
+>
+> However, in much of its everyday commercial practice, it operates closer to a skilled craft or applied science than to a fully matured engineering profession: due to the absence of mandatory licensing, persistently high project failure rates, requirements volatility, and the lack of physical constraints that impose external discipline on practitioners.
+>
+> The label "engineering" is not wrong — it is *aspirational* in exactly the way Fritz Bauer intended it to be in 1968: a call to arms for the profession to hold itself to a higher, more rigorous standard. Reeves' own insight in this paper — that source code *is* the engineering design document — is one of the clearest steps the field has taken toward that standard.
+
+---
+
+> **Key References for Further Reading:**
+> - NATO 1968 Software Engineering Conference Report — Naur & Randell (eds.)
+> - *The Mythical Man-Month* — Frederick P. Brooks Jr. (1975, 20th Anniversary Ed. 1995)
+> - *The Art of Computer Programming* — Donald E. Knuth (1968–present)
+> - SWEBOK v3.0 — IEEE Computer Society (2014)
+> - Standish Group CHAOS Report (2013–2020)
+> - *Software Engineering: A Practitioner's Approach* — Roger S. Pressman
+> - Agile Manifesto — Beck et al. (2001), agilemanifesto.org
+> - DO-178C — Software Considerations in Airborne Systems Certification (RTCA)
+> - IEC 62304 — Medical Device Software Lifecycle Processes

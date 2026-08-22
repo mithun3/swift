@@ -82,10 +82,27 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 [S4] M. Fowler, *Refactoring: Improving the Design of Existing Code*, Addison-Wesley, 1999.
 [S5] J. Kerievsky, *Refactoring to Patterns*, Addison-Wesley, 2004.
 
+**Editorial Commentary References (Ch 1.1, Section 3)**
+[E1] P. Naur and B. Randell, Eds., *Software Engineering: Report of a conference sponsored by the NATO Science Committee*, NATO Scientific Affairs Division, Brussels, 1969.
+[E2] F. P. Brooks Jr., *The Mythical Man-Month: Essays on Software Engineering*, Addison-Wesley, 1975 (20th Anniversary Ed. 1995).
+[E3] D. E. Knuth, *The Art of Computer Programming*, vols. 1–4B, Addison-Wesley, 1968–present.
+[E4] IEEE Computer Society, *Guide to the Software Engineering Body of Knowledge (SWEBOK v3.0)*, IEEE, 2014. Available: https://www.computer.org/education/bodies-of-knowledge/software-engineering
+[E5] Standish Group, *CHAOS Report*, Standish Group International, 2013–2020.
+[E6] R. S. Pressman and B. Maxim, *Software Engineering: A Practitioner's Approach*, 9th ed., McGraw-Hill, 2019.
+[E7] K. Beck et al., "Manifesto for Agile Software Development," 2001. Available: https://agilemanifesto.org/
+[E8] RTCA, *DO-178C: Software Considerations in Airborne Systems and Equipment Certification*, RTCA Inc., 2011.
+[E9] IEC, *IEC 62304: Medical Device Software — Software Life Cycle Processes*, International Electrotechnical Commission, 2006 (Ed. 1.1, 2015).
+
 **Subject Index Cross-References:**
+- Agile Manifesto ........ Ch 1.1 (§3)
 - Code as Documentation .. Ch 1.3
+- Engineering Discipline (debate) .... Ch 1.1 (§3)
+- Formal Methods ......... Ch 1.1 (§3)
 - Information Hiding ..... Ch 1.6
 - Modular Decomposition .. Ch 1.6
+- NATO 1968 Conference ... Ch 1.1 (§3)
 - Null References ........ Ch 1.5
+- Software Crisis (1960s) .......... Ch 1.1 (§3)
 - Software Design ........ Ch 1.1, Ch 1.2
+- SWEBOK ................. Ch 1.1 (§3)
 - UML as Sketch .......... Ch 1.4
