@@ -92,6 +92,7 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 [E7] K. Beck et al., "Manifesto for Agile Software Development," 2001. Available: https://agilemanifesto.org/
 [E8] RTCA, *DO-178C: Software Considerations in Airborne Systems and Equipment Certification*, RTCA Inc., 2011.
 [E9] IEC, *IEC 62304: Medical Device Software — Software Life Cycle Processes*, International Electrotechnical Commission, 2006 (Ed. 1.1, 2015).
+[E10] B. Jacobs ("Tablizer"), "Software, Science, and Math" (subtitle: "Computer Science is Not Science and Software Engineering is Not Engineering"), Findy Services, updated 3 March 2005. Archived: https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm
 
 **Subject Index Cross-References:**
 - Agile Manifesto ........ Ch 1.1 (§3)
@@ -102,7 +103,10 @@ Jack Reeves exposed this circular reasoning: if one instead starts with the prem
 - Modular Decomposition .. Ch 1.6
 - NATO 1968 Conference ... Ch 1.1 (§3)
 - Null References ........ Ch 1.5
+- Software as Mathematics / Virtual World Thesis ........ Ch 1.1 (§4.6)
 - Software Crisis (1960s) .......... Ch 1.1 (§3)
 - Software Design ........ Ch 1.1, Ch 1.2
 - SWEBOK ................. Ch 1.1 (§3)
+- Tablizer Thesis (B. Jacobs, 2005) ................... Ch 1.1 (§4.6)
+- Turing Completeness (epistemological limits of) ...... Ch 1.1 (§4.6)
 - UML as Sketch .......... Ch 1.4

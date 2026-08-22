@@ -124,7 +124,7 @@ The verbatim text is not paraphrased, edited, or summarised. What you read is ex
 
 This section provides standalone research profiles for every cited work, person, and concept mentioned in the source paper. Each deep-dive includes publication history, mathematical or architectural detail not covered in the primer, and cross-references to other chapters.
 
-> **Note on Chapter 1.1:** This chapter is an exception to the above pattern. Its Section 3 carries an **Editorial Commentary** in direct response to a question raised by Reeves within his verbatim text — specifically, whether software development is an engineering discipline or not. The citation and reference deep-dives for Module 1 are consolidated in Chapter 1.7.
+> **Note on Chapter 1.1:** This chapter is an exception to the above pattern. Its Section 3 carries an **Editorial Commentary** in direct response to a question raised by Reeves within his verbatim text — specifically, whether software development is an engineering discipline or not. The commentary includes an analysis of the case for and against the engineering label (§§3–5), and in §4.6 presents a dedicated examination of **B. Jacobs' ("Tablizer") 2005 essay** *"Software, Science, and Math"* — which argues that neither "Computer Science" nor "Software Engineering" is accurately labelled, and that software design is more properly understood as applied mathematics operating on internally consistent virtual worlds, unconstrained by physical laws. The citation and reference deep-dives for Module 1 are consolidated in Chapter 1.7.
 
 ### Code Examples
 
