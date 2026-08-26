@@ -124,7 +124,7 @@ The conclusion they came to was that to get the best caching behavior, you need 
 > *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 
-Martin Thompson ⋅ Dave Farley ⋅ Michael Barker ⋅ Patricia Gee ⋅ Andrew Stewart
+Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart
  – Version 4.0.0-SNAPSHOT, May 2011
 #### Abstract
 
@@ -258,7 +258,7 @@ Separating the concerns normally conflated in queue implementations allows for a
 
 As a reference we choose Doug Lea’s excellent java.util.concurrent.ArrayBlockingQueue [7] which has the highest performance of any bounded queue based on our testing. The tests are conducted in a blocking programming style to match that of the Disruptor. The tests cases detailed below are available in the Disruptor open source project.
 
- running the tests requires a system capable of executing at least 4 threads in parallel.
+> **Warning:** running the tests requires a system capable of executing at least 4 threads in parallel.
 
 #### Figure 1. Unicast: 1P – 1C
 

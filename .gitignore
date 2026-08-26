@@ -25,7 +25,7 @@ logs/
 # Build and compiled artifacts
 # Book compilation
 # *_compiled.md
-*.pdf
+# *.pdf
 *.aux
 *.out
 *.toc

@@ -49,10 +49,14 @@ While Presentation-Domain-Data is the standard, variations exist such as Hexagon
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
-    public OrderController(OrderService orderService) { this.orderService = orderService; }
+    
+    public OrderController(OrderService orderService) { 
+        this.orderService = orderService; 
+    }
     
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest request) {
+    public ResponseEntity<Order> createOrder(
+            @RequestBody OrderRequest request) {
         return ResponseEntity.ok(orderService.placeOrder(request));
     }
 }
@@ -61,11 +65,19 @@ public class OrderController {
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
-    public OrderService(OrderRepository orderRepository) { this.orderRepository = orderRepository; }
+    
+    public OrderService(OrderRepository orderRepository) { 
+        this.orderRepository = orderRepository; 
+    }
     
     public Order placeOrder(OrderRequest request) {
-        if (request.getQuantity() <= 0) throw new IllegalArgumentException("Invalid qty");
-        Order order = new Order(request.getProductId(), request.getQuantity());
+        if (request.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Invalid qty");
+        }
+        Order order = new Order(
+            request.getProductId(), 
+            request.getQuantity()
+        );
         order.calculateTotal();
         return orderRepository.save(order);
     }
@@ -126,7 +138,10 @@ from domain.order_service import OrderService
 router = APIRouter()
 
 @router.post("/orders")
-def create_order(order_req: OrderRequest, service: OrderService = Depends()):
+def create_order(
+    order_req: OrderRequest, 
+    service: OrderService = Depends()
+):
     try:
         return service.place_order(order_req)
     except ValueError as e:
@@ -153,6 +168,7 @@ class OrderRepository:
 ```
 
 ---
+
 <div class="page-break"></div>
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS

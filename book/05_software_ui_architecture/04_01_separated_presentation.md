@@ -82,6 +82,7 @@ class CheckoutWindow(tk.Frame):
 ```
 
 ---
+
 <div class="page-break"></div>
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS

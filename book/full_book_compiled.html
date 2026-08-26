@@ -1341,6 +1341,12 @@ Concepts</a></li>
 Real-World Examples</a></li>
 <li><a href="#code-examples-java-js-python-1" id="toc-code-examples-java-js-python-1">4. Code Examples (Java / JS /
 Python)</a></li>
+</ul></li>
+<li><a href="#section-2-verbatim-research-texts-6" id="toc-section-2-verbatim-research-texts-6">SECTION 2: VERBATIM &amp;
+RESEARCH TEXTS</a>
+<ul>
+<li><a href="#separated-presentation-and-domain-decoupling" id="toc-separated-presentation-and-domain-decoupling">Separated
+Presentation and Domain Decoupling</a></li>
 <li><a href="#section-3-citation-reference-deep-dives-17" id="toc-section-3-citation-reference-deep-dives-17">SECTION 3: CITATION
 &amp; REFERENCE DEEP-DIVES</a></li>
 </ul></li>
@@ -1359,6 +1365,12 @@ Cognitive Scope Narrowing</a></li>
 Diagram</a></li>
 <li><a href="#code-examples-java-js-python-2" id="toc-code-examples-java-js-python-2">4. Code Examples (Java / JS /
 Python)</a></li>
+</ul></li>
+<li><a href="#section-2-verbatim-research-texts-7" id="toc-section-2-verbatim-research-texts-7">SECTION 2: VERBATIM &amp;
+RESEARCH TEXTS</a>
+<ul>
+<li><a href="#presentation-domain-data-layering-and-cognitive-scope" id="toc-presentation-domain-data-layering-and-cognitive-scope">Presentation
+Domain Data Layering and Cognitive Scope</a></li>
 <li><a href="#section-3-citation-reference-deep-dives-18" id="toc-section-3-citation-reference-deep-dives-18">SECTION 3: CITATION
 &amp; REFERENCE DEEP-DIVES</a></li>
 </ul></li>
@@ -1465,7 +1477,7 @@ Refactor</a></li>
 Method Pattern</a></li>
 <li><a href="#the-notification-pattern-replacing-exceptions-for-validation" id="toc-the-notification-pattern-replacing-exceptions-for-validation">7.
 The Notification Pattern — Replacing Exceptions for Validation</a></li>
-<li><a href="#section-2-verbatim-research-texts-6" id="toc-section-2-verbatim-research-texts-6">SECTION 2: VERBATIM &amp;
+<li><a href="#section-2-verbatim-research-texts-8" id="toc-section-2-verbatim-research-texts-8">SECTION 2: VERBATIM &amp;
 RESEARCH TEXTS</a></li>
 <li><a href="#the-core-philosophy-of-refactoring" id="toc-the-core-philosophy-of-refactoring">1. The Core Philosophy of
 Refactoring</a></li>
@@ -1637,6 +1649,9 @@ B: Subject Index</a></li>
 <li><a href="#part-c-author-index" id="toc-part-c-author-index">Part C:
 Author Index</a></li>
 <li><a href="#part-d-url-master-list" id="toc-part-d-url-master-list">Part D: URL Master List</a></li>
+<li><a href="#section-2" id="toc-section-2">SECTION 2</a></li>
+<li><a href="#content" id="toc-content">content</a></li>
+<li><a href="#section-2-1" id="toc-section-2-1">SECTION 2</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -7150,9 +7165,8 @@ Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart -
 <p><em>Note: The following text is reproduced verbatim — exact
 word-for-word.</em></p>
 </blockquote>
-<p>Martin Thompson ⋅ Dave Farley ⋅ Michael Barker ⋅ Patricia
-Gee ⋅ Andrew Stewart  – Version 4.0.0-SNAPSHOT, May 2011 ####
-Abstract</p>
+<p>Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew
+Stewart  – Version 4.0.0-SNAPSHOT, May 2011 #### Abstract</p>
 <p>LMAX was established to create a very high performance financial
 exchange. As part of our work to accomplish this goal we have evaluated
 several approaches to the design of such a system, but as we began to
@@ -7624,8 +7638,10 @@ performance of any bounded queue based on our testing. The tests are
 conducted in a blocking programming style to match that of the
 Disruptor. The tests cases detailed below are available in the Disruptor
 open source project.</p>
-<p> running the tests requires a system capable of executing at least 4
-threads in parallel.</p>
+<blockquote>
+<p><strong>Warning:</strong> running the tests requires a system capable
+of executing at least 4 threads in parallel.</p>
+</blockquote>
 <h4 id="figure-1.-unicast-1p-1c">Figure 1. Unicast: 1P – 1C</h4>
 <div class="sourceCode" id="cb58"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Callback handler which can be implemented by consumers</span></span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="dt">final</span> BatchHandler<span class="op">&lt;</span>ValueEntry<span class="op">&gt;</span> batchHandler <span class="op">=</span> <span class="kw">new</span> BatchHandler<span class="op">&lt;</span>ValueEntry<span class="op">&gt;()</span></span>
@@ -13714,37 +13730,30 @@ Implementation</h4>
 <span id="cb150-9"><a href="#cb150-9" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.total_entry.config(fg<span class="op">=</span><span class="st">&quot;red&quot;</span>)</span>
 <span id="cb150-10"><a href="#cb150-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.total_entry.delete(<span class="dv">0</span>, tk.END)</span>
 <span id="cb150-11"><a href="#cb150-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.total_entry.insert(<span class="dv">0</span>, <span class="bu">str</span>(new_total))</span></code></pre></div>
-<table style="width:6%;">
-<colgroup>
-<col style="width: 5%" />
-</colgroup>
-<tbody>
-<tr>
-<td></td>
-</tr>
-<tr>
-<td>## SECTION 2: VERBATIM &amp; RESEARCH TEXTS</td>
-</tr>
-<tr>
-<td>&gt; <strong>VERBATIM SOURCE</strong> &gt; - <strong>Title:</strong>
-Separated Presentation &gt; - <strong>Author(s):</strong> Martin Fowler
-&gt; - <strong>Published:</strong> June 2006, martinfowler.com &gt; -
-<strong>Source type:</strong> Architecture Pattern Essay &gt; -
-<strong>Original URL:</strong>
-https://martinfowler.com/eaaDev/SeparatedPresentation.html &gt; &gt;
-<em>Note: The following text presents the core architectural text and
-research synthesis for educational study.</em></td>
-</tr>
-<tr>
-<td>### Separated Presentation and Domain Decoupling The Separated
-Presentation pattern, as codified by Martin Fowler, dictates an absolute
-logical decoupling between presentation components and domain logic.
-Rooted in the original Smalltalk-80 MVC paradigm, this architectural
-layering ensures that the domain model remains completely unaware of its
-presentation mechanisms.</td>
-</tr>
-<tr>
-<td>Fowler outlines several core principles for implementation: -
+<hr />
+<div class="page-break">
+
+</div>
+<h2 id="section-2-verbatim-research-texts-6">SECTION 2: VERBATIM &amp;
+RESEARCH TEXTS</h2>
+<blockquote>
+<p><strong>VERBATIM SOURCE</strong> - <strong>Title:</strong> Separated
+Presentation - <strong>Author(s):</strong> Martin Fowler -
+<strong>Published:</strong> June 2006, martinfowler.com - <strong>Source
+type:</strong> Architecture Pattern Essay - <strong>Original
+URL:</strong>
+https://martinfowler.com/eaaDev/SeparatedPresentation.html</p>
+<p><em>Note: The following text presents the core architectural text and
+research synthesis for educational study.</em></p>
+</blockquote>
+<h3 id="separated-presentation-and-domain-decoupling">Separated
+Presentation and Domain Decoupling</h3>
+<p>The Separated Presentation pattern, as codified by Martin Fowler,
+dictates an absolute logical decoupling between presentation components
+and domain logic. Rooted in the original Smalltalk-80 MVC paradigm, this
+architectural layering ensures that the domain model remains completely
+unaware of its presentation mechanisms.</p>
+<p>Fowler outlines several core principles for implementation: -
 <strong>Logical Modularity</strong>: The presentation layer (managing
 GUI widgets, HTTP responses, or CLI formatting) and the domain layer
 (managing business rules) must exist in disparate logical modules,
@@ -13757,16 +13766,12 @@ itself in response. - <strong>Refactoring Strategy</strong>: Migrating
 tightly coupled code requires systematically isolating business
 calculations into localized queries (e.g., using “Replace Temp with
 Query”) and migrating these operations into domain entities,
-subsequently replacing direct UI manipulation with state observers.</td>
-</tr>
-<tr>
-<td>Ultimately, Separated Presentation serves as a litmus test for
-domain purity: a robustly separated application should theoretically
-allow its entire Graphical User Interface to be replaced by a Command
-Line Interface without modifying a single line of domain code.</td>
-</tr>
-</tbody>
-</table>
+subsequently replacing direct UI manipulation with state observers.</p>
+<p>Ultimately, Separated Presentation serves as a litmus test for domain
+purity: a robustly separated application should theoretically allow its
+entire Graphical User Interface to be replaced by a Command Line
+Interface without modifying a single line of domain code.</p>
+<hr />
 <div class="page-break">
 
 </div>
@@ -13844,33 +13849,45 @@ MVC)</h4>
 <span id="cb152-4"><a href="#cb152-4" aria-hidden="true" tabindex="-1"></a><span class="at">@RequestMapping</span><span class="op">(</span><span class="st">&quot;/orders&quot;</span><span class="op">)</span></span>
 <span id="cb152-5"><a href="#cb152-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> OrderController <span class="op">{</span></span>
 <span id="cb152-6"><a href="#cb152-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> OrderService orderService<span class="op">;</span></span>
-<span id="cb152-7"><a href="#cb152-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">OrderController</span><span class="op">(</span>OrderService orderService<span class="op">)</span> <span class="op">{</span> <span class="kw">this</span><span class="op">.</span><span class="fu">orderService</span> <span class="op">=</span> orderService<span class="op">;</span> <span class="op">}</span></span>
-<span id="cb152-8"><a href="#cb152-8" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb152-9"><a href="#cb152-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PostMapping</span></span>
-<span id="cb152-10"><a href="#cb152-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> ResponseEntity<span class="op">&lt;</span>Order<span class="op">&gt;</span> <span class="fu">createOrder</span><span class="op">(</span><span class="at">@RequestBody</span> OrderRequest request<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb152-11"><a href="#cb152-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ResponseEntity<span class="op">.</span><span class="fu">ok</span><span class="op">(</span>orderService<span class="op">.</span><span class="fu">placeOrder</span><span class="op">(</span>request<span class="op">));</span></span>
-<span id="cb152-12"><a href="#cb152-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb152-13"><a href="#cb152-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb152-14"><a href="#cb152-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb152-15"><a href="#cb152-15" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. Domain Layer</span></span>
-<span id="cb152-16"><a href="#cb152-16" aria-hidden="true" tabindex="-1"></a><span class="at">@Service</span></span>
-<span id="cb152-17"><a href="#cb152-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> OrderService <span class="op">{</span></span>
-<span id="cb152-18"><a href="#cb152-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> OrderRepository orderRepository<span class="op">;</span></span>
-<span id="cb152-19"><a href="#cb152-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">OrderService</span><span class="op">(</span>OrderRepository orderRepository<span class="op">)</span> <span class="op">{</span> <span class="kw">this</span><span class="op">.</span><span class="fu">orderRepository</span> <span class="op">=</span> orderRepository<span class="op">;</span> <span class="op">}</span></span>
-<span id="cb152-20"><a href="#cb152-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb152-21"><a href="#cb152-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">placeOrder</span><span class="op">(</span>OrderRequest request<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb152-22"><a href="#cb152-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>request<span class="op">.</span><span class="fu">getQuantity</span><span class="op">()</span> <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;Invalid qty&quot;</span><span class="op">);</span></span>
-<span id="cb152-23"><a href="#cb152-23" aria-hidden="true" tabindex="-1"></a>        Order order <span class="op">=</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span>request<span class="op">.</span><span class="fu">getProductId</span><span class="op">(),</span> request<span class="op">.</span><span class="fu">getQuantity</span><span class="op">());</span></span>
-<span id="cb152-24"><a href="#cb152-24" aria-hidden="true" tabindex="-1"></a>        order<span class="op">.</span><span class="fu">calculateTotal</span><span class="op">();</span></span>
-<span id="cb152-25"><a href="#cb152-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> orderRepository<span class="op">.</span><span class="fu">save</span><span class="op">(</span>order<span class="op">);</span></span>
+<span id="cb152-7"><a href="#cb152-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb152-8"><a href="#cb152-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">OrderController</span><span class="op">(</span>OrderService orderService<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb152-9"><a href="#cb152-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">orderService</span> <span class="op">=</span> orderService<span class="op">;</span> </span>
+<span id="cb152-10"><a href="#cb152-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb152-11"><a href="#cb152-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb152-12"><a href="#cb152-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">@PostMapping</span></span>
+<span id="cb152-13"><a href="#cb152-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> ResponseEntity<span class="op">&lt;</span>Order<span class="op">&gt;</span> <span class="fu">createOrder</span><span class="op">(</span></span>
+<span id="cb152-14"><a href="#cb152-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">@RequestBody</span> OrderRequest request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb152-15"><a href="#cb152-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ResponseEntity<span class="op">.</span><span class="fu">ok</span><span class="op">(</span>orderService<span class="op">.</span><span class="fu">placeOrder</span><span class="op">(</span>request<span class="op">));</span></span>
+<span id="cb152-16"><a href="#cb152-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb152-17"><a href="#cb152-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb152-18"><a href="#cb152-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-19"><a href="#cb152-19" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. Domain Layer</span></span>
+<span id="cb152-20"><a href="#cb152-20" aria-hidden="true" tabindex="-1"></a><span class="at">@Service</span></span>
+<span id="cb152-21"><a href="#cb152-21" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> OrderService <span class="op">{</span></span>
+<span id="cb152-22"><a href="#cb152-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> OrderRepository orderRepository<span class="op">;</span></span>
+<span id="cb152-23"><a href="#cb152-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb152-24"><a href="#cb152-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">OrderService</span><span class="op">(</span>OrderRepository orderRepository<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb152-25"><a href="#cb152-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">orderRepository</span> <span class="op">=</span> orderRepository<span class="op">;</span> </span>
 <span id="cb152-26"><a href="#cb152-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb152-27"><a href="#cb152-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb152-28"><a href="#cb152-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb152-29"><a href="#cb152-29" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Data Layer</span></span>
-<span id="cb152-30"><a href="#cb152-30" aria-hidden="true" tabindex="-1"></a><span class="at">@Repository</span></span>
-<span id="cb152-31"><a href="#cb152-31" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">interface</span> OrderRepository <span class="kw">extends</span> JpaRepository<span class="op">&lt;</span>Order<span class="op">,</span> <span class="bu">Long</span><span class="op">&gt;</span> <span class="op">{</span></span>
-<span id="cb152-32"><a href="#cb152-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Database mapping handled by Spring Data JPA</span></span>
-<span id="cb152-33"><a href="#cb152-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb152-27"><a href="#cb152-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb152-28"><a href="#cb152-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">placeOrder</span><span class="op">(</span>OrderRequest request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb152-29"><a href="#cb152-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>request<span class="op">.</span><span class="fu">getQuantity</span><span class="op">()</span> <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb152-30"><a href="#cb152-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;Invalid qty&quot;</span><span class="op">);</span></span>
+<span id="cb152-31"><a href="#cb152-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb152-32"><a href="#cb152-32" aria-hidden="true" tabindex="-1"></a>        Order order <span class="op">=</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb152-33"><a href="#cb152-33" aria-hidden="true" tabindex="-1"></a>            request<span class="op">.</span><span class="fu">getProductId</span><span class="op">(),</span> </span>
+<span id="cb152-34"><a href="#cb152-34" aria-hidden="true" tabindex="-1"></a>            request<span class="op">.</span><span class="fu">getQuantity</span><span class="op">()</span></span>
+<span id="cb152-35"><a href="#cb152-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">);</span></span>
+<span id="cb152-36"><a href="#cb152-36" aria-hidden="true" tabindex="-1"></a>        order<span class="op">.</span><span class="fu">calculateTotal</span><span class="op">();</span></span>
+<span id="cb152-37"><a href="#cb152-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> orderRepository<span class="op">.</span><span class="fu">save</span><span class="op">(</span>order<span class="op">);</span></span>
+<span id="cb152-38"><a href="#cb152-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb152-39"><a href="#cb152-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb152-40"><a href="#cb152-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-41"><a href="#cb152-41" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Data Layer</span></span>
+<span id="cb152-42"><a href="#cb152-42" aria-hidden="true" tabindex="-1"></a><span class="at">@Repository</span></span>
+<span id="cb152-43"><a href="#cb152-43" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">interface</span> OrderRepository <span class="kw">extends</span> JpaRepository<span class="op">&lt;</span>Order<span class="op">,</span> <span class="bu">Long</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb152-44"><a href="#cb152-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Database mapping handled by Spring Data JPA</span></span>
+<span id="cb152-45"><a href="#cb152-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <h4 id="javascript-typescript-implementation-express">JavaScript /
 TypeScript Implementation (Express)</h4>
 <div class="sourceCode" id="cb153"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="co">// ES2022+ — Three-Layer Architecture in Express</span></span>
@@ -13917,71 +13934,65 @@ TypeScript Implementation (Express)</h4>
 <span id="cb154-6"><a href="#cb154-6" aria-hidden="true" tabindex="-1"></a>router <span class="op">=</span> APIRouter()</span>
 <span id="cb154-7"><a href="#cb154-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb154-8"><a href="#cb154-8" aria-hidden="true" tabindex="-1"></a><span class="at">@router.post</span>(<span class="st">&quot;/orders&quot;</span>)</span>
-<span id="cb154-9"><a href="#cb154-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_order(order_req: OrderRequest, service: OrderService <span class="op">=</span> Depends()):</span>
-<span id="cb154-10"><a href="#cb154-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb154-11"><a href="#cb154-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> service.place_order(order_req)</span>
-<span id="cb154-12"><a href="#cb154-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">ValueError</span> <span class="im">as</span> e:</span>
-<span id="cb154-13"><a href="#cb154-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> HTTPException(status_code<span class="op">=</span><span class="dv">400</span>, detail<span class="op">=</span><span class="bu">str</span>(e))</span>
-<span id="cb154-14"><a href="#cb154-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb154-15"><a href="#cb154-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Domain Layer</span></span>
-<span id="cb154-16"><a href="#cb154-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderService:</span>
-<span id="cb154-17"><a href="#cb154-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, repo: OrderRepository):</span>
-<span id="cb154-18"><a href="#cb154-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.repo <span class="op">=</span> repo</span>
-<span id="cb154-19"><a href="#cb154-19" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb154-20"><a href="#cb154-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> place_order(<span class="va">self</span>, req: OrderRequest) <span class="op">-&gt;</span> Order:</span>
-<span id="cb154-21"><a href="#cb154-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> req.quantity <span class="op">&lt;=</span> <span class="dv">0</span>:</span>
-<span id="cb154-22"><a href="#cb154-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">&quot;Invalid quantity&quot;</span>)</span>
-<span id="cb154-23"><a href="#cb154-23" aria-hidden="true" tabindex="-1"></a>        order <span class="op">=</span> Order(product_id<span class="op">=</span>req.product_id, quantity<span class="op">=</span>req.quantity)</span>
-<span id="cb154-24"><a href="#cb154-24" aria-hidden="true" tabindex="-1"></a>        order.total <span class="op">=</span> order.quantity <span class="op">*</span> <span class="fl">100.0</span></span>
-<span id="cb154-25"><a href="#cb154-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.repo.save(order)</span>
-<span id="cb154-26"><a href="#cb154-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb154-27"><a href="#cb154-27" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Data Layer</span></span>
-<span id="cb154-28"><a href="#cb154-28" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderRepository:</span>
-<span id="cb154-29"><a href="#cb154-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>, order: Order) <span class="op">-&gt;</span> Order:</span>
-<span id="cb154-30"><a href="#cb154-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># SQL insert operation here</span></span>
-<span id="cb154-31"><a href="#cb154-31" aria-hidden="true" tabindex="-1"></a>        order.<span class="bu">id</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb154-32"><a href="#cb154-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> order</span></code></pre></div>
-<table style="width:6%;">
-<colgroup>
-<col style="width: 5%" />
-</colgroup>
-<tbody>
-<tr>
-<td></td>
-</tr>
-<tr>
-<td>## SECTION 2: VERBATIM &amp; RESEARCH TEXTS</td>
-</tr>
-<tr>
-<td>&gt; <strong>VERBATIM SOURCE</strong> &gt; - <strong>Title:</strong>
-Presentation Domain Data Layering &gt; - <strong>Author(s):</strong>
-Martin Fowler &gt; - <strong>Published:</strong> 2015, martinfowler.com
-&gt; - <strong>Source type:</strong> Architecture Essay &gt; -
-<strong>Original URL:</strong>
-https://martinfowler.com/bliki/PresentationDomainDataLayering.html &gt;
-&gt; <em>Note: The following text presents the core architectural text
-and research synthesis for educational study.</em></td>
-</tr>
-<tr>
-<td>### Presentation Domain Data Layering and Cognitive Scope The
-three-layer architecture (Presentation, Domain, Data) remains a
+<span id="cb154-9"><a href="#cb154-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_order(</span>
+<span id="cb154-10"><a href="#cb154-10" aria-hidden="true" tabindex="-1"></a>    order_req: OrderRequest, </span>
+<span id="cb154-11"><a href="#cb154-11" aria-hidden="true" tabindex="-1"></a>    service: OrderService <span class="op">=</span> Depends()</span>
+<span id="cb154-12"><a href="#cb154-12" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb154-13"><a href="#cb154-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb154-14"><a href="#cb154-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> service.place_order(order_req)</span>
+<span id="cb154-15"><a href="#cb154-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">ValueError</span> <span class="im">as</span> e:</span>
+<span id="cb154-16"><a href="#cb154-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> HTTPException(status_code<span class="op">=</span><span class="dv">400</span>, detail<span class="op">=</span><span class="bu">str</span>(e))</span>
+<span id="cb154-17"><a href="#cb154-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb154-18"><a href="#cb154-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Domain Layer</span></span>
+<span id="cb154-19"><a href="#cb154-19" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderService:</span>
+<span id="cb154-20"><a href="#cb154-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, repo: OrderRepository):</span>
+<span id="cb154-21"><a href="#cb154-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.repo <span class="op">=</span> repo</span>
+<span id="cb154-22"><a href="#cb154-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb154-23"><a href="#cb154-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> place_order(<span class="va">self</span>, req: OrderRequest) <span class="op">-&gt;</span> Order:</span>
+<span id="cb154-24"><a href="#cb154-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> req.quantity <span class="op">&lt;=</span> <span class="dv">0</span>:</span>
+<span id="cb154-25"><a href="#cb154-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">&quot;Invalid quantity&quot;</span>)</span>
+<span id="cb154-26"><a href="#cb154-26" aria-hidden="true" tabindex="-1"></a>        order <span class="op">=</span> Order(product_id<span class="op">=</span>req.product_id, quantity<span class="op">=</span>req.quantity)</span>
+<span id="cb154-27"><a href="#cb154-27" aria-hidden="true" tabindex="-1"></a>        order.total <span class="op">=</span> order.quantity <span class="op">*</span> <span class="fl">100.0</span></span>
+<span id="cb154-28"><a href="#cb154-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.repo.save(order)</span>
+<span id="cb154-29"><a href="#cb154-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb154-30"><a href="#cb154-30" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Data Layer</span></span>
+<span id="cb154-31"><a href="#cb154-31" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderRepository:</span>
+<span id="cb154-32"><a href="#cb154-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>, order: Order) <span class="op">-&gt;</span> Order:</span>
+<span id="cb154-33"><a href="#cb154-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># SQL insert operation here</span></span>
+<span id="cb154-34"><a href="#cb154-34" aria-hidden="true" tabindex="-1"></a>        order.<span class="bu">id</span> <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb154-35"><a href="#cb154-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> order</span></code></pre></div>
+<hr />
+<div class="page-break">
+
+</div>
+<h2 id="section-2-verbatim-research-texts-7">SECTION 2: VERBATIM &amp;
+RESEARCH TEXTS</h2>
+<blockquote>
+<p><strong>VERBATIM SOURCE</strong> - <strong>Title:</strong>
+Presentation Domain Data Layering - <strong>Author(s):</strong> Martin
+Fowler - <strong>Published:</strong> 2015, martinfowler.com -
+<strong>Source type:</strong> Architecture Essay - <strong>Original
+URL:</strong>
+https://martinfowler.com/bliki/PresentationDomainDataLayering.html</p>
+<p><em>Note: The following text presents the core architectural text and
+research synthesis for educational study.</em></p>
+</blockquote>
+<h3 id="presentation-domain-data-layering-and-cognitive-scope">Presentation
+Domain Data Layering and Cognitive Scope</h3>
+<p>The three-layer architecture (Presentation, Domain, Data) remains a
 ubiquitous strategy for modularizing information-rich software. While
 substitutability (e.g., swapping databases) and testability are
 frequently cited as the primary drivers for this architecture, Martin
 Fowler emphasizes a more profound psychological benefit: cognitive scope
-narrowing.</td>
-</tr>
-<tr>
-<td>By rigidly enforcing boundaries between user interface concerns,
+narrowing.</p>
+<p>By rigidly enforcing boundaries between user interface concerns,
 business logic, and database persistence, developers can dramatically
 reduce their cognitive load. Operating within the domain layer allows a
 developer to focus exclusively on business rules, treating data access
 as an abstract contract and ignoring the mechanics of UI rendering. This
 separation mirrors the cognitive context switching found in the “Two
-Hats” refactoring technique.</td>
-</tr>
-<tr>
-<td>Fowler also issues critical architectural warnings regarding layered
+Hats” refactoring technique.</p>
+<p>Fowler also issues critical architectural warnings regarding layered
 systems. First, layering is a logical construct, not strictly a physical
 one; it can be implemented within a single monolithic codebase or
 distributed across microservices. Second, as applications scale,
@@ -13995,10 +14006,8 @@ map development teams directly to these technical layers (e.g.,
 dedicated “frontend” and “database” teams). Fowler strongly cautions
 against this, as the inherent cross-layer volatility of feature
 development introduces severe organizational friction, advocating
-instead for cross-functional, full-stack product teams.</td>
-</tr>
-</tbody>
-</table>
+instead for cross-functional, full-stack product teams.</p>
+<hr />
 <div class="page-break">
 
 </div>
@@ -14793,7 +14802,7 @@ at once, not just the first one.</p>
 <div class="page-break">
 
 </div>
-<h3 id="section-2-verbatim-research-texts-6">SECTION 2: VERBATIM &amp;
+<h3 id="section-2-verbatim-research-texts-8">SECTION 2: VERBATIM &amp;
 RESEARCH TEXTS</h3>
 <blockquote>
 <p><strong>VERBATIM SOURCE</strong> - <strong>Title:</strong>
@@ -16484,5 +16493,36 @@ https://www.computer.org/education/bodies-of-knowledge/software-engineering</li>
 Machine archive):
 https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm</li>
 </ul>
+<hr />
+<div class="page-break">
+
+</div>
+<h2 id="section-2">SECTION 2</h2>
+<h2 id="content">content</h2>
+<div class="page-break">
+
+</div>
+<table style="width:6%;">
+<colgroup>
+<col style="width: 5%" />
+</colgroup>
+<tbody>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>some text</td>
+</tr>
+</tbody>
+</table>
+<div class="page-break">
+
+</div>
+<h2 id="section-2-1">SECTION 2</h2>
+<p>content</p>
+<hr />
+<div class="page-break">
+
+</div>
 </body>
 </html>

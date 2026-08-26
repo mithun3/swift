@@ -3004,7 +3004,7 @@ The conclusion they came to was that to get the best caching behavior, you need 
 > *Note: The following text is reproduced verbatim — exact word-for-word.*
 
 
-Martin Thompson ⋅ Dave Farley ⋅ Michael Barker ⋅ Patricia Gee ⋅ Andrew Stewart
+Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart
  – Version 4.0.0-SNAPSHOT, May 2011
 #### Abstract
 
@@ -3138,7 +3138,7 @@ Separating the concerns normally conflated in queue implementations allows for a
 
 As a reference we choose Doug Lea’s excellent java.util.concurrent.ArrayBlockingQueue [7] which has the highest performance of any bounded queue based on our testing. The tests are conducted in a blocking programming style to match that of the Disruptor. The tests cases detailed below are available in the Disruptor open source project.
 
- running the tests requires a system capable of executing at least 4 threads in parallel.
+> **Warning:** running the tests requires a system capable of executing at least 4 threads in parallel.
 
 #### Figure 1. Unicast: 1P – 1C
 
@@ -7524,6 +7524,7 @@ class CheckoutWindow(tk.Frame):
 ```
 
 ---
+
 <div class="page-break"></div>
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
@@ -7610,10 +7611,14 @@ While Presentation-Domain-Data is the standard, variations exist such as Hexagon
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
-    public OrderController(OrderService orderService) { this.orderService = orderService; }
+    
+    public OrderController(OrderService orderService) { 
+        this.orderService = orderService; 
+    }
     
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest request) {
+    public ResponseEntity<Order> createOrder(
+            @RequestBody OrderRequest request) {
         return ResponseEntity.ok(orderService.placeOrder(request));
     }
 }
@@ -7622,11 +7627,19 @@ public class OrderController {
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
-    public OrderService(OrderRepository orderRepository) { this.orderRepository = orderRepository; }
+    
+    public OrderService(OrderRepository orderRepository) { 
+        this.orderRepository = orderRepository; 
+    }
     
     public Order placeOrder(OrderRequest request) {
-        if (request.getQuantity() <= 0) throw new IllegalArgumentException("Invalid qty");
-        Order order = new Order(request.getProductId(), request.getQuantity());
+        if (request.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Invalid qty");
+        }
+        Order order = new Order(
+            request.getProductId(), 
+            request.getQuantity()
+        );
         order.calculateTotal();
         return orderRepository.save(order);
     }
@@ -7687,7 +7700,10 @@ from domain.order_service import OrderService
 router = APIRouter()
 
 @router.post("/orders")
-def create_order(order_req: OrderRequest, service: OrderService = Depends()):
+def create_order(
+    order_req: OrderRequest, 
+    service: OrderService = Depends()
+):
     try:
         return service.place_order(order_req)
     except ValueError as e:
@@ -7714,6 +7730,7 @@ class OrderRepository:
 ```
 
 ---
+
 <div class="page-break"></div>
 
 ## SECTION 2: VERBATIM & RESEARCH TEXTS
@@ -9836,3 +9853,32 @@ The SOLID principles guide the target structure of refactoring efforts:
 - IEEE SWEBOK v3.0: https://www.computer.org/education/bodies-of-knowledge/software-engineering
 - Agile Manifesto: https://agilemanifesto.org/
 - Tablizer (B. Jacobs) — "Software, Science, and Math" (Wayback Machine archive): https://web.archive.org/web/20140428173939/http://www.geocities.com/tablizer/science.htm
+
+---
+
+<div class="page-break"></div>
+
+## SECTION 2
+content
+---
+
+<div class="page-break"></div>
+
+---
+<div class="page-break"></div>
+
+## SECTION 2
+content
+---
+<div class="page-break"></div>
+
+some text
+
+---
+<div class="page-break"></div>
+
+## SECTION 2
+content
+
+---
+<div class="page-break"></div>
