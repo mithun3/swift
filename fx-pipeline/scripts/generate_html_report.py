@@ -22,7 +22,7 @@ def get_percentile(hgrm_file, target_pct):
                     if "Total count" in line:
                         parts = line.split()
                         try:
-                            total_count = int(parts[-1])
+                            total_count = int(parts[-1].rstrip(']'))
                         except:
                             pass
                     continue
@@ -245,7 +245,9 @@ def main():
 </html>
 """
 
-    report_path = "latency_report.html"
+    output_dir = os.path.dirname(os.path.abspath(hlog_files[0])) if hlog_files else "."
+    report_path = os.path.join(output_dir, "latency_report.html")
+    
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(html_content)
         

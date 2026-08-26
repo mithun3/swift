@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  serv-c:
+    image: fx-pipeline:latest
+    container_name: fx-serv-c
+    network_mode: "host"
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    cpuset: "3"
+    volumes:
+      - fx-queues:/tmp/fx-queues/
+      - ./fx-data:/opt/fx-data
+      - ./fx-telemetry:/tmp/fx-telemetry
+    command: ["sh", "-c", "java $$JVM_OPTS -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/* com.fx.persistence.PersistenceMain"]
+
+  telemetry:
+    image: fx-pipeline:latest
+    container_name: fx-telemetry
+    network_mode: "host"
+    volumes:
+      - fx-queues:/tmp/fx-queues/
+    command: ["sh", "-c", "java $$JVM_OPTS -cp common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/* com.fx.common.telemetry.TelemetryMain"]
+    depends_on:
+      - serv-c
+
+  serv-b:
+    image: fx-pipeline:latest
+    container_name: fx-serv-b
+    network_mode: "host"
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    cpuset: "2"
+    volumes:
+      - fx-queues:/tmp/fx-queues/
+    command: ["sh", "-c", "java $$JVM_OPTS -cp serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/* com.fx.pricing.PricingMain"]
+    depends_on:
+      - serv-c
+
+  serv-a:
+    image: fx-pipeline:latest
+    container_name: fx-serv-a
+    network_mode: "host"
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    cpuset: "1"
+    volumes:
+      - fx-queues:/tmp/fx-queues/
+    command: ["sh", "-c", "java $$JVM_OPTS -cp serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/* com.fx.risk.RiskMain"]
+    depends_on:
+      - serv-b
+
+  serv-0:
+    image: fx-pipeline:latest
+    container_name: fx-serv-0
+    network_mode: "host"
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    cpuset: "0"
+    volumes:
+      - fx-queues:/tmp/fx-queues/
+    command: ["sh", "-c", "java $$JVM_OPTS -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain"]
+    depends_on:
+      - serv-a
+
+  benchmark:
+    image: fx-pipeline:latest
+    container_name: fx-benchmark
+    profiles: ["benchmark"]
+    network_mode: "host"
+    volumes:
+      - fx-queues:/tmp/fx-queues/
+      - ./fx-telemetry:/tmp/fx-telemetry
+    command: ["sh", "-c", "/app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency.hlog"]
+
+volumes:
+  fx-queues:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=8G"
