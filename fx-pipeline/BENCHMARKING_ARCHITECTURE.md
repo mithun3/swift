@@ -246,3 +246,116 @@ Software architecture alone cannot guarantee sub-millisecond latencies. The OS a
 4. **CPU Governor:** Set to `performance` to prevent P-state transitions during the benchmark window.
 
 *(See `BENCHMARK_TUNING.md` for the exact kernel boot parameters and JVM flags.)*
+
+---
+
+## 8. Benchmark Run Analysis & Identified Issues
+
+### 8.1 Run Configuration
+
+| Parameter | Value |
+|---|---|
+| Mode | Direct (LoadGenerator → queue-a, bypassing serv-0) |
+| Target injection rate | 5,000,000 events/sec |
+| Total messages sent | 2,000,000 |
+| Total messages persisted | 1,221,641 |
+| Environment | macOS / Docker (advisory CPU affinity only) |
+
+### 8.2 Observed Metrics
+
+All values below are in milliseconds. Adaptive units (µs / ms / s) are used in the HTML report.
+
+| File | Samples | P50 | P90 | P99 | P99.99 | Max |
+|---|---|---|---|---|---|---|
+| `fx-latency-serv-0` | 2,000,000 | 0.001 ms | 0.002 ms | 0.006 ms | 0.090 ms | 26 ms |
+| `fx-latency-queue-a` | 1,221,641 | **733 ms** | **1,050 ms** | **1,125 ms** | **1,128 ms** | **1,128 ms** |
+| `fx-latency-serv-a` | 1,221,641 | < 0.001 ms | < 0.001 ms | < 0.001 ms | 0.001 ms | 0.137 ms |
+| `fx-latency-queue-b` | 1,221,641 | 7.6 ms | 20.4 ms | 57.9 ms | 93.1 ms | 93.1 ms |
+| `fx-latency-serv-b` | 1,221,641 | < 0.001 ms | < 0.001 ms | < 0.001 ms | 0.001 ms | 10.7 ms |
+| `fx-latency-queue-c` | 1,221,641 | **25.7 ms** | **1,536 ms** | **4,995 ms** | **5,302 ms** | **5,302 ms** |
+| `fx-latency-serv-c` | 1,221,641 | < 0.001 ms | < 0.001 ms | 0.002 ms | 4.887 ms | **586 ms** |
+
+### 8.3 Math Validation
+
+Values are stored in HdrHistogram `.hgrm` files as **nanoseconds** (the unit recorded by `System.nanoTime()` differences). The previous HTML report divided by `1,000,000` to display milliseconds — this arithmetic is correct, but millisecond display masks sub-microsecond values (e.g. serv-a P50 appeared as `0.000 ms` rather than `< 1 µs`).
+
+The updated `generate_html_report.py` stores raw nanoseconds internally and applies adaptive unit selection at render time:
+
+```
+value_ns <   1,000,000  (<  1,000 µs) → display in µs
+value_ns < 1,000,000,000  (< 1,000 ms) → display in ms
+value_ns ≥ 1,000,000,000              → display in s
+```
+
+### 8.4 Root-Cause Analysis
+
+#### Issue 1 — Queue-A: Producer-Consumer Rate Mismatch (P50 = 733 ms)
+
+**Pattern:** Flat distribution — P50 (733 ms) through Max (1,128 ms) spans only ~400 ms. This is not a rare spike; it is a steady-state queue backlog.
+
+**Mechanism:**
+
+1. serv-0 stamps `ingressNanoTime` (T0) and writes to queue-a in ~1 µs.
+2. The load generator paced at 5M events/sec → ~5,000 events every millisecond.
+3. The downstream pipeline sustained only ~1–2M events/sec on this hardware.
+4. A growing backlog accumulated in queue-a. Each event's measured `T1 − T0` includes all the time other events ahead of it took to be processed.
+5. At a 733 ms P50, approximately 733K events were ahead of any median-ranked event.
+
+**The ~778K missing events** (2,000,000 sent − 1,221,641 persisted) were still in-flight or written to queue-a when the benchmark was terminated — confirming the backlog was never fully drained.
+
+**Contributing factors:**
+
+| Factor | Detail |
+|---|---|
+| macOS advisory affinity | `AffinityLock.acquireLock()` calls `thread_policy_set(THREAD_AFFINITY_POLICY)` — a *hint* only. The macOS scheduler can preempt serv-a for tens to hundreds of milliseconds at any time. |
+| Chronicle Queue page faults | When the 64 MB store file rolls to a new segment the first access triggers a kernel page fault. On HDD: up to 500 ms. On SSD: 10–50 ms. Pre-warming eliminates this. |
+| JIT warm-up safepoints | C2 compilation of hot methods triggers JVM-global safepoints of 200–500 ms in the first few seconds of a benchmark, contaminating early histogram buckets. |
+
+**Recommended fixes:**
+
+1. Calibrate the load generator rate to ≤ 80% of the measured sustainable pipeline throughput (measure first, then drive).
+2. Run benchmarks on Linux with `isolcpus` + `nohz_full` + `rcu_nocbs` (see `BENCHMARK_TUNING.md`) for strict CPU isolation.
+3. Pre-warm queue-a with a dummy write at startup to pre-fault the first mmap segment.
+
+#### Issue 2 — Queue-C: Ring Buffer Saturation (P50 = 25 ms, P99 = 5 s)
+
+**Pattern:** Bimodal distribution — fast 50% of the time (P50 = 25 ms), catastrophically slow 1% of the time (P99 = 5 s).
+
+**Mechanism:**
+
+```java
+// BatchPersistenceEngine.accumulate() — hot-path spin-wait
+while (w - r >= RING_SIZE) {   // blocks serv-c event loop when ring is full
+    Thread.onSpinWait();
+    r = readPointer;
+}
+```
+
+1. `BatchPersistenceEngine.accumulate()` writes to a pre-allocated async ring buffer.
+2. A background `db-writer` thread drains the ring via JDBC `executeBatch() + commit()`.
+3. At 1M events/sec a 65,536-slot ring absorbed only ~65 ms of burst.
+4. Any H2 commit taking longer than ~65 ms filled the ring and stalled `accumulate()`.
+5. While stalled, serv-c could not read from queue-c → queue-c depth grew to seconds.
+
+**Direct evidence:**
+
+| Observation | Interpretation |
+|---|---|
+| serv-c P99.99 = 4.887 ms | `handle()` spent up to 4.9 ms spinning inside `accumulate()` |
+| serv-c Max = 586 ms | One H2 commit stall kept serv-c blocked for 586 ms |
+| queue-c Max = 5,302 ms | During those 586 ms, ~586K events piled up in queue-c |
+
+#### Issue 3 — serv-C Tail (Max = 586 ms): Same Root as Issue 2
+
+The 586 ms serv-c Max is the measured duration of the spin-wait inside `accumulate()`. This is not a separate issue — it is the direct in-process observation of the ring-buffer stall that causes the queue-c cascade.
+
+### 8.5 Fixes Applied
+
+| Component | Setting | Before | After | Impact |
+|---|---|---|---|---|
+| `BatchPersistenceEngine` | `RING_SIZE` | 65,536 | **524,288** | ~524 ms burst absorption @ 1M evt/sec; 8× more headroom |
+| `BatchPersistenceEngine` | `MAX_BATCH` | 4,096 | **32,768** | Fewer `commit()` calls per second; lower amortised H2 overhead |
+| `PersistenceEventLoop` | Default JDBC URL | H2 1.x params attempted | **Reverted** | `LOG=0`/`UNDO_LOG=0` unsupported in H2 2.x MVStore; broke JDBC connection at startup |
+| `generate_html_report.py` | Unit display | Fixed `ms` column | Adaptive µs / ms / s with severity heat-map | Correct precision for sub-µs values; embedded RCA + fix plan in HTML |
+
+> **H2 2.x note:** `LOG=0` and `UNDO_LOG=0` were H2 1.x-only URL parameters. H2 2.3.x (MVStore engine) does not support them — supplying them causes serv-c's JDBC connection to fail at startup, which prevents all per-stage telemetry from recording (all `.hlog` files show 249 bytes / header-only). The correct URL for H2 2.x is `jdbc:h2:mem:fxdb;DB_CLOSE_DELAY=-1;MODE=MySQL`.

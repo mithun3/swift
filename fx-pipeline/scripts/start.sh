@@ -24,6 +24,12 @@ echo "=========================================="
 echo "    Starting FX Pipeline Services"
 echo "=========================================="
 
+echo "Cleaning up old queues and telemetry..."
+rm -rf /tmp/fx-queues/*
+rm -rf /tmp/fx-telemetry/*
+rm -f /tmp/fx-latency*
+
+
 OS=$(uname)
 if [ "$OS" = "Linux" ]; then
     SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider"

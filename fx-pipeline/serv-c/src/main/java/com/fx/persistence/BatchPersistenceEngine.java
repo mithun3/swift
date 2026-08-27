@@ -56,12 +56,29 @@ import java.sql.Statement;
  */
 public final class BatchPersistenceEngine implements AutoCloseable {
 
-    /** Power of 2 ring size for mask-based wrapping. */
-    private static final int RING_SIZE = 65536;
+    /**
+     * Ring-buffer capacity: 524,288 slots (power of two, required for mask-based wrapping).
+     *
+     * <p>At 1M events/sec this ring absorbs ~524 ms of burst before the hot-path
+     * {@link #accumulate} spin-wait fires.  The previous 65,536-slot ring only
+     * covered ~65 ms, causing serv-c to stall whenever an H2 {@code executeBatch()}
+     * took longer than that threshold &mdash; which in turn starved queue-c and
+     * produced the observed P99 = 5 s queue-c wait times.
+     *
+     * <p>Memory footprint: 524,288 &times; ~128 bytes per {@link BatchRow} &asymp; 64 MB.
+     * All slots are pre-allocated at construction &mdash; zero GC after startup.
+     */
+    private static final int RING_SIZE = 524_288;
     private static final int MASK = RING_SIZE - 1;
 
-    /** Maximum items the background thread will pull into a single JDBC batch. */
-    private static final int MAX_BATCH = 4096;
+    /**
+     * Maximum rows pulled into a single JDBC {@code executeBatch()} call.
+     *
+     * <p>Raised from 4,096 to 32,768 to reduce commit frequency and amortise
+     * H2 transaction overhead over larger batches, lowering the average time
+     * spent inside each {@code commit()} and keeping the ring from filling.
+     */
+    private static final int MAX_BATCH = 32_768;
 
     /** Pre-allocated batch row objects — never replaced after construction. */
     private final BatchRow[] ringBuffer = new BatchRow[RING_SIZE];

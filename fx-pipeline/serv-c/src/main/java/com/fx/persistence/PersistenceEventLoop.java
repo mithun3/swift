@@ -53,7 +53,16 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
     /** CPU core for the persistence thread. Core 3 is isolated from all other services. */
     public static final int CPU_CORE = 3;
 
-    /** Default JDBC URL: H2 in-memory database with persistent connection. */
+    /**
+     * Default JDBC URL for the H2 2.x in-memory database (MVStore engine).
+     *
+     * <p>H2 2.x removed the {@code LOG} and {@code UNDO_LOG} URL parameters that
+     * existed in H2 1.x — supplying them causes the connection to fail.  The MVStore
+     * engine manages its own write-ahead strategy internally; an in-memory database
+     * already keeps all data off-disk, so no additional URL-level tuning is needed.
+     *
+     * <p>Override at runtime with {@code -Dfx.persistence.jdbc.url=<url>}.
+     */
     public static final String DEFAULT_JDBC_URL =
             System.getProperty("fx.persistence.jdbc.url",
                     "jdbc:h2:mem:fxdb;DB_CLOSE_DELAY=-1;MODE=MySQL");
@@ -77,9 +86,24 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
     private final TelemetryRecorder servARecorder;
 
     /**
-     * Optional zero-allocation latency recorder for serv-b duration (T3 - T2).
+     * Optional zero-allocation latency recorder for queue-b wait time.
+     */
+    private final TelemetryRecorder queueBRecorder;
+
+    /**
+     * Optional zero-allocation latency recorder for serv-b duration (T2Exit - T2Entry).
      */
     private final TelemetryRecorder servBRecorder;
+
+    /**
+     * Optional zero-allocation latency recorder for queue-c wait time.
+     */
+    private final TelemetryRecorder queueCRecorder;
+
+    /**
+     * Optional zero-allocation latency recorder for serv-c duration.
+     */
+    private final TelemetryRecorder servCRecorder;
 
     /**
      * Constructs the persistence event loop with no telemetry recording.
@@ -90,7 +114,7 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
      * @throws SQLException if the database connection cannot be established
      */
     public PersistenceEventLoop(final String jdbcUrl) throws SQLException {
-        this(jdbcUrl, null, null, null, null);
+        this(jdbcUrl, null, null, null, null, null, null, null);
     }
 
     /**
@@ -107,7 +131,10 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
                                  final TelemetryRecorder e2eRecorder,
                                  final TelemetryRecorder queueARecorder,
                                  final TelemetryRecorder servARecorder,
-                                 final TelemetryRecorder servBRecorder) throws SQLException {
+                                 final TelemetryRecorder queueBRecorder,
+                                 final TelemetryRecorder servBRecorder,
+                                 final TelemetryRecorder queueCRecorder,
+                                 final TelemetryRecorder servCRecorder) throws SQLException {
         super(
                 "persist-c",
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_C, "queue-c"),
@@ -119,7 +146,10 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
         this.e2eRecorder        = e2eRecorder;
         this.queueARecorder     = queueARecorder;
         this.servARecorder      = servARecorder;
+        this.queueBRecorder     = queueBRecorder;
         this.servBRecorder      = servBRecorder;
+        this.queueCRecorder     = queueCRecorder;
+        this.servCRecorder      = servCRecorder;
     }
 
     /**
@@ -152,17 +182,20 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
 
         // End-to-end pipeline latency = time from FIX ingress (T0) to persistence entry (T3).
         // Recorded via SingleWriterRecorder — zero-allocation, wait-free.
-        if (e2eRecorder != null) {
-            e2eRecorder.recordValue(event.t3ServCEntry - event.ingressNanoTime);
-        }
         if (queueARecorder != null) {
             queueARecorder.recordValue(event.t1ServAEntry - event.ingressNanoTime);
         }
         if (servARecorder != null) {
-            servARecorder.recordValue(event.t2ServBEntry - event.t1ServAEntry);
+            servARecorder.recordValue(event.t1ServAExit - event.t1ServAEntry);
+        }
+        if (queueBRecorder != null) {
+            queueBRecorder.recordValue(event.t2ServBEntry - event.t1ServAExit);
         }
         if (servBRecorder != null) {
-            servBRecorder.recordValue(event.t3ServCEntry - event.t2ServBEntry);
+            servBRecorder.recordValue(event.t2ServBExit - event.t2ServBEntry);
+        }
+        if (queueCRecorder != null) {
+            queueCRecorder.recordValue(event.t3ServCEntry - event.t2ServBExit);
         }
 
         try {
@@ -174,6 +207,14 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
             // The persistence loop continues with the next event; the failed event
             // is captured in queue-err for diagnosis and potential replay.
             errorWriter.write(event, "persist-c", e.getMessage());
+        }
+
+        long t3ServCExit = System.nanoTime();
+        if (servCRecorder != null) {
+            servCRecorder.recordValue(t3ServCExit - event.t3ServCEntry);
+        }
+        if (e2eRecorder != null) {
+            e2eRecorder.recordValue(t3ServCExit - event.ingressNanoTime);
         }
     }
 

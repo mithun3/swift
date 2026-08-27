@@ -66,7 +66,10 @@ for HLOG_FILE in "$@"; do
     # 2. Process .hlog to .hgrm
     echo "Extracting percentiles to $HGRM_FILE..."
     TMP_PREFIX="${HLOG_FILE}.tmp"
-    if java -cp "$HDR_JAR" org.HdrHistogram.HistogramLogProcessor -i "$HLOG_FILE" -o "$TMP_PREFIX" -outputValueUnitRatio 1; then
+    # Capture output since HistogramLogProcessor exits with 0 even on NullPointerException
+    OUTPUT=$(java -cp "$HDR_JAR" org.HdrHistogram.HistogramLogProcessor -i "$HLOG_FILE" -o "$TMP_PREFIX" -outputValueUnitRatio 1 2>&1 || true)
+    
+    if ! echo "$OUTPUT" | grep -q "Exception"; then
         mv "${TMP_PREFIX}.hgrm" "$HGRM_FILE"
         rm -f "${TMP_PREFIX}"*
         PROCESSED_FILES+=("$HLOG_FILE")

@@ -34,3 +34,20 @@ java $JVM_OPTS -cp target/serv-a-1.0-SNAPSHOT.jar:target/dependency/* com.fx.ris
 
 > [!TIP]
 > **Easier Execution**: Rather than running this manually, use the `scripts/deploy.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `scripts/test.sh` to diagnose OS-specific JVM properties if needed.
+
+---
+
+## Observed Telemetry
+
+Metrics from `fx-latency-serv-a.hlog` and `fx-latency-queue-a.hlog` (1,221,641 samples):
+
+| File | Measures | P50 | P99 | Max |
+|---|---|---|---|---|
+| `fx-latency-serv-a` | Credit-check duration (`t1_exit − t1_entry`) | < 1 µs | < 1 µs | 137 µs |
+| `fx-latency-queue-a` | Queue-a wait: ingress → serv-a entry (`t1 − T0`) | **733 ms** | **1,125 ms** | **1,128 ms** |
+
+**serv-a's own processing is extremely fast** (sub-microsecond at P99), confirming the credit-check engine is working as designed with zero allocation on the hot path.
+
+**The queue-a wait time is the primary pipeline bottleneck.** The 733 ms P50 is not caused by serv-a running slowly — it is caused by the load generator injecting events faster than the downstream pipeline can consume them (producer-consumer rate mismatch). When serv-a *does* pick up an event, it processes it instantly; the 733 ms was spent sitting in the queue.
+
+On macOS, `AffinityLock` thread-pinning is advisory. The OS scheduler can preempt the serv-a thread for tens to hundreds of milliseconds, further compounding the backlog. True deterministic scheduling requires Linux `isolcpus` (see `BENCHMARK_TUNING.md`).

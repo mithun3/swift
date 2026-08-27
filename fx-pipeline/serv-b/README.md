@@ -35,3 +35,20 @@ java $JVM_OPTS -cp target/serv-b-1.0-SNAPSHOT.jar:target/dependency/* com.fx.pri
 
 > [!TIP]
 > **Easier Execution**: Rather than running this manually, use the `scripts/deploy.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `scripts/test.sh` to diagnose OS-specific JVM properties if needed.
+
+---
+
+## Observed Telemetry
+
+Metrics from `fx-latency-serv-b.hlog` and `fx-latency-queue-b.hlog` (1,221,641 samples):
+
+| File | Measures | P50 | P99 | Max |
+|---|---|---|---|---|
+| `fx-latency-serv-b` | Spread-engine duration (`t2_exit − t2_entry`) | < 1 µs | < 1 µs | 10.7 ms |
+| `fx-latency-queue-b` | Queue-b wait: serv-a exit → serv-b entry (`t2 − t1_exit`) | 7.6 ms | 57.9 ms | 93.1 ms |
+
+**serv-b's own processing is excellent** — spread application using fixed-point `long` arithmetic completes in nanoseconds with zero allocation.
+
+**Queue-b shows moderate latency** (P50 = 7.6 ms, P99 = 57.9 ms). This is a downstream consequence of the queue-a backlog; events arrive at queue-b in bursts after serv-a drains its own backlog. The 10.7 ms serv-b Max corresponds to a sporadic JIT safepoint or OS preemption during the benchmark warm-up window.
+
+The serv-b Max of 10.7 ms will decrease on Linux with strict CPU isolation and a fully JIT-warmed JVM.

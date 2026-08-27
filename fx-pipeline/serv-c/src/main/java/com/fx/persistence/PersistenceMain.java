@@ -73,7 +73,10 @@ public final class PersistenceMain {
         TelemetryRecorder e2eRecorder = null;
         TelemetryRecorder qaRecorder = null;
         TelemetryRecorder saRecorder = null;
+        TelemetryRecorder qbRecorder = null;
         TelemetryRecorder sbRecorder = null;
+        TelemetryRecorder qcRecorder = null;
+        TelemetryRecorder scRecorder = null;
 
         if (telemetryEnabled) {
             try {
@@ -87,8 +90,14 @@ public final class PersistenceMain {
                         new File(basePath + "-queue-a.hlog"), 10_000_000_000L, 1_000L);
                 saRecorder = new TelemetryRecorder(
                         new File(basePath + "-serv-a.hlog"), 10_000_000_000L, 1_000L);
+                qbRecorder = new TelemetryRecorder(
+                        new File(basePath + "-queue-b.hlog"), 10_000_000_000L, 1_000L);
                 sbRecorder = new TelemetryRecorder(
                         new File(basePath + "-serv-b.hlog"), 10_000_000_000L, 1_000L);
+                qcRecorder = new TelemetryRecorder(
+                        new File(basePath + "-queue-c.hlog"), 10_000_000_000L, 1_000L);
+                scRecorder = new TelemetryRecorder(
+                        new File(basePath + "-serv-c.hlog"), 10_000_000_000L, 1_000L);
                         
                 logger.info("[serv-c] Telemetry enabled. Writing latency logs to: " + basePath + "*");
             } catch (final Exception e) {
@@ -101,13 +110,16 @@ public final class PersistenceMain {
 
         // ── Event Loop Construction ───────────────────────────────────────────
         final PersistenceEventLoop loop = new PersistenceEventLoop(
-                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, qaRecorder, saRecorder, sbRecorder);
+                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, qaRecorder, saRecorder, qbRecorder, sbRecorder, qcRecorder, scRecorder);
 
         // ── Shutdown Hook ─────────────────────────────────────────────────────
         final TelemetryRecorder finalE2e = e2eRecorder;
         final TelemetryRecorder finalQa = qaRecorder;
         final TelemetryRecorder finalSa = saRecorder;
+        final TelemetryRecorder finalQb = qbRecorder;
         final TelemetryRecorder finalSb = sbRecorder;
+        final TelemetryRecorder finalQc = qcRecorder;
+        final TelemetryRecorder finalSc = scRecorder;
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             logger.info("[serv-c] Shutdown signal received.");
             loop.stop();
@@ -121,7 +133,10 @@ public final class PersistenceMain {
             if (finalE2e != null) finalE2e.close();
             if (finalQa != null) finalQa.close();
             if (finalSa != null) finalSa.close();
+            if (finalQb != null) finalQb.close();
             if (finalSb != null) finalSb.close();
+            if (finalQc != null) finalQc.close();
+            if (finalSc != null) finalSc.close();
             
             if (finalE2e != null) {
                 logger.info("[serv-c] Telemetry flushed to: " + telemetryLogPath + "*");
