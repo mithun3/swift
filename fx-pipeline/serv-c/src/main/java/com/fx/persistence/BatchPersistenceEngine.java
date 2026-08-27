@@ -56,20 +56,27 @@ import java.sql.Statement;
  */
 public final class BatchPersistenceEngine implements AutoCloseable {
 
-    /**
-     * Number of events per batch flush.
-     *
-     * <p>Tuning note: larger batches reduce JDBC overhead per event but increase
-     * the maximum latency before an event is persisted. 256 is a balanced default
-     * that achieves ~200µs average persistence latency at 1M events/sec throughput.
-     */
-    private static final int BATCH_SIZE = 256;
+    /** Power of 2 ring size for mask-based wrapping. */
+    private static final int RING_SIZE = 65536;
+    private static final int MASK = RING_SIZE - 1;
+
+    /** Maximum items the background thread will pull into a single JDBC batch. */
+    private static final int MAX_BATCH = 4096;
 
     /** Pre-allocated batch row objects — never replaced after construction. */
-    private final BatchRow[] batchBuffer = new BatchRow[BATCH_SIZE];
+    private final BatchRow[] ringBuffer = new BatchRow[RING_SIZE];
 
-    /** Current write position in the batch buffer. */
-    private int batchCount = 0;
+    /** Volatile pointer advanced by the event loop. */
+    private volatile long writePointer = 0;
+
+    /** Volatile pointer advanced by the background JDBC thread. */
+    private volatile long readPointer = 0;
+
+    /** Background thread for asynchronous database inserts. */
+    private final Thread dbThread;
+    
+    /** Flag to signal the background thread to stop gracefully. */
+    private volatile boolean running = true;
 
     /** JDBC connection to the H2 in-memory database. */
     private final Connection connection;
@@ -92,36 +99,44 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                         + "currency_pair_code, side, notional_minor, "
                         + "requested_price_scaled, executed_price_scaled, "
                         + "spread_scaled, event_status, "
-                        + "t1_serv_a_entry, t2_serv_b_entry, t3_serv_c_entry"
-                        + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        + "t1_serv_a_entry, t1_serv_a_exit, t2_serv_b_entry, t2_serv_b_exit, t3_serv_c_entry"
+                        + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         // Pre-allocate all batch row objects once at construction.
-        // These mutable objects are reused across all batch cycles,
-        // preventing any allocation in the accumulate() hot path.
-        for (int i = 0; i < BATCH_SIZE; i++) {
-            batchBuffer[i] = new BatchRow();
+        for (int i = 0; i < RING_SIZE; i++) {
+            ringBuffer[i] = new BatchRow();
         }
+
+        // Start the background JDBC writer thread
+        this.dbThread = new Thread(this::flushLoop, "db-writer");
+        this.dbThread.setDaemon(true);
+        this.dbThread.start();
     }
 
     /**
-     * Accumulates a single event into the batch buffer.
+     * Accumulates a single event into the asynchronous ring buffer.
      *
      * <p>This is the hot-path method. All operations are primitive field assignments
      * into pre-allocated {@link BatchRow} slots — zero heap allocations.
-     *
-     * <p>If the buffer is full after this accumulation, a flush is triggered
-     * automatically. The {@code endOfBatch} flag triggers a flush even when the
-     * buffer is partially filled, preventing stale events at low throughput.
+     * It only blocks (spin-waits) if the entire 65,536 element ring buffer is full.
      *
      * @param event      the event to persist; fields copied into batch slot
-     * @param endOfBatch {@code true} if no further events are immediately available
-     * @throws SQLException if the database flush fails
+     * @param endOfBatch purely a hint, ignored in async design since the db-writer
+     *                   dynamically batches available events.
+     * @throws SQLException not thrown by async publish
      */
     public void accumulate(final FxMarketEvent event,
                             final boolean endOfBatch) throws SQLException {
-        // Copy primitive fields into the next pre-allocated batch slot.
-        // This is the only "write" in the hot path — no objects created.
-        final BatchRow row = batchBuffer[batchCount++];
+        long w = writePointer;
+        long r = readPointer;
+
+        // Apply backpressure if the ring buffer is completely full
+        while (w - r >= RING_SIZE) {
+            Thread.onSpinWait();
+            r = readPointer;
+        }
+
+        final BatchRow row = ringBuffer[(int) (w & MASK)];
         row.correlationId        = event.correlationId;
         row.ingressNanoTime      = event.ingressNanoTime;
         row.clientId             = event.clientId;
@@ -133,95 +148,104 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         row.executedPriceScaled  = event.executedPriceScaled;
         row.spreadScaled         = event.spreadScaled;
         row.eventStatus          = event.eventStatus;
-        // Stage-entry timestamps — captured by each service's handle() method.
-        // Zero if the event did not reach that stage (e.g., rejected at serv-a).
         row.t1ServAEntry         = event.t1ServAEntry;
+        row.t1ServAExit          = event.t1ServAExit;
         row.t2ServBEntry         = event.t2ServBEntry;
+        row.t2ServBExit          = event.t2ServBExit;
         row.t3ServCEntry         = event.t3ServCEntry;
 
-        // Flush if batch is full or if no more events are immediately available.
-        if (batchCount >= BATCH_SIZE || endOfBatch) {
-            flush();
+        // Publish the event to the background thread
+        writePointer = w + 1;
+    }
+
+    /**
+     * The background thread loop that constantly reads from the ring buffer,
+     * batches events up to MAX_BATCH, and executes JDBC inserts.
+     */
+    private void flushLoop() {
+        while (running || readPointer < writePointer) {
+            final long r = readPointer;
+            final long w = writePointer;
+
+            if (r == w) {
+                if (!running) {
+                    break;
+                }
+                Thread.onSpinWait();
+                continue;
+            }
+
+            final long available = w - r;
+            final int batchSize = (int) Math.min(available, MAX_BATCH);
+
+            try {
+                for (int i = 0; i < batchSize; i++) {
+                    final BatchRow row = ringBuffer[(int) ((r + i) & MASK)];
+                    insertStatement.setLong  (1,  row.correlationId);
+                    insertStatement.setLong  (2,  row.ingressNanoTime);
+                    insertStatement.setLong  (3,  row.clientId);
+                    insertStatement.setInt   (4,  row.clientTier);
+                    insertStatement.setLong  (5,  row.currencyPairCode);
+                    insertStatement.setByte  (6,  row.side);
+                    insertStatement.setLong  (7,  row.notionalMinorUnits);
+                    insertStatement.setLong  (8,  row.requestedPriceScaled);
+                    insertStatement.setLong  (9,  row.executedPriceScaled);
+                    insertStatement.setLong  (10, row.spreadScaled);
+                    insertStatement.setInt   (11, row.eventStatus);
+                    insertStatement.setLong  (12, row.t1ServAEntry);
+                    insertStatement.setLong  (13, row.t1ServAExit);
+                    insertStatement.setLong  (14, row.t2ServBEntry);
+                    insertStatement.setLong  (15, row.t2ServBExit);
+                    insertStatement.setLong  (16, row.t3ServCEntry);
+                    insertStatement.addBatch();
+                }
+
+                insertStatement.executeBatch();
+                connection.commit();
+
+                // Publish progress
+                readPointer = r + batchSize;
+            } catch (final SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (final SQLException rollbackEx) {
+                    System.err.println("[db-writer] Rollback failed: " + rollbackEx.getMessage());
+                }
+                System.err.println("[db-writer] Batch insert failed: " + e.getMessage());
+                
+                // Advance read pointer to discard poisoned batch and prevent infinite crash loop
+                readPointer = r + batchSize;
+            }
         }
     }
 
     /**
-     * Flushes the accumulated batch to the database via a single JDBC batch execute.
+     * Synchronously waits for the background thread to flush all pending events.
+     * Useful for graceful shutdown and testing.
      *
-     * <p>This method is NOT on the critical hot path — it is called at batch boundaries.
-     * JDBC overhead is amortised across {@link #BATCH_SIZE} events.
-     *
-     * <p>On failure, a {@link #connection} rollback is performed to ensure partial
-     * writes do not corrupt the {@code fx_trades} table. The exception is re-thrown
-     * so the caller (the event loop) can route the batch to the error queue.
-     *
-     * @throws SQLException if any batch insert fails; the transaction is rolled back
+     * @throws SQLException if the DB thread died
      */
     public void flush() throws SQLException {
-        if (batchCount == 0) {
-            return; // Nothing to flush
-        }
-
-        try {
-            for (int i = 0; i < batchCount; i++) {
-                final BatchRow row = batchBuffer[i];
-                // Bind each field to the prepared statement parameters.
-                // JDBC setLong/setInt/setByte avoid boxing for primitive types
-                // in well-implemented JDBC drivers (H2 included).
-                insertStatement.setLong  (1,  row.correlationId);
-                insertStatement.setLong  (2,  row.ingressNanoTime);
-                insertStatement.setLong  (3,  row.clientId);
-                insertStatement.setInt   (4,  row.clientTier);
-                insertStatement.setLong  (5,  row.currencyPairCode);
-                insertStatement.setByte  (6,  row.side);
-                insertStatement.setLong  (7,  row.notionalMinorUnits);
-                insertStatement.setLong  (8,  row.requestedPriceScaled);
-                insertStatement.setLong  (9,  row.executedPriceScaled);
-                insertStatement.setLong  (10, row.spreadScaled);
-                insertStatement.setInt   (11, row.eventStatus);
-                insertStatement.setLong  (12, row.t1ServAEntry);
-                insertStatement.setLong  (13, row.t2ServBEntry);
-                insertStatement.setLong  (14, row.t3ServCEntry);
-                insertStatement.addBatch();
+        final long target = writePointer;
+        while (readPointer < target && running) {
+            Thread.onSpinWait();
+            if (!dbThread.isAlive()) {
+                throw new SQLException("DB Writer thread died prematurely");
             }
-
-            insertStatement.executeBatch();
-            connection.commit();
-        } catch (final SQLException e) {
-            // GAP-7 FIX: Roll back the entire batch on failure to prevent partial writes.
-            // This maintains ACID consistency: either all events in the batch are committed
-            // or none are. The exception is re-thrown so the event loop routes the poisoned
-            // batch to the error Chronicle Queue for replay investigation.
-            try {
-                connection.rollback();
-            } catch (final SQLException rollbackEx) {
-                // Log rollback failure to stderr — we're already in an error state.
-                System.err.println("[serv-c] Rollback failed after batch error: "
-                        + rollbackEx.getMessage());
-            }
-            throw e; // Re-throw so the event loop can handle it
-        } finally {
-            // Always reset batch counter — whether flush succeeded or failed.
-            // This prevents double-submission of the same events on the next call.
-            batchCount = 0;
         }
     }
 
     /**
-     * Returns the number of events currently accumulated in the batch buffer.
+     * Returns the number of events currently waiting in the ring buffer.
      *
-     * @return current batch count (0 to {@link #BATCH_SIZE})
+     * @return current pending count
      */
     public int batchCount() {
-        return batchCount;
+        return (int) (writePointer - readPointer);
     }
 
     /**
      * Initialises the database schema — creates the {@code fx_trades} table if absent.
-     *
-     * <p>The schema includes per-stage nanosecond timestamps ({@code t1_serv_a_entry},
-     * {@code t2_serv_b_entry}, {@code t3_serv_c_entry}) to enable offline per-stage
-     * latency analysis from the persisted data.
      *
      * @throws SQLException if table creation fails
      */
@@ -242,9 +266,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                             + "executed_price_scaled  BIGINT NOT NULL, "
                             + "spread_scaled          BIGINT NOT NULL, "
                             + "event_status           INT NOT NULL, "
-                            // Per-stage timestamps: 0 if the event did not reach that stage.
                             + "t1_serv_a_entry        BIGINT NOT NULL DEFAULT 0, "
+                            + "t1_serv_a_exit         BIGINT NOT NULL DEFAULT 0, "
                             + "t2_serv_b_entry        BIGINT NOT NULL DEFAULT 0, "
+                            + "t2_serv_b_exit         BIGINT NOT NULL DEFAULT 0, "
                             + "t3_serv_c_entry        BIGINT NOT NULL DEFAULT 0"
                             + ")"
             );
@@ -255,28 +280,22 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     /** {@inheritDoc} */
     @Override
     public void close() {
+        running = false;
         try {
-            flush(); // Ensure any remaining events in the buffer are persisted
+            dbThread.join(5000); // Wait up to 5 seconds for background thread to finish remaining writes
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        try {
             insertStatement.close();
             connection.close();
         } catch (final SQLException e) {
-            // Log to stderr on close — acceptable since we're shutting down.
             System.err.println("[serv-c] Error closing persistence engine: " + e.getMessage());
         }
     }
 
     // ── Inner Data Carrier ────────────────────────────────────────────────────
 
-    /**
-     * {@code BatchRow} — Pre-allocated holder for one event's primitive fields.
-     *
-     * <p>All fields are package-private primitives for maximum write throughput from the
-     * accumulate() loop. No accessor methods — direct field assignment is faster
-     * and the single-threaded access model makes encapsulation irrelevant here.
-     *
-     * <p>Includes per-stage nanosecond timestamps aligned with the fields defined
-     * in {@link FxMarketEvent} for full pipeline stage-by-stage latency tracking.
-     */
     static final class BatchRow {
         long correlationId;
         long ingressNanoTime;
@@ -289,10 +308,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         long executedPriceScaled;
         long spreadScaled;
         int  eventStatus;
-        // Per-stage entry timestamps (nanoseconds, monotonic System.nanoTime()).
-        // Default 0L = stage not reached.
         long t1ServAEntry;
+        long t1ServAExit;
         long t2ServBEntry;
+        long t2ServBExit;
         long t3ServCEntry;
     }
 }

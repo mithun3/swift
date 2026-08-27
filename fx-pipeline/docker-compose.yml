@@ -63,7 +63,8 @@ services:
     cpuset: "0"
     volumes:
       - fx-queues:/tmp/fx-queues/
-    command: ["sh", "-c", "java $$JVM_OPTS -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain"]
+      - ./fx-telemetry:/tmp/fx-telemetry
+    command: ["sh", "-c", "java $$JVM_OPTS -Dfx.telemetry.enabled=true -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain"]
     depends_on:
       - serv-a
 
@@ -75,7 +76,7 @@ services:
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
-    command: ["sh", "-c", "/app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency.hlog"]
+    command: ["sh", "-c", "export JVM_OPTS=\"$$JVM_OPTS -Dfx.load.mode=tcp\"; /app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-0.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency-serv-c.hlog /tmp/fx-telemetry/fx-latency.hlog"]
 
 volumes:
   fx-queues:

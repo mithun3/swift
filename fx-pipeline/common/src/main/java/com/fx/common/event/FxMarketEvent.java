@@ -92,6 +92,12 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
     /** T3: Entry to serv-c (Persistence). Captured right after reading from queue-c. */
     public long t3ServCEntry;
 
+    /** T1: Exit from serv-a (Risk). Captured right before writing to queue-b. */
+    public long t1ServAExit;
+
+    /** T2: Exit from serv-b (Pricing). Captured right before writing to queue-c. */
+    public long t2ServBExit;
+
     // ─────────────────────────────────────────────────────────────────────────
     // FX INSTRUMENT GROUP  (offset 16)
     // ─────────────────────────────────────────────────────────────────────────
@@ -216,7 +222,9 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
         correlationId        = 0L;
         ingressNanoTime      = 0L;
         t1ServAEntry         = 0L;
+        t1ServAExit          = 0L;
         t2ServBEntry         = 0L;
+        t2ServBExit          = 0L;
         t3ServCEntry         = 0L;
         currencyPairCode     = 0L;
         side                 = 0;
@@ -248,7 +256,9 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
         this.correlationId        = source.correlationId;
         this.ingressNanoTime      = source.ingressNanoTime;
         this.t1ServAEntry         = source.t1ServAEntry;
+        this.t1ServAExit          = source.t1ServAExit;
         this.t2ServBEntry         = source.t2ServBEntry;
+        this.t2ServBExit          = source.t2ServBExit;
         this.t3ServCEntry         = source.t3ServCEntry;
         this.currencyPairCode     = source.currencyPairCode;
         this.side                 = source.side;

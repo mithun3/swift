@@ -3,28 +3,44 @@
 # ==============================================================================
 # Script: run_load_generator.sh
 # Description: Executes the high-throughput garbage-free load generator
-# Usage: ./run_load_generator.sh <queue-path> <target-rate> [message-count]
-# Example 1: ./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
-#   -> Runs infinitely, generating 5,000,000 messages per second.
-# Example 2: ./run_load_generator.sh /tmp/fx-queues/queue-a 500000 5000000
-#   -> Runs for exactly 10 seconds, generating a total of 5,000,000 messages 
-#      at a rate of 500,000 messages per second.
-# Example 3: ./run_load_generator.sh /tmp/fx-queues/queue-a 1 1  (Sends exactly 1 message at 1 msgs/sec)
+# Usage: ./run_load_generator.sh <queue-path> <target-rate> [message-count] [--tcp|--direct]
+# Modes:
+#   --tcp    (default) Connects to serv-0 on :5001 and injects raw FIX bytes over TCP.
+#            serv-0 must already be running in tcp mode before calling this script.
+#   --direct Writes directly to the Chronicle Queue at <queue-path>, bypassing serv-0.
+#            Use this for downstream-only latency measurement.
+# Example 1: ./run_load_generator.sh /tmp/fx-queues/queue-a 500000 500000
+#   -> TCP mode (default): 500k msgs/sec through serv-0.
+# Example 2: ./run_load_generator.sh /tmp/fx-queues/queue-a 500000 500000 --direct
+#   -> Direct mode: bypasses serv-0, writes to queue-a.
+# Example 3: ./run_load_generator.sh /tmp/fx-queues/queue-a 5000000
+#   -> Runs infinitely in TCP mode.
 # ==============================================================================
 
 set -e
 
-if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
-    echo "Usage: $0 <queue-path> <target-rate> [message-count]"
-    echo "Example 1: $0 /tmp/fx-queues/queue-a 5000000"
-    echo "Example 2: $0 /tmp/fx-queues/queue-a 500000 5000000"
-    echo "Example 3: $0 /tmp/fx-queues/queue-a 1 1"
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 <queue-path> <target-rate> [message-count] [--tcp|--direct]"
+    echo "Example 1: $0 /tmp/fx-queues/queue-a 500000 500000"
+    echo "Example 2: $0 /tmp/fx-queues/queue-a 500000 500000 --direct"
+    echo "Example 3: $0 /tmp/fx-queues/queue-a 5000000"
     exit 1
 fi
 
 QUEUE_PATH=$1
 TARGET_RATE=$2
 MESSAGE_COUNT=${3:-"-1"}
+
+# Parse optional mode flag (4th argument). Default to tcp.
+LOAD_MODE_ARG="${4:---tcp}"
+if [ "$LOAD_MODE_ARG" = "--tcp" ]; then
+    LOAD_MODE="tcp"
+elif [ "$LOAD_MODE_ARG" = "--direct" ]; then
+    LOAD_MODE="direct"
+else
+    echo "Error: Unknown mode '$LOAD_MODE_ARG'. Use --tcp or --direct."
+    exit 1
+fi
 
 # Ensure we are in the project root directory
 cd "$(dirname "$0")/.."
@@ -37,7 +53,7 @@ if [ ! -f "test/target/test-1.0.0-SNAPSHOT.jar" ]; then
 fi
 
 # We use the same JVM options used for optimal latency and Chronicle Queue compatibility
-JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
+JVM_OPTS="$JVM_OPTS --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED \
 --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED \
 --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED \
@@ -62,6 +78,7 @@ if [ "$MESSAGE_COUNT" != "-1" ]; then
 else
     echo "    Count: Infinite"
 fi
+echo "    Mode:  $LOAD_MODE"
 echo "=========================================="
 
-java $JVM_OPTS -cp "test/target/test-1.0.0-SNAPSHOT.jar:test/target/dependency/*" com.fx.test.LoadGenerator "$QUEUE_PATH" "$TARGET_RATE" "$MESSAGE_COUNT"
+java $JVM_OPTS -Dfx.load.mode="$LOAD_MODE" -cp "test/target/test-1.0.0-SNAPSHOT.jar:test/target/dependency/*" com.fx.test.LoadGenerator "$QUEUE_PATH" "$TARGET_RATE" "$MESSAGE_COUNT"

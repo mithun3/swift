@@ -188,6 +188,18 @@ def main():
                 <p><em>Note: All times in the table below are expressed in <strong>microseconds (&mu;s)</strong> (1&mu;s = 1,000 nanoseconds). Lower is better.</em></p>
             </div>
             
+            <h2>Understanding the Pipeline Stages</h2>
+            <div class="explanation">
+                <p>The report includes several rows representing different components in the pipeline. Here is what they measure:</p>
+                <ul>
+                    <li><strong>fx-latency-queue-a.hlog:</strong> Time from Gateway ingress to Risk validation start (Network + Gateway parsing + queue-a write/read).</li>
+                    <li><strong>fx-latency-serv-0.hlog:</strong> Gateway (serv-0) internal processing latency before writing to queue-a.</li>
+                    <li><strong>fx-latency-serv-a.hlog:</strong> Risk validation (serv-a) internal processing latency (from reading queue-a to writing queue-b).</li>
+                    <li><strong>fx-latency-serv-b.hlog:</strong> Pricing engine (serv-b) internal processing latency (from reading queue-b to writing queue-c).</li>
+                    <li><strong>fx-latency.hlog:</strong> End-to-End latency. The total time from the initial FIX message ingress at the Gateway until the final persistence in serv-c.</li>
+                </ul>
+            </div>
+            
             <h3>Summary Table</h3>
             <table>
                 <thead>

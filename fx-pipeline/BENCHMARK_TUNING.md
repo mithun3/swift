@@ -24,8 +24,25 @@ The pipeline should be run with the following JVM flags (included in `scripts/de
 - `-XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints`: Improve async profiler visibility.
 
 ## 4. Running the Benchmark
-1. Pin the `serv-test-gen` load generator to an isolated core (e.g., Core 2) using `AffinityLock`.
-2. Pin `serv-0`, `serv-a`, `serv-b`, `serv-c` to Cores 3, 4, 5, 6 respectively.
-3. Start the services.
-4. Run the load generator at the desired rate.
-5. Process the output `.hlog` files using the provided Python visualization script.
+1. Start the pipeline: `./scripts/start.sh`
+2. Pin the `LoadGenerator` to an isolated core — handled automatically via `AffinityLock` inside the JVM.
+3. Run the load generator through serv-0 (TCP mode, default):
+   ```bash
+   ./scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000 10000000
+   ```
+   Or bypass serv-0 for downstream-only measurement (direct mode):
+   ```bash
+   ./scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
+   ```
+4. Stop the pipeline to flush all telemetry buffers: `./scripts/stop.sh`
+5. Process the output `.hlog` files using the provided Python visualization script:
+   ```bash
+   ./scripts/process_latency.sh /tmp/fx-latency*.hlog
+   python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
+   ```
+
+Or use the full orchestrated suite (handles steps 3–5 automatically):
+```bash
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000          # --tcp default
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct  # downstream only
+```

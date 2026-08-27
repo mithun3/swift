@@ -6,6 +6,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
 /**
@@ -65,6 +66,9 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     /** Generates monotonically increasing 64-bit correlation IDs. */
     private final CorrelationIdGenerator idGenerator;
 
+    /** Optional zero-allocation latency recorder for serv-0 execution. */
+    private final TelemetryRecorder s0Recorder;
+
     /**
      * Constructs the gateway event loop.
      *
@@ -77,9 +81,11 @@ public final class GatewayEventLoop extends AbstractEventLoop {
      *
      * @param messageSource the FIX byte message source
      * @param idGenerator   the correlation ID generator
+     * @param s0Recorder    optional telemetry recorder
      */
     public GatewayEventLoop(final FixMessageSource messageSource,
-            final CorrelationIdGenerator idGenerator) {
+            final CorrelationIdGenerator idGenerator,
+            final TelemetryRecorder s0Recorder) {
         super(
                 "gateway",
                 // The gateway reads from the FIX source, not a Chronicle Queue.
@@ -92,6 +98,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
                 CPU_CORE);
         this.messageSource = messageSource;
         this.idGenerator = idGenerator;
+        this.s0Recorder = s0Recorder;
         this.decoder = new FixDecoder();
         // Pre-allocate the decode frame once — reused across all messages.
         this.frame = new FixDecoder.FxMessageFrame();
@@ -189,6 +196,11 @@ public final class GatewayEventLoop extends AbstractEventLoop {
         // This is a memory-mapped write into the Chronicle Queue store file —
         // typically completing in < 1 microsecond with warm page cache.
         appender.writeDocument(flyweight);
+
+        // Step 9: Record processing latency (serv-0)
+        if (s0Recorder != null) {
+            s0Recorder.recordValue(System.nanoTime() - flyweight.ingressNanoTime);
+        }
     }
 
     /**

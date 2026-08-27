@@ -71,6 +71,7 @@ public final class PricingEventLoop extends AbstractEventLoop {
         // Fast-path: if the event was already rejected upstream, skip pricing entirely.
         // Forward the event to queue-c so serv-c can persist the rejection record.
         if (EventStatus.isTerminalFailure(event.eventStatus)) {
+            event.t2ServBExit = System.nanoTime();
             appender.writeDocument(event);
             return;
         }
@@ -82,6 +83,7 @@ public final class PricingEventLoop extends AbstractEventLoop {
         event.eventStatus = pricingSucceeded ? EventStatus.PRICED : EventStatus.PRICING_FAILED;
 
         // Forward to queue-c regardless of pricing outcome — for full audit trail.
+        event.t2ServBExit = System.nanoTime();
         appender.writeDocument(event);
     }
 }

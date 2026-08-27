@@ -71,8 +71,8 @@ def main():
                     pass
                     
     if not percentiles:
-        print("No valid data found in the .hgrm file.")
-        sys.exit(1)
+        print("Warning: No valid data found in the .hgrm file. Skipping plot generation.")
+        sys.exit(0)
         
     plt.figure(figsize=(10, 6))
     

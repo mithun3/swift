@@ -100,6 +100,9 @@ public final class RiskValidationEventLoop extends AbstractEventLoop {
         event.eventStatus = accepted ? EventStatus.ACCEPTED : EventStatus.CREDIT_REJECTED;
 
         // Step 4: Write the mutated event to queue-b.
+        // We capture the exit timestamp right before the queue write to exclude Chronicle I/O time from serv-a processing latency.
+        event.t1ServAExit = System.nanoTime();
+        
         // This is a single memory-mapped append — typically < 500 nanoseconds.
         // The appender serialises the flyweight's fields directly into the
         // off-heap Chronicle buffer. No intermediate byte[] is created.

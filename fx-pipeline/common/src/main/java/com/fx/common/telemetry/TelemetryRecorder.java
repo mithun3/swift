@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 
 /**
  * {@code TelemetryRecorder} — Zero-allocation, concurrent latency recorder.
@@ -18,10 +19,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class TelemetryRecorder implements AutoCloseable {
 
+    private static final Logger logger = Logger.getLogger(TelemetryRecorder.class.getName());
+
     private final SingleWriterRecorder recorder;
     private final Thread backgroundThread;
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final HistogramLogWriter logWriter;
+    /** Retained so we can explicitly flush and close the stream on shutdown. */
+    private final PrintStream printStream;
     private final long intervalMillis;
 
     /**
@@ -35,9 +40,14 @@ public final class TelemetryRecorder implements AutoCloseable {
         // 3 significant digits provide ~0.1% accuracy.
         this.recorder = new SingleWriterRecorder(highestValue, 3);
         this.intervalMillis = intervalMillis;
-        this.logWriter = new HistogramLogWriter(new PrintStream(logFile));
-        
-        // Output standard HdrHistogram log header
+        // Retain the PrintStream so we can flush and close it explicitly in close().
+        // Without this, bytes buffered inside PrintStream are silently lost on JVM exit.
+        this.printStream = new PrintStream(logFile);
+        this.logWriter = new HistogramLogWriter(this.printStream);
+
+        // Output standard HdrHistogram log header.
+        // Restoring base time / start time headers to prevent NullPointerException
+        // in HistogramLogProcessor (v2.2.2) when parsing log files that contain no intervals.
         this.logWriter.outputLogFormatVersion();
         this.logWriter.outputLegend();
         this.logWriter.outputBaseTime(System.currentTimeMillis());
@@ -54,7 +64,12 @@ public final class TelemetryRecorder implements AutoCloseable {
      * @param value The value to record (e.g., latency in nanoseconds).
      */
     public void recordValue(final long value) {
-        recorder.recordValue(value);
+        try {
+            recorder.recordValue(value);
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
+            // Swallow telemetry exceptions gracefully to avoid disrupting
+            // the main processing loop or causing false event rejections.
+        }
     }
 
     private void flushLoop() {
@@ -67,10 +82,13 @@ public final class TelemetryRecorder implements AutoCloseable {
                 intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
                 
                 if (intervalHistogram.getTotalCount() > 0) {
-                    final double startTimeSec = (System.currentTimeMillis() - intervalHistogram.getStartTimeStamp()) / 1000.0;
-                    final double endTimeSec = startTimeSec + (intervalMillis / 1000.0);
-                    // Write to the .hlog file (this allocates strings and does I/O, but it's on a background thread)
-                    logWriter.outputIntervalHistogram(startTimeSec, endTimeSec, intervalHistogram);
+                    // Use the single-argument overload — it reads startTimeStamp and
+                    // endTimeStamp directly from the histogram's own internal fields,
+                    // which are maintained correctly by SingleWriterRecorder.
+                    // The previous 3-arg overload required computing a wall-clock offset
+                    // from a base time, which produced near-zero values and collapsed
+                    // all percentiles to 0.00 µs.
+                    logWriter.outputIntervalHistogram(intervalHistogram);
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -90,13 +108,19 @@ public final class TelemetryRecorder implements AutoCloseable {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        
-        // Flush any remaining data
-        Histogram intervalHistogram = recorder.getIntervalHistogram();
+
+        // Flush the final partial interval — data recorded since the last background flush.
+        // This is the critical step: without it, the last interval's samples are lost.
+        final Histogram intervalHistogram = recorder.getIntervalHistogram();
         if (intervalHistogram.getTotalCount() > 0) {
-            final double startTimeSec = (System.currentTimeMillis() - intervalHistogram.getStartTimeStamp()) / 1000.0;
-            final double endTimeSec = startTimeSec + (intervalMillis / 1000.0);
-            logWriter.outputIntervalHistogram(startTimeSec, endTimeSec, intervalHistogram);
+            logWriter.outputIntervalHistogram(intervalHistogram);
         }
+
+        // Explicitly flush and close the underlying PrintStream.
+        // PrintStream is internally buffered — without this, any bytes not yet written
+        // to the OS page cache will be silently lost when the JVM exits.
+        logWriter.outputComment("TelemetryRecorder closed — all intervals flushed.");
+        printStream.flush();
+        printStream.close();
     }
 }

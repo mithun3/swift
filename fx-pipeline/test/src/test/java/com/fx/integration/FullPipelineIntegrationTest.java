@@ -132,7 +132,7 @@ class FullPipelineIntegrationTest {
         // Create gateway with a finite synthetic source
         final SyntheticFixSource source = new SyntheticFixSource(EVENT_COUNT);
         final CorrelationIdGenerator idGen = new CorrelationIdGenerator();
-        gateway = new GatewayEventLoop(source, idGen);
+        gateway = new GatewayEventLoop(source, idGen, null);
 
         // Start in reverse pipeline order (consumers first) to avoid queue writes
         // being missed by a consumer that hasn't started tailing yet.
@@ -237,7 +237,7 @@ class FullPipelineIntegrationTest {
         telemetryStitcher  = new TelemetryStitcher(queueCPath, traceLogPath);
 
         final SyntheticFixSource source = new SyntheticFixSource(count);
-        gateway = new GatewayEventLoop(source, new CorrelationIdGenerator());
+        gateway = new GatewayEventLoop(source, new CorrelationIdGenerator(), null);
 
         persistenceService.start();
         pricingService.start();

@@ -213,10 +213,13 @@ mvn verify -pl test -Dfailsafe.fork.count=1
 # Build first
 scripts/build.sh
 
-# Start pipeline, send 1 message, then verify DB
-scripts/deploy.sh &
+# Start pipeline, send 1 message via TCP through serv-0, then verify DB
+scripts/start.sh
 scripts/run_load_generator.sh /tmp/fx-queues/queue-a 1 1
 scripts/view_db.sh
+
+# Stop when done
+scripts/stop.sh
 ```
 
 ---
@@ -227,8 +230,12 @@ The pipeline includes a coordinated-omission-aware load generator and an HdrHist
 
 ```bash
 # Run the full benchmark suite (Load generation -> Latency processing -> HTML report)
-# Example: target rate 5M msgs/sec for 10M messages total
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 /tmp/fx-latency*.hlog
+# Default mode is --tcp: load is routed through serv-0. All 6 services record telemetry.
+# Ensure the full pipeline is running first: ./scripts/start.sh
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000
+
+# Downstream-only mode: bypasses serv-0 and writes directly to queue-a.
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
 ```
 
 ---

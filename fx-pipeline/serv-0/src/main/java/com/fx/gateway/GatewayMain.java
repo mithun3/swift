@@ -3,7 +3,8 @@ package com.fx.gateway;
 import com.fx.common.logging.Logger;
 import com.fx.common.logging.LoggerFactory;
 import com.fx.common.queue.QueuePaths;
-
+import com.fx.common.telemetry.TelemetryRecorder;
+import java.io.File;
 /**
  * {@code GatewayMain} — Entry point for serv-0 (FIX Gateway).
  *
@@ -69,9 +70,29 @@ public final class GatewayMain {
         }
 
         final CorrelationIdGenerator idGen    = new CorrelationIdGenerator();
-        final GatewayEventLoop loop           = new GatewayEventLoop(source, idGen);
+        
+        final boolean telemetryEnabled = Boolean.parseBoolean(
+                System.getProperty("fx.telemetry.enabled", "true"));
+        final String telemetryLogPath = System.getProperty(
+                "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
+
+        TelemetryRecorder s0Recorder = null;
+        if (telemetryEnabled) {
+            try {
+                String basePath = telemetryLogPath.replace(".hlog", "");
+                s0Recorder = new TelemetryRecorder(
+                        new File(basePath + "-serv-0.hlog"), 60_000_000_000L, 1_000L);
+                logger.info("[serv-0] Telemetry enabled. Writing latency logs to: " + basePath + "-serv-0.hlog");
+            } catch (final Exception e) {
+                logger.warn("[serv-0] WARNING: Failed to init TelemetryRecorder: "
+                        + e.getMessage() + " — continuing without telemetry.");
+            }
+        }
+
+        final GatewayEventLoop loop           = new GatewayEventLoop(source, idGen, s0Recorder);
 
         // Shutdown hook
+        final TelemetryRecorder finalS0 = s0Recorder;
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             logger.info("[serv-0] Shutdown signal received. Stopping event loop...");
             loop.stop();
@@ -81,6 +102,7 @@ public final class GatewayMain {
                 if (source instanceof AutoCloseable) {
                     ((AutoCloseable) source).close();
                 }
+                if (finalS0 != null) finalS0.close();
             } catch (final Exception e) {
                 Thread.currentThread().interrupt();
             }

@@ -24,7 +24,7 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
     private static final int BUFFER_SIZE = 1024;
     private static final Logger logger = LoggerFactory.getLogger(TcpFixSource.class);
 
-    private final byte[] messageBuffer = new byte[BUFFER_SIZE];
+    private final byte[] messageBuffer = new byte[8192];
     private final ByteBuffer nioBuffer = ByteBuffer.wrap(messageBuffer);
 
     private final ServerSocketChannel serverChannel;
@@ -52,17 +52,9 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
         return messageBuffer;
     }
 
-    /**
-     * Non-blocking poll for the next FIX message.
-     *
-     * <p>If no client is connected, it attempts to accept one without blocking.
-     * If a client is connected, it attempts a non-blocking read into the buffer.
-     *
-     * @param buf       destination buffer (same as returned by {@link #buffer()})
-     * @param offset    start position
-     * @param maxLength maximum bytes to write
-     * @return bytes read (> 0), 0 if no data is available, -1 on EOF or error
-     */
+    private int bufferPosition = 0; // Current write position from the socket
+    private int readPosition = 0;   // Current read position for the parser
+
     @Override
     public int poll(final byte[] buf, final int offset, final int maxLength) {
         try {
@@ -75,19 +67,58 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
                 return 0; // Yield to event loop
             }
 
-            nioBuffer.clear();
-            nioBuffer.limit(offset + Math.min(maxLength, BUFFER_SIZE - offset));
-            nioBuffer.position(offset);
+            // If we have a full message buffered, return it immediately
+            if (bufferPosition - readPosition >= 76) {
+                System.arraycopy(messageBuffer, readPosition, buf, offset, 76);
+                readPosition += 76;
+                // Compact buffer if fully read
+                if (readPosition == bufferPosition) {
+                    readPosition = 0;
+                    bufferPosition = 0;
+                }
+                return 76;
+            }
+
+            // We need more data. First, compact any partial message to the front of the buffer
+            if (readPosition > 0) {
+                int remaining = bufferPosition - readPosition;
+                if (remaining > 0) {
+                    System.arraycopy(messageBuffer, readPosition, messageBuffer, 0, remaining);
+                }
+                bufferPosition = remaining;
+                readPosition = 0;
+            }
+
+            // Attempt a non-blocking read into the remaining space
+            nioBuffer.limit(messageBuffer.length);
+            nioBuffer.position(bufferPosition);
 
             final int bytesRead = activeClient.read(nioBuffer);
             if (bytesRead < 0) {
                 logger.info("[TcpFixSource] Client disconnected.");
                 activeClient.close();
                 activeClient = null;
+                bufferPosition = 0;
+                readPosition = 0;
                 return 0; // Return 0 to keep the event loop alive but yield
             }
 
-            return bytesRead;
+            if (bytesRead > 0) {
+                bufferPosition += bytesRead;
+            }
+
+            // Check again if we now have a complete message
+            if (bufferPosition - readPosition >= 76) {
+                System.arraycopy(messageBuffer, readPosition, buf, offset, 76);
+                readPosition += 76;
+                if (readPosition == bufferPosition) {
+                    readPosition = 0;
+                    bufferPosition = 0;
+                }
+                return 76;
+            }
+
+            return 0; // Not enough bytes yet
         } catch (final IOException e) {
             logger.error("[TcpFixSource] I/O error during poll: ", e);
             try {
@@ -96,6 +127,8 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
                 }
             } catch (final IOException ignored) {}
             activeClient = null;
+            bufferPosition = 0;
+            readPosition = 0;
             return 0;
         }
     }

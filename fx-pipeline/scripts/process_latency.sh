@@ -8,7 +8,7 @@
 # Example: ./process_latency.sh /tmp/fx-latency.hlog
 # ==============================================================================
 
-set -e
+set -euo pipefail
 
 if [ "$#" -lt 1 ]; then
     echo "Usage: $0 <path_to.hlog> [path_to2.hlog ...]"
@@ -46,9 +46,14 @@ fi
 
 echo "Using HdrHistogram JAR: $HDR_JAR"
 
+# Tracking arrays for the final summary
+PROCESSED_FILES=()
+SKIPPED_FILES=()
+
 for HLOG_FILE in "$@"; do
     if [ ! -f "$HLOG_FILE" ]; then
         echo "Warning: File not found: $HLOG_FILE. Skipping."
+        SKIPPED_FILES+=("$HLOG_FILE (not found)")
         continue
     fi
 
@@ -61,9 +66,18 @@ for HLOG_FILE in "$@"; do
     # 2. Process .hlog to .hgrm
     echo "Extracting percentiles to $HGRM_FILE..."
     TMP_PREFIX="${HLOG_FILE}.tmp"
-    java -cp "$HDR_JAR" org.HdrHistogram.HistogramLogProcessor -i "$HLOG_FILE" -o "$TMP_PREFIX"
-    mv "${TMP_PREFIX}.hgrm" "$HGRM_FILE"
-    rm -f "$TMP_PREFIX"
+    if java -cp "$HDR_JAR" org.HdrHistogram.HistogramLogProcessor -i "$HLOG_FILE" -o "$TMP_PREFIX" -outputValueUnitRatio 1; then
+        mv "${TMP_PREFIX}.hgrm" "$HGRM_FILE"
+        rm -f "${TMP_PREFIX}"*
+        PROCESSED_FILES+=("$HLOG_FILE")
+    else
+        FILE_SIZE=$(wc -c < "$HLOG_FILE" 2>/dev/null || echo "unknown")
+        echo "Warning: Failed to extract percentiles from $HLOG_FILE"
+        echo "         File size: ${FILE_SIZE} bytes (0 or very small = no data recorded; may need a longer run)"
+        rm -f "${TMP_PREFIX}"*
+        SKIPPED_FILES+=("$HLOG_FILE (HistogramLogProcessor failed — ${FILE_SIZE} bytes)")
+        continue
+    fi
 
     # 3. Generate the plot
     if command -v python3 &>/dev/null; then
@@ -78,3 +92,12 @@ done
 echo "=========================================="
 echo "    Processing Complete!"
 echo "=========================================="
+
+if [ ${#PROCESSED_FILES[@]} -gt 0 ]; then
+    echo "  Successfully processed (${#PROCESSED_FILES[@]}):"
+    for f in "${PROCESSED_FILES[@]}"; do echo "    ✓ $f"; done
+fi
+if [ ${#SKIPPED_FILES[@]} -gt 0 ]; then
+    echo "  Skipped (${#SKIPPED_FILES[@]}):"
+    for f in "${SKIPPED_FILES[@]}"; do echo "    ✗ $f"; done
+fi

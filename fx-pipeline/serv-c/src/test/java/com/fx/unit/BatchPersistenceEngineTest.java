@@ -69,8 +69,9 @@ class BatchPersistenceEngineTest {
     @DisplayName("accumulate() with endOfBatch=true flushes the batch")
     void testEndOfBatchTriggerFlush() throws SQLException {
         populateEvent(event, 42L, EventStatus.PRICED);
-        engine.accumulate(event, true); // endOfBatch = true → flush
-        assertEquals(0, engine.batchCount(), "batchCount must be 0 after end-of-batch flush");
+        engine.accumulate(event, true); // endOfBatch = true
+        engine.flush(); // Wait for async flush
+        assertEquals(0, engine.batchCount(), "batchCount must be 0 after flush");
         assertEquals(1L, countRows(), "Exactly 1 row must be in the DB after flush");
     }
 
@@ -100,6 +101,7 @@ class BatchPersistenceEngineTest {
         event.t3ServCEntry         = 333L;
 
         engine.accumulate(event, true);
+        engine.flush(); // Wait for async flush
 
         try (final Connection c = DriverManager.getConnection(jdbcUrl, "sa", "");
              final Statement s = c.createStatement();
@@ -129,9 +131,9 @@ class BatchPersistenceEngineTest {
     void testMultipleEventsAccumulatedAndFlushed() throws SQLException {
         for (long id = 1L; id <= 10L; id++) {
             populateEvent(event, id, EventStatus.PRICED);
-            // Only flush on the last event
             engine.accumulate(event, id == 10L);
         }
+        engine.flush(); // Wait for async flush
         assertEquals(10L, countRows(), "All 10 events must be in the DB after batch flush");
     }
 
@@ -143,6 +145,7 @@ class BatchPersistenceEngineTest {
         event.notionalMinorUnits = 100L;
         // t1/t2/t3 remain 0 (reset())
         engine.accumulate(event, true);
+        engine.flush(); // Wait for async flush
 
         try (final Connection c = DriverManager.getConnection(jdbcUrl, "sa", "");
              final Statement s = c.createStatement();

@@ -21,7 +21,16 @@ If the system experiences a 100-millisecond GC pause, the sender also pauses. Th
 
 ### The Solution: Paced Sending and Intended Timestamps
 
-Our `LoadGenerator` (in the `test` Maven module) mitigates this by pacing itself to a fixed target throughput and calculating the *intended* send time for every message in advance:
+Our `LoadGenerator` (in the `test` Maven module) mitigates this by pacing itself to a fixed target throughput and calculating the *intended* send time for every message in advance.
+
+The load generator supports two delivery modes, selected via a flag:
+
+| Mode | Flag | Description |
+|---|---|---|
+| **TCP** (default) | `--tcp` | Connects to serv-0 on `:5001` and injects raw FIX bytes. The full gateway path (decode → correlationId → ingress timestamp) is exercised. |
+| **Direct** | `--direct` | Writes a pre-built `FxMarketEvent` flyweight directly to `queue-a`, bypassing serv-0 entirely. Useful for isolating downstream service latency. |
+
+In **direct mode**, `ingressNanoTime` is set to the *intended* send time (not actual), correctly propagating any stall delay through the pipeline as measured latency at serv-c.
 
 ```java
 // From test/src/main/java/com/fx/test/LoadGenerator.java
@@ -37,13 +46,14 @@ while (true) {
         // Record intendedSendTime rather than 'now'. If the JVM paused or
         // we fell behind, this correctly propagates the stall delay through
         // the pipeline as measured latency at serv-c.
-        flyweight.ingressNanoTime = intendedSendTime;
+        flyweight.ingressNanoTime = intendedSendTime; // direct mode
         flyweight.currencyPairCode = eurUsdCode;
         flyweight.side = 1;
         flyweight.notionalMinorUnits = 100_000_000L;
         flyweight.clientTier = 2;
         flyweight.clientId = 9999L;
-        appender.writeDocument(flyweight);
+        appender.writeDocument(flyweight); // direct mode: write to queue-a
+        // In TCP mode: write raw FIX bytes to serv-0 via SocketChannel instead
 
         intendedSendTime += intervalNanos;
     }
@@ -182,30 +192,45 @@ python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
 
 ## 6. Running the Benchmark
 
+### Orchestrated (recommended)
+
 ```bash
 # 1. Build all modules
 scripts/build.sh
 
-# 2. Start the pipeline (all 4 services)
-scripts/deploy.sh
+# 2. Start the pipeline
+scripts/start.sh
 
-# 3. Run the full benchmark suite (Load Generation -> Process Latency -> HTML Report)
-# Example: 5M msgs/sec for 10M messages total
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 /tmp/fx-latency*.hlog
+# 3. Run the full benchmark suite
+#    Default mode: --tcp (load routes through serv-0, all 6 services record telemetry)
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000
 
-# 4. Stop the pipeline (Ctrl+C or kill the PIDs)
+#    Downstream-only mode: --direct (bypasses serv-0, serv-a/b/c telemetry only)
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
+
+# 4. Stop the pipeline
+scripts/stop.sh
 ```
 
-Alternatively, you can run the scripts in a standalone manner:
+> The benchmark suite automatically stops services after the load run to flush
+> all `TelemetryRecorder` buffers to disk before processing `.hlog` files.
+
+### Standalone (manual steps)
 
 ```bash
-# 3a. Run load generator manually
-scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000
+# 3a. Run load generator in TCP mode (default — routes through serv-0)
+scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000 10000000
 
-# 3b. Process latencies
+# 3a. Run load generator in direct mode (bypasses serv-0)
+scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
+
+# 3b. Stop services to flush telemetry
+scripts/stop.sh
+
+# 3c. Process latencies
 ./scripts/process_latency.sh /tmp/fx-latency*.hlog
 
-# 3c. Generate HTML report
+# 3d. Generate HTML report
 python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
 ```
 
