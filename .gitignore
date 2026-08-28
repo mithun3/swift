@@ -22,6 +22,12 @@ target/
 *.log
 logs/
 
+# Runtime data / telemetry output (docker bind mounts)
+fx-data/
+fx-telemetry/
+*.jsonl
+*.hlog
+
 # Build and compiled artifacts
 # Book compilation
 # *_compiled.md
