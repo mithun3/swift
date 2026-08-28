@@ -59,11 +59,14 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     /**
      * Ring-buffer capacity: 524,288 slots (power of two, required for mask-based wrapping).
      *
-     * <p>At 1M events/sec this ring absorbs ~524 ms of burst before the hot-path
-     * {@link #accumulate} spin-wait fires.  The previous 65,536-slot ring only
-     * covered ~65 ms, causing serv-c to stall whenever an H2 {@code executeBatch()}
-     * took longer than that threshold &mdash; which in turn starved queue-c and
-     * produced the observed P99 = 5 s queue-c wait times.
+     * <p>At 175K events/sec (macOS benchmark throughput) this ring absorbs ~3 seconds
+     * of burst absorption before the hot-path {@link #accumulate} spin-wait could fire.
+     * The previous 65,536-slot ring only covered ~375 ms, causing serv-c to stall
+     * whenever an H2 {@code executeBatch()} took longer than that threshold.
+     *
+     * <p>With the {@link #readPointer} now advanced <em>before</em> the H2 commit,
+     * this ring only needs to absorb load while the db-writer is loading data into
+     * the JDBC batch — not the full commit duration. Ring fill is extremely rare.
      *
      * <p>Memory footprint: 524,288 &times; ~128 bytes per {@link BatchRow} &asymp; 64 MB.
      * All slots are pre-allocated at construction &mdash; zero GC after startup.
@@ -74,20 +77,47 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     /**
      * Maximum rows pulled into a single JDBC {@code executeBatch()} call.
      *
-     * <p>Raised from 4,096 to 32,768 to reduce commit frequency and amortise
-     * H2 transaction overhead over larger batches, lowering the average time
-     * spent inside each {@code commit()} and keeping the ring from filling.
+     * <p>Reduced from 32,768 to 8,192 to prevent multi-second H2 commits.
+     * At 175K events/sec, an 8,192-row batch represents ~47 ms of events.
+     * In-memory H2 commits 8K rows in approximately 20-50 ms, which is
+     * well below the 3-second ring-fill threshold at 175K events/sec.
+     *
+     * <p>The previous 32,768 value caused individual H2 commits to take
+     * 200 ms &ndash; 2+ s as the {@code fx_trades} table grew past 1M rows
+     * (MVStore B-tree depth increases), triggering the {@link #accumulate}
+     * spin-wait and producing the observed serv-c Max = 2.676 s.
      */
-    private static final int MAX_BATCH = 32_768;
+    private static final int MAX_BATCH = 8_192;
 
     /** Pre-allocated batch row objects — never replaced after construction. */
     private final BatchRow[] ringBuffer = new BatchRow[RING_SIZE];
 
-    /** Volatile pointer advanced by the event loop. */
+    /**
+     * Write pointer advanced by the event-loop thread ({@code accumulate}).
+     * Slots in range {@code [readPointer, writePointer)} hold live data.
+     */
     private volatile long writePointer = 0;
 
-    /** Volatile pointer advanced by the background JDBC thread. */
+    /**
+     * Read pointer advanced by the db-writer thread <em>before</em> the JDBC
+     * commit, immediately after all ring-buffer rows have been copied into the
+     * {@link java.sql.PreparedStatement} batch.  Advancing here frees the ring
+     * slots so {@code accumulate()} can write new events while H2 is committing
+     * &mdash; hiding commit latency from the serv-c hot path entirely.
+     *
+     * <p>Ring-full guard: {@code writePointer - readPointer &lt; RING_SIZE}.
+     */
     private volatile long readPointer = 0;
+
+    /**
+     * Committed pointer advanced by the db-writer thread <em>after</em> a
+     * successful {@link java.sql.Connection#commit()}.  Used by {@link #flush()}
+     * to guarantee that all recorded events are durably in H2 before returning,
+     * and by {@link #batchCount()} to report truly uncommitted events.
+     * On a commit failure the batch is discarded and this pointer advances
+     * alongside {@link #readPointer} to prevent {@link #flush()} from hanging.
+     */
+    private volatile long committedPointer = 0;
 
     /** Background thread for asynchronous database inserts. */
     private final Thread dbThread;
@@ -134,13 +164,18 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      * Accumulates a single event into the asynchronous ring buffer.
      *
      * <p>This is the hot-path method. All operations are primitive field assignments
-     * into pre-allocated {@link BatchRow} slots — zero heap allocations.
-     * It only blocks (spin-waits) if the entire 65,536 element ring buffer is full.
+     * into pre-allocated {@link BatchRow} slots &mdash; zero heap allocations.
      *
-     * @param event      the event to persist; fields copied into batch slot
-     * @param endOfBatch purely a hint, ignored in async design since the db-writer
-     *                   dynamically batches available events.
-     * @throws SQLException not thrown by async publish
+     * <p>Back-pressure guard: spins only if all {@value #RING_SIZE} slots are
+     * occupied ({@link #readPointer} has not yet advanced past slot {@code w}).
+     * Because {@link #readPointer} is advanced <em>before</em> the H2 commit,
+     * this guard fires only during the brief window when the db-writer is loading
+     * the PreparedStatement batch &mdash; not during the H2 commit itself.
+     * In practice the guard should never fire under normal load.
+     *
+     * @param event      the event to persist; fields are copied into a ring slot
+     * @param endOfBatch not used; the db-writer batches dynamically
+     * @throws SQLException never thrown; declared for interface compatibility
      */
     public void accumulate(final FxMarketEvent event,
                             final boolean endOfBatch) throws SQLException {
@@ -176,11 +211,25 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     }
 
     /**
-     * The background thread loop that constantly reads from the ring buffer,
-     * batches events up to MAX_BATCH, and executes JDBC inserts.
+     * Background db-writer loop: drains the ring buffer into H2 via JDBC batches.
+     *
+     * <h3>Two-phase progress tracking</h3>
+     * <ol>
+     *   <li>{@link #readPointer} is advanced <em>immediately after</em> all ring
+     *       slots for this batch have been copied into the PreparedStatement batch
+     *       via {@code addBatch()}.  This frees the ring slots for the producer
+     *       ({@link #accumulate}) to reuse while H2 commits in the background.</li>
+     *   <li>{@link #committedPointer} is advanced <em>after</em> a successful
+     *       {@link Connection#commit()}.  {@link #flush()} and the loop-exit
+     *       condition use this pointer to guarantee durability.</li>
+     * </ol>
+     *
+     * <p>On a commit failure both pointers are advanced to discard the poisoned
+     * batch and prevent an infinite retry loop.
      */
     private void flushLoop() {
-        while (running || readPointer < writePointer) {
+        // Exit only after all events have been durably committed, not merely loaded.
+        while (running || committedPointer < writePointer) {
             final long r = readPointer;
             final long w = writePointer;
 
@@ -217,11 +266,16 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                     insertStatement.addBatch();
                 }
 
+                // Phase 1: free ring slots now that data is loaded into the JDBC batch.
+                // The hot-path accumulate() can write new events to these slots while
+                // H2 processes the transaction — commit latency is hidden from the pipeline.
+                readPointer = r + batchSize;
+
                 insertStatement.executeBatch();
                 connection.commit();
 
-                // Publish progress
-                readPointer = r + batchSize;
+                // Phase 2: signal durability — flush() and the exit condition use this.
+                committedPointer = r + batchSize;
             } catch (final SQLException e) {
                 try {
                     connection.rollback();
@@ -229,22 +283,27 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                     System.err.println("[db-writer] Rollback failed: " + rollbackEx.getMessage());
                 }
                 System.err.println("[db-writer] Batch insert failed: " + e.getMessage());
-                
-                // Advance read pointer to discard poisoned batch and prevent infinite crash loop
-                readPointer = r + batchSize;
+
+                // readPointer was already advanced before executeBatch (phase 1).
+                // Advance committedPointer to match so flush() is not blocked
+                // indefinitely by a poisoned batch that will never be committed.
+                committedPointer = r + batchSize;
             }
         }
     }
 
     /**
-     * Synchronously waits for the background thread to flush all pending events.
-     * Useful for graceful shutdown and testing.
+     * Synchronously waits until all accumulated events have been durably committed.
      *
-     * @throws SQLException if the DB thread died
+     * <p>Uses {@link #committedPointer} (not {@link #readPointer}) to guarantee
+     * that data is in H2 before returning — not merely loaded into the JDBC batch.
+     * Safe to call from any thread.
+     *
+     * @throws SQLException if the db-writer thread died before committing
      */
     public void flush() throws SQLException {
         final long target = writePointer;
-        while (readPointer < target && running) {
+        while (committedPointer < target && running) {
             Thread.onSpinWait();
             if (!dbThread.isAlive()) {
                 throw new SQLException("DB Writer thread died prematurely");
@@ -253,16 +312,32 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     }
 
     /**
-     * Returns the number of events currently waiting in the ring buffer.
+     * Returns the number of events accumulated but not yet committed to H2.
      *
-     * @return current pending count
+     * <p>Events counted here have been written to the ring buffer and may already
+     * be loaded into the JDBC batch, but their H2 transaction is still in flight.
+     *
+     * @return uncommitted event count
      */
     public int batchCount() {
-        return (int) (writePointer - readPointer);
+        return (int) (writePointer - committedPointer);
     }
 
     /**
      * Initialises the database schema — creates the {@code fx_trades} table if absent.
+     *
+     * <h3>Schema design notes</h3>
+     * <ul>
+     *   <li>{@code correlation_id} is used as PRIMARY KEY instead of a separate
+     *       auto-increment {@code id} column.  The correlation ID is a monotonically
+     *       increasing {@link java.util.concurrent.atomic.AtomicLong}, so H2 MVStore
+     *       always appends to the rightmost B-tree leaf — O(1) amortised insert cost
+     *       with no random page splits.  An auto-increment column would have required
+     *       a separate sequence counter update on every row, adding overhead that
+     *       grew visibly as the table exceeded 1 M rows.</li>
+     *   <li>All timestamp columns default to {@code 0} so rows inserted before
+     *       a given stage completes remain queryable.</li>
+     * </ul>
      *
      * @throws SQLException if table creation fails
      */
@@ -271,8 +346,9 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         try (final Statement stmt = connection.createStatement()) {
             stmt.execute(
                     "CREATE TABLE IF NOT EXISTS fx_trades ("
-                            + "id                    BIGINT AUTO_INCREMENT PRIMARY KEY, "
-                            + "correlation_id         BIGINT NOT NULL, "
+                            // Monotonically increasing sequential long — O(1) B-tree append,
+                            // no separate sequence counter, queries by trade ID in O(log n).
+                            + "correlation_id         BIGINT NOT NULL PRIMARY KEY, "
                             + "ingress_nano           BIGINT NOT NULL, "
                             + "client_id              BIGINT NOT NULL, "
                             + "client_tier            INT NOT NULL, "

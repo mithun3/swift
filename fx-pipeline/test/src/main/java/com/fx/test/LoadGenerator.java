@@ -19,14 +19,40 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * {@code LoadGenerator} — Garbage-free, coordinated-omission-aware test generator.
  *
- * <p>Designed to flood the pipeline at a specific target rate (e.g., 5,000,000 msgs/sec).
+ * <p>Designed to inject events at a specific target rate (e.g., 500,000 msgs/sec).
  * Pacing is achieved via a busy-spin delay loop. To mitigate coordinated omission,
- * the {@code ingressNanoTime} is set to the <em>intended</em> send time, not the actual
- * send time, which correctly pushes any queueing delay into the measured tail latency.
+ * the {@code ingressNanoTime} is set to the <em>intended</em> send time, not the
+ * actual send time, which correctly propagates any queueing delay into the measured
+ * tail latency rather than hiding it.
+ *
+ * <p><b>Sustainable Rate Guidance (Direct Mode, macOS):</b>
+ * Chronicle Queue on macOS with a regular filesystem sustains approximately
+ * 175,000–300,000 events/sec end-to-end. Injecting at a higher rate than the
+ * pipeline can consume creates a systematic queue-a backlog where every event
+ * waits a linearly growing time before being processed. The coordinated-omission
+ * correction then correctly reports multi-second P50 latency — not because the
+ * pipeline is slow, but because the producer is too fast.
+ * Recommended benchmark rates:
+ * <ul>
+ *   <li><b>macOS (dev)</b>: 150,000–200,000 events/sec</li>
+ *   <li><b>Linux with {@code isolcpus}/tmpfs</b>: up to 1,000,000 events/sec</li>
+ * </ul>
+ * Run a calibration pass first: inject at 150K/sec, observe {@code fx-latency-queue-a}
+ * P50. If P50 stays below 100µs, the pipeline is keeping up. Increase until P50
+ * starts growing — that inflection point is the sustainable rate for your hardware.
+ *
+ * <p><b>Warmup (Direct Mode):</b>
+ * A short JVM warmup phase ({@value #WARMUP_EVENTS} events) is written to a
+ * <em>dedicated ephemeral queue</em> under {@code /tmp/fx-warmup-*}, completely
+ * separate from the measured {@code queue-a}. This warms up the JIT and Chronicle
+ * mmap code paths without creating a backlog of warmup events ahead of the measured
+ * events in {@code queue-a}. The previous design wrote 1,000,000 warmup events
+ * directly to {@code queue-a}; at 175K events/sec effective throughput those events
+ * took ~5.7 seconds to drain, contaminating the histogram with warmup-event latency.
  *
  * <p><b>Benchmark Behavior (Direct Mode):</b>
- * LoadGenerator writes directly to queue-a, entirely bypassing the real serv-0 gateway
- * to push maximum throughput. Thus, no gateway processing latency is recorded.
+ * LoadGenerator writes directly to queue-a, entirely bypassing the real serv-0
+ * gateway to push maximum throughput. No gateway processing latency is recorded.
  *
  * <p><b>TCP Mode:</b>
  * If {@code -Dfx.load.mode=tcp} is provided, it connects to {@code serv-0} over TCP
@@ -51,6 +77,15 @@ import java.util.concurrent.locks.LockSupport;
 public final class LoadGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadGenerator.class);
+
+    /**
+     * Number of warmup events written to the ephemeral warmup queue.
+     *
+     * <p>100K events is sufficient for C2 JIT to compile all Chronicle Queue
+     * appender hot paths. Written to a separate queue so they never enter queue-a
+     * and cannot create a backlog ahead of the measured run.
+     */
+    private static final long WARMUP_EVENTS = 100_000L;
 
     public static void main(final String[] args) {
         if (args.length < 2) {
@@ -93,28 +128,41 @@ public final class LoadGenerator {
             final long intervalNanos = TimeUnit.SECONDS.toNanos(1) / targetRate;
             long intendedSendTime = System.nanoTime();
 
-            // Warmup phase (1 million iterations unpaced, skipped for small tests)
-            final long warmupIterations = (messageCount != -1 && messageCount < 1_000_000) ? 0 : 1_000_000;
-            if (warmupIterations > 0 && !isTcp) {
-                logger.info(String.format("Warming up JVM (%,d iterations)...", warmupIterations));
-                for (long i = 0; i < warmupIterations; i++) {
-                    flyweight.reset();
-                    flyweight.correlationId = -i; // Negative ID to mark as warmup
-                    flyweight.ingressNanoTime = System.nanoTime();
-                    flyweight.currencyPairCode = eurUsdCode;
-                    flyweight.side = 1;
-                    flyweight.notionalMinorUnits = 100_000_000L;
-                    appender.writeDocument(flyweight);
+            // Warmup phase: write to a dedicated ephemeral queue, NOT to the measured
+            // queue-a.  The pipeline never sees these events, so no backlog accumulates
+            // ahead of the measured run.  100K events is sufficient for C2 JIT to fully
+            // optimise the Chronicle appender and flyweight serialisation hot paths.
+            // Skipped for small tests (< WARMUP_EVENTS) to avoid warmup dominating runtime.
+            if (messageCount == -1 || messageCount >= WARMUP_EVENTS) {
+                if (!isTcp) {
+                    final String warmupPath = "/tmp/fx-warmup-" + System.nanoTime();
+                    logger.info(String.format("Warming up JVM (%,d iterations to %s)...",
+                            WARMUP_EVENTS, warmupPath));
+                    try (final ChronicleQueue warmupQueue = QueueFactory.create(warmupPath)) {
+                        final ExcerptAppender warmupAppender = warmupQueue.createAppender();
+                        for (long i = 0; i < WARMUP_EVENTS; i++) {
+                            flyweight.reset();
+                            flyweight.correlationId    = -i;
+                            flyweight.ingressNanoTime  = System.nanoTime();
+                            flyweight.currencyPairCode = eurUsdCode;
+                            flyweight.side             = 1;
+                            flyweight.notionalMinorUnits = 100_000_000L;
+                            warmupAppender.writeDocument(flyweight);
+                        }
+                    }
+                    logger.info("Warmup complete.");
+                } else {
+                    logger.info("Skipping JVM warmup in TCP mode to prevent flooding gateway unpaced...");
                 }
-                logger.info("Warmup complete. Starting main load test...");
-            } else if (!isTcp) {
-                logger.info("Skipping JVM warmup phase due to small target message count...");
             } else {
-                logger.info("Skipping JVM warmup in TCP mode to prevent flooding gateway unpaced...");
+                logger.info("Skipping JVM warmup phase due to small target message count...");
             }
-            
-            // Re-sync intended send time after warmup
-            intendedSendTime = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(100);
+
+            // Drain pause: allow any pre-existing pipeline state to settle before
+            // the measured run starts.  500 ms gives a 2.5x safety margin over the
+            // ~200 ms it takes the pipeline to drain at 175K events/sec with an empty
+            // queue-a (no warmup backlog in queue-a thanks to the ephemeral warmup queue).
+            intendedSendTime = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(500);
 
             long count = 0;
             long lastPrintTime = System.nanoTime();

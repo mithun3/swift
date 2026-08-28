@@ -17,4 +17,5 @@ cd "$(dirname "$0")/.."
 echo "=========================================="
 echo "    Building FX Pipeline Artifacts"
 echo "=========================================="
-mvn clean package dependency:copy-dependencies -DskipTests
+mvn clean package dependency:copy-dependencies
+#-DskipTests
