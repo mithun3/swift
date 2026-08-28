@@ -106,37 +106,33 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     }
 
     /**
-     * Overrides the standard tail-and-dispatch loop from {@link AbstractEventLoop}.
+     * Supplies the gateway-specific poll/dispatch body for {@link AbstractEventLoop#runLoop}.
      *
      * <p>
      * The gateway does not tail a Chronicle Queue — it reads from the
-     * {@link FixMessageSource} directly. We override
-     * {@link AbstractEventLoop#run()}
-     * to provide a custom loop body while preserving the thread lifecycle
-     * management
-     * (pinned platform thread, busy-spin, clean stop signal).
+     * {@link FixMessageSource} directly. CPU affinity pinning and the
+     * output-queue appender's open/close lifecycle are handled uniformly by
+     * {@link AbstractEventLoop#run()}; this override supplies only the
+     * gateway-specific poll source and dispatch body.
+     *
+     * @param appender the queue-a appender to write decoded events into
      */
     @Override
-    public void run() {
-        // Acquire a dedicated ExcerptAppender for queue-a.
-        // ExcerptAppender is NOT thread-safe — we must never share it across threads.
-        // This is safe here because we are the single writer for queue-a.
-        try (final ExcerptAppender appender = outputQueue.createAppender()) {
-            while (isRunning()) {
-                // Poll the FIX message source for the next raw byte buffer.
-                // Returns -1 if no message is currently available.
-                final int bytesRead = messageSource.poll(messageSource.buffer(),
-                        0, messageSource.buffer().length);
+    protected void runLoop(final ExcerptAppender appender) {
+        while (isRunning()) {
+            // Poll the FIX message source for the next raw byte buffer.
+            // Returns -1 if no message is currently available.
+            final int bytesRead = messageSource.poll(messageSource.buffer(),
+                    0, messageSource.buffer().length);
 
-                if (bytesRead > 0) {
-                    // A FIX message is available — process it.
-                    processFixMessage(appender, bytesRead);
-                } else {
-                    // No data available — busy-spin with CPU hint.
-                    // This avoids an OS context switch at the cost of one CPU core
-                    // spinning continuously. Acceptable for a dedicated pinned core.
-                    Thread.onSpinWait();
-                }
+            if (bytesRead > 0) {
+                // A FIX message is available — process it.
+                processFixMessage(appender, bytesRead);
+            } else {
+                // No data available — busy-spin with CPU hint.
+                // This avoids an OS context switch at the cost of one CPU core
+                // spinning continuously. Acceptable for a dedicated pinned core.
+                Thread.onSpinWait();
             }
         }
     }
@@ -204,7 +200,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
 
     /**
      * Not used by the gateway — handle() is part of the standard tail-dispatch
-     * flow in AbstractEventLoop. The gateway overrides run() entirely.
+     * flow in AbstractEventLoop. The gateway overrides {@link #runLoop} instead.
      *
      * @param event      unused
      * @param sequence   unused
@@ -216,7 +212,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
             final long sequence,
             final boolean endOfBatch,
             final ExcerptAppender appender) {
-        // Intentionally empty — gateway uses a custom run() loop.
+        // Intentionally empty — gateway uses a custom runLoop() body.
     }
 
     // ──────────────────────────────────────────────────────────────────────────

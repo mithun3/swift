@@ -198,6 +198,43 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                 ? outputQueue.createAppender()
                 : null;
 
+        try {
+            // Delegate the poll/dispatch loop to the subclass hook below. Every
+            // service shares CPU-affinity pinning and appender lifecycle from
+            // this method uniformly; only the poll source and dispatch body
+            // (Chronicle tailer vs. GatewayEventLoop's FixMessageSource) differ.
+            runLoop(appender);
+        } finally {
+            // Release the CPU affinity lock before the thread exits,
+            // returning the core to the system for potential reassignment.
+            if (affinityLock != null) {
+                affinityLock.release();
+            }
+            // Close appender if it was opened. This flushes any pending writes
+            // and releases the memory-mapped segment handle.
+            if (appender != null) {
+                appender.close();
+            }
+        }
+    }
+
+    /**
+     * Runs the busy-spin poll/dispatch loop until {@link #stop()} is signalled.
+     *
+     * <p>Default implementation: tails {@link #inputQueue} via Chronicle Queue's
+     * {@link ExcerptTailer}, dispatching each event to {@link #handle}, then
+     * drains any backlog left in the queue once stopped (see
+     * {@link #drainRemainingBacklog}).
+     *
+     * <p>{@code GatewayEventLoop} overrides this method to poll a
+     * {@code FixMessageSource} instead of tailing a Chronicle Queue — CPU
+     * affinity pinning and the appender's open/close lifecycle in {@link #run()}
+     * apply uniformly regardless of which poll source a subclass uses.
+     *
+     * @param appender the output-queue appender for this service; may be
+     *                 {@code null} for terminal services with no output queue
+     */
+    protected void runLoop(final ExcerptAppender appender) {
         // ExcerptTailer reads events sequentially from the tail of the input queue.
         // It maintains its own read position (index), so no external index tracking needed.
         try (final ExcerptTailer tailer = inputQueue.createTailer(name)) {
@@ -241,17 +278,6 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
             // exists right now (bounded by DRAIN_TIMEOUT_MILLIS) so a service stopped mid-backlog
             // doesn't silently drop events from the pipeline and its telemetry.
             drainRemainingBacklog(tailer, appender);
-        } finally {
-            // Release the CPU affinity lock before the thread exits,
-            // returning the core to the system for potential reassignment.
-            if (affinityLock != null) {
-                affinityLock.release();
-            }
-            // Close appender if it was opened. This flushes any pending writes
-            // and releases the memory-mapped segment handle.
-            if (appender != null) {
-                appender.close();
-            }
         }
     }
 
