@@ -157,6 +157,67 @@ class BatchPersistenceEngineTest {
         }
     }
 
+    @Test
+    @DisplayName("a duplicate-primary-key batch failure is rolled back and does not block future flushes")
+    void testBatchFailureIsRolledBackAndDoesNotBlockFutureFlushes() throws SQLException {
+        populateEvent(event, 500L, EventStatus.PRICED);
+        engine.accumulate(event, true);
+        engine.flush();
+        assertEquals(1L, countRows(), "first insert of correlationId=500 must commit");
+
+        // Re-accumulate the SAME correlationId (primary key) — executeBatch()/commit()
+        // will fail with a PK violation, exercising flushLoop()'s rollback + poisoned-batch
+        // committedPointer-advance branch. flush() must not hang even though the batch failed.
+        populateEvent(event, 500L, EventStatus.PRICED);
+        engine.accumulate(event, true);
+        engine.flush();
+
+        assertEquals(1L, countRows(), "duplicate PK batch must be rolled back, not committed");
+        assertEquals(0, engine.batchCount(), "committedPointer must advance past the poisoned batch");
+    }
+
+    @Test
+    @DisplayName("close() catches InterruptedException from the background join() and restores the interrupt flag")
+    void testCloseCatchesInterruptedExceptionDuringJoin() throws Exception {
+        final BatchPersistenceEngine localEngine = new BatchPersistenceEngine(
+                "jdbc:h2:mem:test_close_intr_" + System.nanoTime() + ";DB_CLOSE_DELAY=-1");
+        try {
+            final Thread closer = new Thread(localEngine::close, "engine-closer");
+            // Setting the interrupt flag before start() guarantees dbThread.join(5000)
+            // observes it immediately once the closer thread runs, deterministically
+            // exercising the catch(InterruptedException) branch inside close().
+            closer.interrupt();
+            closer.start();
+            closer.join(6_000L);
+            assertFalse(closer.isAlive(), "closer thread must finish despite the injected interrupt");
+        } finally {
+            Thread.interrupted(); // clear this test thread's interrupt status, if any leaked
+        }
+    }
+
+    @Test
+    @DisplayName("close() remains a no-op-safe operation even after the connection was already shut down externally")
+    void testCloseIsSafeAfterConnectionAlreadyShutdown() throws Exception {
+        final String url = "jdbc:h2:mem:test_close_sqlerr_" + System.nanoTime() + ";DB_CLOSE_DELAY=-1";
+        final BatchPersistenceEngine localEngine = new BatchPersistenceEngine(url);
+
+        // Force the underlying H2 database to shut down from a separate connection.
+        // Per the JDBC spec, Statement.close()/Connection.close() on an already-closed
+        // resource must be a silent no-op (not throw) — so this does NOT reliably reach
+        // close()'s catch(SQLException) logging branch (see deferred-exceptions note in
+        // the module's testing-conventions memory); it does verify close() never throws
+        // even when the connection was invalidated out from under it.
+        try (Connection shutdownConn = DriverManager.getConnection(url, "sa", "");
+             Statement s = shutdownConn.createStatement()) {
+            s.execute("SHUTDOWN IMMEDIATELY");
+        } catch (final SQLException ignoredShutdownRace) {
+            // Some H2 versions report the self-shutdown as an exception on the same statement — ignore.
+        }
+
+        assertDoesNotThrow(localEngine::close,
+                "close() must never throw, even when the underlying connection was already shut down");
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private void populateEvent(final FxMarketEvent e, final long corrId, final int status) {

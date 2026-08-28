@@ -17,6 +17,12 @@ public final class RiskMain {
 
     private static final Logger logger = LoggerFactory.getLogger(RiskMain.class);
 
+    /** Highest trackable latency for the serv-a telemetry histograms: 10 seconds in nanos. */
+    private static final long TELEMETRY_HIGHEST_LATENCY_NANOS = 10_000_000_000L;
+
+    /** Background flush interval for the serv-a telemetry recorders. */
+    private static final long TELEMETRY_FLUSH_INTERVAL_MILLIS = 1_000L;
+
     private RiskMain() {
         throw new UnsupportedOperationException("Main class; not instantiable");
     }
@@ -43,9 +49,9 @@ public final class RiskMain {
             try {
                 final String basePath = telemetryLogPath.replace(".hlog", "");
                 queueARecorder = new TelemetryRecorder(
-                        new File(basePath + "-queue-a.hlog"), 10_000_000_000L, 1_000L);
+                        new File(basePath + "-queue-a.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 servARecorder = new TelemetryRecorder(
-                        new File(basePath + "-serv-a.hlog"), 10_000_000_000L, 1_000L);
+                        new File(basePath + "-serv-a.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 logger.info("[serv-a] Telemetry enabled. Writing latency logs to: " + basePath + "-{queue-a,serv-a}.hlog");
             } catch (final Exception e) {
                 logger.warn("[serv-a] WARNING: Failed to init TelemetryRecorders: "

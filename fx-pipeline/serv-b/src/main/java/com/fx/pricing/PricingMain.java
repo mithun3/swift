@@ -14,7 +14,13 @@ import java.io.File;
 public final class PricingMain {
     
     private static final Logger logger = LoggerFactory.getLogger(PricingMain.class);
-    
+
+    /** Highest trackable latency for the serv-b telemetry histograms: 10 seconds in nanos. */
+    private static final long TELEMETRY_HIGHEST_LATENCY_NANOS = 10_000_000_000L;
+
+    /** Background flush interval for the serv-b telemetry recorders. */
+    private static final long TELEMETRY_FLUSH_INTERVAL_MILLIS = 1_000L;
+
     private PricingMain() { throw new UnsupportedOperationException("Main class"); }
 
     public static void main(final String[] args) throws InterruptedException {
@@ -33,9 +39,9 @@ public final class PricingMain {
             try {
                 final String basePath = telemetryLogPath.replace(".hlog", "");
                 queueBRecorder = new TelemetryRecorder(
-                        new File(basePath + "-queue-b.hlog"), 10_000_000_000L, 1_000L);
+                        new File(basePath + "-queue-b.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 servBRecorder = new TelemetryRecorder(
-                        new File(basePath + "-serv-b.hlog"), 10_000_000_000L, 1_000L);
+                        new File(basePath + "-serv-b.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 logger.info("[serv-b] Telemetry enabled. Writing latency logs to: " + basePath + "-{queue-b,serv-b}.hlog");
             } catch (final Exception e) {
                 logger.warn("[serv-b] WARNING: Failed to init TelemetryRecorders: "

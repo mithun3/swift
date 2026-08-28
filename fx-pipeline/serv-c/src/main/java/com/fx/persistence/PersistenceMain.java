@@ -37,6 +37,19 @@ public final class PersistenceMain {
 
     private static final Logger logger = LoggerFactory.getLogger(PersistenceMain.class);
 
+    /** Highest trackable latency for the serv-c telemetry histograms: 10 seconds in nanos. */
+    private static final long TELEMETRY_HIGHEST_LATENCY_NANOS = 10_000_000_000L;
+
+    /** Background flush interval for the serv-c telemetry recorders. */
+    private static final long TELEMETRY_FLUSH_INTERVAL_MILLIS = 1_000L;
+
+    /**
+     * TCP port for the H2 external-inspection server. Override at runtime with
+     * {@code -Dfx.persistence.h2.tcp.port=<port>} (e.g. to run multiple instances
+     * side-by-side in tests without a fixed-port bind conflict). Default unchanged: 9092.
+     */
+    private static final String H2_TCP_PORT = System.getProperty("fx.persistence.h2.tcp.port", "9092");
+
     private PersistenceMain() {
         throw new UnsupportedOperationException("Main class — not instantiable");
     }
@@ -56,9 +69,9 @@ public final class PersistenceMain {
         // Start the H2 TCP server to allow external clients to connect to the in-memory database.
         // This enables real-time inspection of persisted trades without stopping the service.
         final Server h2Server = Server.createTcpServer(
-                "-tcp", "-tcpAllowOthers", "-tcpPort", "9092").start();
-        logger.info("[serv-c] H2 TCP Server started on port 9092.");
-        logger.info("[serv-c] External JDBC URL: jdbc:h2:tcp://localhost:9092/mem:fxdb");
+                "-tcp", "-tcpAllowOthers", "-tcpPort", H2_TCP_PORT).start();
+        logger.info("[serv-c] H2 TCP Server started on port " + H2_TCP_PORT + ".");
+        logger.info("[serv-c] External JDBC URL: jdbc:h2:tcp://localhost:" + H2_TCP_PORT + "/mem:fxdb");
 
         // ── Telemetry Recorder (GAP-5) ────────────────────────────────────────
         // The TelemetryRecorder uses HdrHistogram's SingleWriterRecorder to capture
@@ -81,11 +94,11 @@ public final class PersistenceMain {
                 String basePath = telemetryLogPath.replace(".hlog", "");
                 
                 e2eRecorder = new TelemetryRecorder(
-                        new File(telemetryLogPath), 10_000_000_000L, 1_000L);
+                        new File(telemetryLogPath), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 qcRecorder = new TelemetryRecorder(
-                        new File(basePath + "-queue-c.hlog"), 10_000_000_000L, 1_000L);
+                        new File(basePath + "-queue-c.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 scRecorder = new TelemetryRecorder(
-                        new File(basePath + "-serv-c.hlog"), 10_000_000_000L, 1_000L);
+                        new File(basePath + "-serv-c.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                         
                 logger.info("[serv-c] Telemetry enabled. Writing latency logs to: " + basePath + "*");
             } catch (final Exception e) {

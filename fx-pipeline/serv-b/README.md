@@ -19,22 +19,25 @@ Ensure the project is built via `mvn clean package` at the root directory.
 Run the service using the required JVM arguments:
 
 ```bash
+# -Djava.nio.channels.spi.SelectorProvider=...EPollSelectorProvider is Linux-only
+# (scripts/start.sh sets it conditionally via `uname` — omit it on macOS/other OSes).
 export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED \
 --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED \
+--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED \
 --add-opens=java.base/java.lang=ALL-UNNAMED \
 --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
 --add-opens=java.base/java.io=ALL-UNNAMED \
 --add-opens=java.base/java.util=ALL-UNNAMED \
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED \
 -XX:+UseZGC -XX:+ZGenerational -Xmx512m -Xms512m \
--XX:+AlwaysPreTouch -XX:+DisableExplicitGC \
--Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider"
+-XX:+AlwaysPreTouch -XX:+DisableExplicitGC"
 
-java $JVM_OPTS -cp target/serv-b-1.0-SNAPSHOT.jar:target/dependency/* com.fx.pricing.PricingMain
+java $JVM_OPTS -cp target/serv-b-1.0.0-SNAPSHOT.jar:target/dependency/* com.fx.pricing.PricingMain
 ```
 
 > [!TIP]
-> **Easier Execution**: Rather than running this manually, use the `scripts/deploy.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `scripts/test.sh` to diagnose OS-specific JVM properties if needed.
+> **Easier Execution**: Rather than running this manually, use the `scripts/start.sh` script from the project root to automatically configure JVM arguments and start all services in the correct order. Use `scripts/test.sh` to diagnose OS-specific JVM properties if needed.
 
 ---
 

@@ -66,8 +66,8 @@ public final class CreditCheckEngine {
      * <p>This is the complete credit check for serv-a's hot path. The method:
      * <ol>
      *   <li>Validates the client tier is within the known range.</li>
-     *   <li>Checks the order notional against the tier's credit limit.</li>
      *   <li>Checks the per-order notional cap (risk management control).</li>
+     *   <li>Checks the order notional against the tier's credit limit.</li>
      * </ol>
      *
      * <p>Returns {@code true} if the event passes all checks (order is accepted),
