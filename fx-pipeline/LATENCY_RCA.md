@@ -1,5 +1,11 @@
 # FX Pipeline Latency Investigation and Root-Cause Analysis
 
+> **Status (2026-08-28):** RCA-2 through RCA-6 below have been resolved in code (verified against the
+> current implementation — see the ✅ markers on each). RCA-1 (producer/consumer rate mismatch) remains
+> an operational calibration concern rather than a code defect. A separate, previously-unrelated issue —
+> a **sample-count discrepancy** between `serv-0` and every downstream stage — was investigated and fixed
+> after this report was originally written; see [Section 9](#9-update--sample-count-discrepancy-between-serv-0-and-downstream-stages) for that RCA and fix.
+
 ## Executive Summary
 
 The queue latencies are not inherently “bad” because the services are slow. The dominant issue is that the system is being fed faster than it can drain, and the measurement logic is then amplifying that backlog into very large queue wait times.
@@ -126,7 +132,7 @@ The pipeline is saturated by injection rate, and the queue backlog is performing
 
 ---
 
-### RCA-2: Warm-up traffic contaminated the later histogram runs
+### RCA-2: Warm-up traffic contaminated the later histogram runs — ✅ RESOLVED
 
 The load generator was writing a large warm-up batch directly into the measured queue before the actual benchmark started.
 
@@ -146,9 +152,13 @@ This explains why a 2M run could appear better than a 500k run in some metrics e
 
 This is a measurement contamination bug, not a real improvement in throughput.
 
+**Fix applied:** `LoadGenerator` now writes warm-up events to a separate, ephemeral warm-up
+Chronicle Queue (not `queue-a`), and skips the warm-up phase entirely in TCP mode to avoid
+flooding the gateway unpaced. The measured queue is never touched by warm-up traffic.
+
 ---
 
-### RCA-3: The `endOfBatch` queue peek adds unnecessary overhead on every message
+### RCA-3: The `endOfBatch` queue peek adds unnecessary overhead on every message — ✅ RESOLVED
 
 There was a dead-cost pattern inside the generic event loop:
 
@@ -167,9 +177,12 @@ Conclusion:
 
 This dead-work loop was shaving throughput and making the backlog worse.
 
+**Fix applied:** `AbstractEventLoop` no longer peeks the next document to compute `endOfBatch`.
+It now passes `endOfBatch=true` unconditionally, since no handler used the false case.
+
 ---
 
-### RCA-4: The ring buffer and H2 commit path were coupled together
+### RCA-4: The ring buffer and H2 commit path were coupled together — ✅ RESOLVED
 
 This was the main persistence-side bottleneck.
 
@@ -195,9 +208,13 @@ This matches the observed queue-c tail:
 - service time remains minor
 - queue-c delay is the real issue
 
+**Fix applied:** `BatchPersistenceEngine` now advances `readPointer` immediately after the batch is
+copied out of the ring, not after `connection.commit()` returns. The ring buffer was also enlarged
+from 65,536 to 524,288 slots so it absorbs load-phase bursts independently of commit latency.
+
 ---
 
-### RCA-5: H2 batch sizing was too large for the table growth pattern
+### RCA-5: H2 batch sizing was too large for the table growth pattern — ✅ RESOLVED
 
 The batch size was too aggressive for the in-memory MVStore table under sustained insert pressure.
 
@@ -208,9 +225,13 @@ This is a balancing problem:
 
 The old behavior was effectively in the “too large” zone once the DB grew to large tables. That created multi-second spikes, which then cascaded into queue-c backlog and end-to-end latency.
 
+**Fix applied:** `MAX_BATCH` is now `8,192` (tuned down from an oversized value), combined with the
+RCA-4 fix decoupling ring occupancy from commit duration — the batch size no longer determines how
+long the ring is blocked.
+
 ---
 
-### RCA-6: Schema design made persistence worse than necessary
+### RCA-6: Schema design made persistence worse than necessary — ✅ RESOLVED
 
 The table used a separate auto-increment `id` plus a correlation key.
 
@@ -221,6 +242,9 @@ The design was not aligned with the write pattern:
 - the auto-increment sequence introduces overhead and an extra B-tree path
 
 This is small compared to the queue saturation, but it is still a real inefficiency at scale.
+
+**Fix applied:** `fx_trades` now uses `correlation_id` directly as the `PRIMARY KEY` — no separate
+auto-increment `id` column or extra B-tree path.
 
 ---
 
@@ -242,19 +266,19 @@ This is why the tail numbers are not a clean service latency profile. They are a
 
 The fix must focus on queue discipline and persistence throughput first.
 
-### Phase 1 — Remove measurement pollution
+### Phase 1 — Remove measurement pollution — ✅ Implemented
 
 - do not write warm-up events into the measured queue
 - use a separate warm-up queue or a dedicated warm-up phase outside the benchmark path
 - ensure `ingressNanoTime` corresponds to intended send time, not warm-up wall-clock time
 
-### Phase 2 — Remove dead, per-event overhead
+### Phase 2 — Remove dead, per-event overhead — ✅ Implemented
 
 - remove the non-blocking `readingDocument(false)` peek from the generic event loop
 - do not compute `endOfBatch` if no handler uses it
 - keep the loop minimal and deterministic
 
-### Phase 3 — Separate ring occupancy from commit latency
+### Phase 3 — Separate ring occupancy from commit latency — ✅ Implemented
 
 - free ring slots immediately after copying into the JDBC batch
 - do not hold the slots until commit completes
@@ -262,19 +286,19 @@ The fix must focus on queue discipline and persistence throughput first.
 
 This is the key fix for queue-c tail spikes.
 
-### Phase 4 — Tune batch size and H2 write profile
+### Phase 4 — Tune batch size and H2 write profile — ✅ Implemented
 
 - use a smaller atomic batch size so each commit completes quickly
 - avoid oversized commits that create long stalls
 - keep batch size large enough to amortize JDBC overhead, but not so large that commit latency becomes the dominant cost
 
-### Phase 5 — Rework the table layout for append efficiency
+### Phase 5 — Rework the table layout for append efficiency — ✅ Implemented
 
 - use correlation ID as the primary key when it is naturally monotonic
 - reduce extra indexing and sequence overhead
 - keep the schema aligned with the write pattern
 
-### Phase 6 — Calibrate the input rate to the sustainable throughput
+### Phase 6 — Calibrate the input rate to the sustainable throughput — ⚠️ Ongoing (operational, not a code fix)
 
 - benchmark the pipeline at a lower rate first
 - find the stable throughput limit for the host
@@ -321,7 +345,76 @@ This is why the numbers vary so much and why the queue files are the real bottle
 
 ---
 
-## 9. Verification
+## 9. Update — Sample-Count Discrepancy Between `serv-0` and Downstream Stages
+
+### 9.1 Observed issue
+
+A later benchmark run (`./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 2000000`, TCP
+mode) showed `fx-latency-serv-0.hlog` with a total sample count of **2,000,000**, while every other
+histogram — `queue-a`, `queue-b`, `queue-c`, `serv-a`, `serv-b`, `serv-c`, and end-to-end
+(`fx-latency.hlog`) — reported an *identical* total of **1,620,030**. This was not data corruption: no
+FIX messages were lost, duplicated, or misdecoded.
+
+### 9.2 Root causes
+
+**RC-1 — Centralized telemetry recording.** `queue-a`, `serv-a`, `queue-b`, `serv-b`, `queue-c`,
+`serv-c`, and e2e latencies were all recorded from a single call site inside
+`PersistenceEventLoop.handle()` (serv-c). Every one of those histograms only received a sample once an
+event reached the terminal stage — so all six were identical by construction, and none of them
+reflected what each individual stage had actually processed.
+
+**RC-2 — Non-draining shutdown.** `run_benchmark_suite.sh` used a fixed 5-second sleep before calling
+`stop.sh`, which sent `SIGTERM` to all services. `AbstractEventLoop.stop()` only flipped a flag checked
+at the top of the loop — it did not drain whatever backlog was still sitting in the input queue. Any
+event not yet fully processed through `serv-c` when the timeout elapsed was abandoned mid-pipeline:
+still on disk in `queue-a`/`queue-b`/`queue-c`, but never consumed, and therefore contributing zero
+samples to any histogram.
+
+`2,000,000 − 1,620,030 = 379,970` events (~19%) were still in flight when the pipeline was torn down —
+consistent with the sustained backpressure documented in RCA-1 above.
+
+### 9.3 Fixes implemented
+
+**Phase 1 — Per-stage independent telemetry.**
+[RiskValidationEventLoop](serv-a/src/main/java/com/fx/risk/RiskValidationEventLoop.java) and
+[PricingEventLoop](serv-b/src/main/java/com/fx/pricing/PricingEventLoop.java) now record their own
+queue-wait and processing-duration recorders at the end of their own `handle()` methods, instead of
+relying on `serv-c` to record on their behalf.
+[PersistenceEventLoop](serv-c/src/main/java/com/fx/persistence/PersistenceEventLoop.java) now only
+records `queue-c`, `serv-c`, and end-to-end — the segment it can actually measure. Each `.hlog`'s
+sample count now reflects events actually processed by that stage, independent of later stages.
+
+**Phase 2 — Drain-then-stop shutdown.**
+[AbstractEventLoop](common/src/main/java/com/fx/common/handler/AbstractEventLoop.java) now treats
+`stop()` as "accept no new work", not "abandon in-flight work": after the main loop exits, it drains
+any backlog already sitting in the input queue (bounded by `-Dfx.eventloop.drainTimeoutMillis`,
+default 30s) and logs how many events were drained, or a warning if the timeout was hit.
+[stop.sh](scripts/stop.sh) was rewritten to stop services one at a time, in strict producer-first
+order (`serv-0 → serv-a → serv-b → serv-c → telemetry`), fully awaiting each exit before signalling
+the next — required so a downstream stage never decides it has "finished draining" while its upstream
+is still mid-flight. [start.sh](scripts/start.sh) now labels each PID so `stop.sh` can target them by
+name. The fixed 5-second guess in `run_benchmark_suite.sh` was replaced with a short 1-second settle
+buffer, since draining correctness now comes from the above rather than a timing guess.
+
+**Phase 3 — Automatic reconciliation in the report.**
+[generate_html_report.py](scripts/generate_html_report.py) now compares `serv-0`'s ingress count
+against the terminal stage's completed count on every run and renders a callout directly in the HTML
+report: a warning with the exact count/percentage unaccounted for if a gap remains, or a confirmation
+that all events were accounted for. This replaced a set of hardcoded, stale "Issue/Fix" sections in the
+same script that referenced numbers and a ring-buffer size from an old, unrelated run and no longer
+matched the current (already-fixed) codebase.
+
+### 9.4 Verification
+
+All six per-stage/constructor-arity changes were validated with `mvn clean test-compile` and
+`mvn test` (`BUILD SUCCESS`, all suites passing, including `PersistenceEventLoopTest` and
+`FullPipelineIntegrationTest`). The reconciliation banner was smoke-tested against synthetic `.hgrm`
+fixtures reproducing the 2,000,000 vs 1,620,030 case, confirming the warning renders with the correct
+count and percentage, and that the confirmation banner renders when counts match.
+
+---
+
+## 10. Verification (original report)
 
 I validated the project state by running the relevant compile/test command:
 

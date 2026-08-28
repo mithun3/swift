@@ -418,143 +418,18 @@ def main():
     html_content += """
     </div>
 
-    <!-- ── Section 2: Root-Cause Analysis ───────────────────────────────── -->
-    <div class="card">
-        <h2>Root-Cause Analysis (RCA)</h2>
-
-        <div class="warn">
-            <h3>&#9888; Issue 1 &mdash; Queue-A: Systematic Producer-Consumer Backlog</h3>
-            <p><strong>Observed:</strong>
-            <code>fx-latency-queue-a</code> P50&nbsp;&asymp;&nbsp;733&nbsp;ms,
-            Max&nbsp;&asymp;&nbsp;1,128&nbsp;ms.
-            The distribution is flat from P50 to Max (only ~400&nbsp;ms spread), which is
-            <em>not</em> a rare spike &mdash; it is a <strong>steady-state queue backlog</strong>.</p>
-
-            <p><strong>Primary root cause &mdash; Producer-Consumer Rate Mismatch:</strong>
-            The <code>LoadGenerator</code> injects events at a configured target rate
-            (e.g.&nbsp;5M&nbsp;events/sec). The downstream pipeline consumes more slowly.
-            Each event waits in queue-a for all preceding events to drain first.
-            A 733&nbsp;ms P50 means the queue held roughly 730&nbsp;ms worth of unconsumed backlog
-            at any given moment. The ~778,000 events that never reached serv-c
-            (2,000,000 sent &minus; 1,221,641 persisted) confirm the unconsumed tail.</p>
-
-            <p><strong>Contributing factors:</strong></p>
-            <ul>
-                <li><strong>macOS / Docker CPU scheduling:</strong>
-                    <code>AffinityLock.acquireLock()</code> is advisory on macOS &mdash; the OS
-                    scheduler can preempt serv-a for tens to hundreds of milliseconds, stalling
-                    queue-a consumption and compounding the backlog.</li>
-                <li><strong>Chronicle Queue mmap page faults:</strong>
-                    When the 64&nbsp;MB queue store file rolls to a new segment the first access
-                    triggers a kernel page fault (&gt;100&nbsp;ms on HDDs; 10&ndash;50&nbsp;ms on SSDs).
-                    Pre-warming the queue at startup eliminates this one-time spike.</li>
-                <li><strong>JIT compilation during warm-up:</strong>
-                    C2 JIT compilation of hot methods triggers JVM safepoints of 200&ndash;500&nbsp;ms
-                    in the first few seconds, contaminating early histogram buckets.</li>
-            </ul>
-        </div>
-
-        <div class="warn">
-            <h3>&#9888; Issue 2 &mdash; Queue-C: Bimodal Latency (P50&nbsp;=&nbsp;25&nbsp;ms, P99&nbsp;=&nbsp;5&nbsp;s)</h3>
-            <p><strong>Observed:</strong>
-            Half of events reach serv-c within ~25&nbsp;ms; the 99th percentile
-            leaps to nearly 5&nbsp;seconds. This bimodal distribution is the fingerprint of
-            periodic hot-path blocking.</p>
-
-            <p><strong>Root cause &mdash; Ring Buffer Saturation in BatchPersistenceEngine:</strong>
-            <code>BatchPersistenceEngine.accumulate()</code> spin-waits when the 65,536-slot
-            async ring buffer is full:</p>
-            <pre><code>while (w - r &gt;= RING_SIZE) Thread.onSpinWait();</code></pre>
-            <p>When H2 <code>executeBatch()&nbsp;+&nbsp;commit()</code> in the <code>db-writer</code>
-            background thread becomes slow (disk I/O, transaction overhead, JVM GC in that thread),
-            the ring fills. The serv-c event-loop thread then stalls inside
-            <code>accumulate()</code>. While stalled, serv-c cannot drain queue-c, causing
-            a cascade of multi-second queue-c backlog.</p>
-            <p>At 1M&nbsp;events/sec, a 65,536-slot ring covers only ~65&nbsp;ms of burst
-            absorption. Any H2 commit taking longer than ~65&nbsp;ms will cause this stall.</p>
-
-            <p><strong>Contributing factors:</strong></p>
-            <ul>
-                <li><strong>H2 transaction overhead:</strong>
-                    In-memory H2 with <code>autoCommit=false</code> and per-batch
-                    <code>commit()</code> has significant MVCC overhead at high insert rates.</li>
-                <li><strong>Small MAX_BATCH:</strong>
-                    4,096 rows per JDBC batch means frequent <code>commit()</code> calls,
-                    each with non-trivial latency that compounds under high throughput.</li>
-            </ul>
-        </div>
-
-        <div class="warn">
-            <h3>&#9888; Issue 3 &mdash; serv-C: Tail Latency (Max&nbsp;&asymp;&nbsp;586&nbsp;ms)</h3>
-            <p><strong>Root cause &mdash; Hot-path spin-wait inside <code>accumulate()</code>:</strong>
-            The serv-c <code>handle()</code> method is directly blocked by ring buffer
-            back-pressure for up to 586&nbsp;ms. This is simultaneously the cause of
-            Issue&nbsp;2: while serv-c is spinning, it cannot read the next event from
-            queue-c, so queue-c depth and wait time explode.</p>
-        </div>
-    </div>
-
-    <!-- ── Section 3: Fix Plan ───────────────────────────────────────────── -->
-    <div class="card">
-        <h2>Fix Plan</h2>
-
-        <div class="fix">
-            <h3>&#10003; Fix 1 &mdash; Calibrate Load-Generator Rate (Immediate, Zero Code Change)</h3>
-            <p>Reduce the target injection rate to match the pipeline's sustainable throughput.
-            Run a short calibration pass at a low rate, measure actual consumed events/sec,
-            then set target rate to 80% of that figure to leave headroom.</p>
-            <pre><code># Calibration pass (direct mode, 500k msgs/sec, 2 million messages):
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 2000000 --direct
-# Observe samples in fx-latency.hlog vs. fx-latency-serv-0.hlog to determine throughput.
-# Set target &le; 80% of the pipeline&apos;s sustainable rate for your hardware.</code></pre>
-        </div>
-
-        <div class="fix">
-            <h3>&#10003; Fix 2 &mdash; Enlarge BatchPersistenceEngine Ring Buffer</h3>
-            <p>Increase <code>RING_SIZE</code> from 65,536 to 524,288 (512&nbsp;K slots) and
-            raise <code>MAX_BATCH</code> from 4,096 to 32,768 in
-            <code>BatchPersistenceEngine.java</code>.
-            This provides ~500&nbsp;ms of burst absorption at 1M&nbsp;events/sec, preventing the
-            serv-c spin-wait stall during H2 commit spikes.</p>
-            <p><em>Memory cost: 524,288 &times; ~128 bytes per <code>BatchRow</code>
-            &asymp; 64&nbsp;MB, pre-allocated at startup &mdash; zero GC after construction.</em></p>
-        </div>
-
-        <div class="fix">
-            <h3>&#10003; Fix 3 &mdash; Tune H2 JDBC URL for Throughput</h3>
-            <p>Add <code>LOG=0;UNDO_LOG=0;CACHE_SIZE=262144</code> to the JDBC URL
-            to minimise transactional overhead. These settings are appropriate for
-            benchmark / audit-log workloads where rollback is not required.</p>
-            <pre><code>jdbc:h2:mem:fxdb;DB_CLOSE_DELAY=-1;MODE=MySQL;LOG=0;UNDO_LOG=0;CACHE_SIZE=262144</code></pre>
-        </div>
-
-        <div class="fix">
-            <h3>&#10003; Fix 4 &mdash; Pre-Warm Chronicle Queue on Startup</h3>
-            <p>Write a single dummy event to queue-a during service startup (before the
-            benchmark begins) to pre-fault all 64&nbsp;MB mmap pages. This eliminates the
-            first-access latency spike from the kernel page-fault handler.
-            For production: store queues on <code>tmpfs</code> / RAM disk and add
-            <code>-XX:+AlwaysPreTouch</code> to JVM flags.</p>
-        </div>
-
-        <div class="fix">
-            <h3>&#10003; Fix 5 &mdash; Linux CPU Isolation for Production Benchmarks</h3>
-            <p>macOS CPU affinity is advisory. For deterministic, reproducible results
-            run on Linux with kernel isolation as documented in
-            <code>BENCHMARK_TUNING.md</code>:
-            <code>isolcpus</code>, <code>nohz_full</code>, <code>rcu_nocbs</code>,
-            and <code>idle=poll</code>. Without isolation, the OS scheduler can preempt
-            any event-loop thread for tens to hundreds of milliseconds.</p>
-        </div>
-    </div>
-
-    <!-- ── Section 4: Distribution Charts ──────────────────────────────── -->
+    <!-- ── Section 2: Distribution Charts ──────────────────────────────── -->
     <h2>Detailed Distribution Charts</h2>
     <div class="info">
         <p>Charts below plot percentile vs. latency on a logarithmic X-axis.
         A flat, horizontal line indicates excellent consistency (no GC pauses, no scheduling jitter).
         A steep "hockey stick" rising at P99+ indicates tail events caused by GC,
         mmap page faults, or OS preemption.</p>
+        <p>For historical root-cause analysis and the fixes already applied to this pipeline
+        (producer/consumer rate mismatch, ring-buffer/commit coupling, warm-up contamination,
+        the serv-0-vs-downstream sample-count discrepancy, etc.), see
+        <code>LATENCY_RCA.md</code> in the project root — it is kept in sync with the current
+        codebase rather than duplicated here as static text that would drift from real run data.</p>
     </div>
 """
 
