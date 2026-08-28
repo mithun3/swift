@@ -84,8 +84,8 @@ public final class PersistenceMain {
                 "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
 
         TelemetryRecorder e2eRecorder = null;
-        TelemetryRecorder qcRecorder = null;
-        TelemetryRecorder scRecorder = null;
+        TelemetryRecorder queueCRecorder = null;
+        TelemetryRecorder servCRecorder = null;
 
         if (telemetryEnabled) {
             try {
@@ -95,9 +95,9 @@ public final class PersistenceMain {
                 
                 e2eRecorder = new TelemetryRecorder(
                         new File(telemetryLogPath), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
-                qcRecorder = new TelemetryRecorder(
+                queueCRecorder = new TelemetryRecorder(
                         new File(basePath + "-queue-c.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
-                scRecorder = new TelemetryRecorder(
+                servCRecorder = new TelemetryRecorder(
                         new File(basePath + "-serv-c.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                         
                 logger.info("[serv-c] Telemetry enabled. Writing latency logs to: " + basePath + "*");
@@ -111,12 +111,12 @@ public final class PersistenceMain {
 
         // ── Event Loop Construction ───────────────────────────────────────────
         final PersistenceEventLoop loop = new PersistenceEventLoop(
-                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, qcRecorder, scRecorder);
+                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, queueCRecorder, servCRecorder);
 
         // ── Shutdown Hook ─────────────────────────────────────────────────────
         final TelemetryRecorder finalE2e = e2eRecorder;
-        final TelemetryRecorder finalQc = qcRecorder;
-        final TelemetryRecorder finalSc = scRecorder;
+        final TelemetryRecorder finalQueueCRecorder = queueCRecorder;
+        final TelemetryRecorder finalServCRecorder = servCRecorder;
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             logger.info("[serv-c] Shutdown signal received.");
             loop.stop();
@@ -128,8 +128,8 @@ public final class PersistenceMain {
             }
             // Close the TelemetryRecorders — flushes the final interval histograms to disk.
             if (finalE2e != null) finalE2e.close();
-            if (finalQc != null) finalQc.close();
-            if (finalSc != null) finalSc.close();
+            if (finalQueueCRecorder != null) finalQueueCRecorder.close();
+            if (finalServCRecorder != null) finalServCRecorder.close();
             
             if (finalE2e != null) {
                 logger.info("[serv-c] Telemetry flushed to: " + telemetryLogPath + "*");

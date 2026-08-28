@@ -95,8 +95,14 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     /**
      * Write pointer advanced by the event-loop thread ({@code accumulate}).
      * Slots in range {@code [readPointer, writePointer)} hold live data.
+     *
+     * <p>Cache-line padded (see {@link PaddedLong}): this pointer is written by
+     * the hot {@code accumulate()} thread and read by the db-writer thread on
+     * every loop iteration. Sharing a 64-byte cache line with {@link #readPointer}
+     * or {@link #committedPointer} would force a cache-coherency round trip on
+     * the hot path every time either of the other two pointers is updated.
      */
-    private volatile long writePointer = 0;
+    private final PaddedLong writePointer = new PaddedLong(0L);
 
     /**
      * Read pointer advanced by the db-writer thread <em>before</em> the JDBC
@@ -106,8 +112,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      * &mdash; hiding commit latency from the serv-c hot path entirely.
      *
      * <p>Ring-full guard: {@code writePointer - readPointer &lt; RING_SIZE}.
+     * Cache-line padded (see {@link PaddedLong}) for the same false-sharing
+     * reason as {@link #writePointer}.
      */
-    private volatile long readPointer = 0;
+    private final PaddedLong readPointer = new PaddedLong(0L);
 
     /**
      * Committed pointer advanced by the db-writer thread <em>after</em> a
@@ -116,8 +124,11 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      * and by {@link #batchCount()} to report truly uncommitted events.
      * On a commit failure the batch is discarded and this pointer advances
      * alongside {@link #readPointer} to prevent {@link #flush()} from hanging.
+     *
+     * <p>Cache-line padded (see {@link PaddedLong}) for the same false-sharing
+     * reason as {@link #writePointer}.
      */
-    private volatile long committedPointer = 0;
+    private final PaddedLong committedPointer = new PaddedLong(0L);
 
     /** Background thread for asynchronous database inserts. */
     private final Thread dbThread;
@@ -179,13 +190,13 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      */
     public void accumulate(final FxMarketEvent event,
                             final boolean endOfBatch) throws SQLException {
-        long w = writePointer;
-        long r = readPointer;
+        long w = writePointer.get();
+        long r = readPointer.get();
 
         // Apply backpressure if the ring buffer is completely full
         while (w - r >= RING_SIZE) {
             Thread.onSpinWait();
-            r = readPointer;
+            r = readPointer.get();
         }
 
         final BatchRow row = ringBuffer[(int) (w & MASK)];
@@ -207,7 +218,7 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         row.t3ServCEntry         = event.t3ServCEntry;
 
         // Publish the event to the background thread
-        writePointer = w + 1;
+        writePointer.set(w + 1);
     }
 
     /**
@@ -229,9 +240,9 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      */
     private void flushLoop() {
         // Exit only after all events have been durably committed, not merely loaded.
-        while (running || committedPointer < writePointer) {
-            final long r = readPointer;
-            final long w = writePointer;
+        while (running || committedPointer.get() < writePointer.get()) {
+            final long r = readPointer.get();
+            final long w = writePointer.get();
 
             if (r == w) {
                 if (!running) {
@@ -269,13 +280,13 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                 // Phase 1: free ring slots now that data is loaded into the JDBC batch.
                 // The hot-path accumulate() can write new events to these slots while
                 // H2 processes the transaction — commit latency is hidden from the pipeline.
-                readPointer = r + batchSize;
+                readPointer.set(r + batchSize);
 
                 insertStatement.executeBatch();
                 connection.commit();
 
                 // Phase 2: signal durability — flush() and the exit condition use this.
-                committedPointer = r + batchSize;
+                committedPointer.set(r + batchSize);
             } catch (final SQLException e) {
                 try {
                     connection.rollback();
@@ -287,7 +298,7 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                 // readPointer was already advanced before executeBatch (phase 1).
                 // Advance committedPointer to match so flush() is not blocked
                 // indefinitely by a poisoned batch that will never be committed.
-                committedPointer = r + batchSize;
+                committedPointer.set(r + batchSize);
             }
         }
     }
@@ -302,8 +313,8 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      * @throws SQLException if the db-writer thread died before committing
      */
     public void flush() throws SQLException {
-        final long target = writePointer;
-        while (committedPointer < target && running) {
+        final long target = writePointer.get();
+        while (committedPointer.get() < target && running) {
             Thread.onSpinWait();
             if (!dbThread.isAlive()) {
                 throw new SQLException("DB Writer thread died prematurely");
@@ -320,7 +331,7 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      * @return uncommitted event count
      */
     public int batchCount() {
-        return (int) (writePointer - committedPointer);
+        return (int) (writePointer.get() - committedPointer.get());
     }
 
     /**
@@ -407,4 +418,48 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         long t2ServBExit;
         long t3ServCEntry;
     }
+
+    // ── Cache-Line-Padded Pointer ─────────────────────────────────────────────
+
+    /** 56 bytes (7 longs) of left-hand padding ahead of {@link ValueHolder#value}. */
+    private abstract static class LhsPadding {
+        @SuppressWarnings("unused")
+        long p1, p2, p3, p4, p5, p6, p7;
+    }
+
+    private abstract static class ValueHolder extends LhsPadding {
+        volatile long value;
+    }
+
+    /** 56 bytes (7 longs) of right-hand padding behind {@link ValueHolder#value}. */
+    private abstract static class RhsPadding extends ValueHolder {
+        @SuppressWarnings("unused")
+        long p9, p10, p11, p12, p13, p14, p15;
+    }
+
+    /**
+     * {@code PaddedLong} — a single volatile long isolated on its own CPU cache line.
+     *
+     * <p>Replicates the padding technique used by LMAX Disruptor's {@code Sequence}
+     * class: {@link LhsPadding} and {@link RhsPadding} surround {@link ValueHolder#value}
+     * with 56 bytes of unused fields on each side via inheritance (not sibling fields
+     * in one class), so the JVM's field layout cannot place another live field within
+     * 64 bytes of {@code value} in either direction. This prevents false sharing when
+     * independent threads each poll a different {@code PaddedLong} at high frequency.
+     */
+    private static final class PaddedLong extends RhsPadding {
+
+        PaddedLong(final long initialValue) {
+            this.value = initialValue;
+        }
+
+        long get() {
+            return value;
+        }
+
+        void set(final long newValue) {
+            value = newValue;
+        }
+    }
 }
+

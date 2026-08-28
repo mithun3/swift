@@ -123,8 +123,14 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
      */
     public long currencyPairCode;
 
+    /** Trade side value for a BUY order; see {@link #side}. */
+    public static final byte SIDE_BUY = 1;
+
+    /** Trade side value for a SELL order; see {@link #side}. */
+    public static final byte SIDE_SELL = -1;
+
     /**
-     * Trade side: {@code 1} = BUY, {@code -1} = SELL.
+     * Trade side: {@link #SIDE_BUY} = BUY, {@link #SIDE_SELL} = SELL.
      *
      * <p>A signed byte keeps the footprint minimal. The JIT will widen to int
      * for arithmetic, but the storage remains 1 byte in the Chronicle buffer.
@@ -224,6 +230,9 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
      *
      * <p>This method must be called by the event loop before populating the
      * flyweight from a queue excerpt or a decoded FIX message.
+     *
+     * @implSpec Must be called before this flyweight is repopulated for reuse;
+     *           skipping it leaks stale field values into the next event.
      */
     public void reset() {
         correlationId        = 0L;

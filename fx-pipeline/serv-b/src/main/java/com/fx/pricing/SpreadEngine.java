@@ -41,15 +41,25 @@ public final class SpreadEngine {
     // Tier 2: PRIME     — 1 pip spread  = 10 scaled units
     // Tier 3: INSTITUTIONAL — 0.5 pip   = 5 scaled units
     // Fits entirely in one cache line (4 longs = 32 bytes).
+
+    /** Sentinel spread value for an unknown/invalid tier; see {@link #spreadForTier}. */
+    private static final long INVALID_SPREAD = -1L;
+
+    /** Tier index sentinel: unset/unknown client tier. */
+    private static final int TIER_UNKNOWN = 0;
+
+    /** Tier index: institutional client — highest tier, tightest spread. */
+    private static final int TIER_INSTITUTIONAL = 3;
+
     private static final long[] SPREAD_BY_TIER = {
-            -1L,  // Tier 0: invalid
-            30L,  // Tier 1: RETAIL — 3 pips
-            10L,  // Tier 2: PRIME  — 1 pip
-            5L    // Tier 3: INSTITUTIONAL — 0.5 pip
+            INVALID_SPREAD, // Tier 0: invalid
+            30L,             // Tier 1: RETAIL — 3 pips
+            10L,             // Tier 2: PRIME  — 1 pip
+            5L               // Tier 3: INSTITUTIONAL — 0.5 pip
     };
 
     /** Maximum tier index supported by the spread table. */
-    private static final int MAX_TIER = 3;
+    private static final int MAX_TIER = TIER_INSTITUTIONAL;
 
     /**
      * Applies the appropriate spread to the event and populates
@@ -67,7 +77,7 @@ public final class SpreadEngine {
      */
     public boolean applySpread(final FxMarketEvent event) {
         // Validate tier is within the supported range.
-        if (event.clientTier < 1 || event.clientTier > MAX_TIER) {
+        if (event.clientTier <= TIER_UNKNOWN || event.clientTier > MAX_TIER) {
             return false;
         }
 
@@ -102,7 +112,7 @@ public final class SpreadEngine {
      */
     public long spreadForTier(final int tier) {
         if (tier < 0 || tier >= SPREAD_BY_TIER.length) {
-            return -1L;
+            return INVALID_SPREAD;
         }
         return SPREAD_BY_TIER[tier];
     }

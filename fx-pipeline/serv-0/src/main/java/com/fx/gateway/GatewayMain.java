@@ -88,11 +88,11 @@ public final class GatewayMain {
         final String telemetryLogPath = System.getProperty(
                 "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
 
-        TelemetryRecorder s0Recorder = null;
+        TelemetryRecorder serv0Recorder = null;
         if (telemetryEnabled) {
             try {
                 String basePath = telemetryLogPath.replace(".hlog", "");
-                s0Recorder = new TelemetryRecorder(
+                serv0Recorder = new TelemetryRecorder(
                         new File(basePath + "-serv-0.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS,
                         TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 logger.info("[serv-0] Telemetry enabled. Writing latency logs to: " + basePath + "-serv-0.hlog");
@@ -102,10 +102,10 @@ public final class GatewayMain {
             }
         }
 
-        final GatewayEventLoop loop           = new GatewayEventLoop(source, idGen, s0Recorder);
+        final GatewayEventLoop loop           = new GatewayEventLoop(source, idGen, serv0Recorder);
 
         // Shutdown hook
-        final TelemetryRecorder finalS0 = s0Recorder;
+        final TelemetryRecorder finalServ0Recorder = serv0Recorder;
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             logger.info("[serv-0] Shutdown signal received. Stopping event loop...");
             loop.stop();
@@ -115,7 +115,7 @@ public final class GatewayMain {
                 if (source instanceof AutoCloseable) {
                     ((AutoCloseable) source).close();
                 }
-                if (finalS0 != null) finalS0.close();
+                if (finalServ0Recorder != null) finalServ0Recorder.close();
             } catch (final Exception e) {
                 Thread.currentThread().interrupt();
             }

@@ -6,6 +6,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.StageMetrics;
 import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
@@ -120,11 +121,7 @@ public final class PricingEventLoop extends AbstractEventLoop {
      * @param event the event just forwarded to queue-c
      */
     private void recordTelemetry(final FxMarketEvent event) {
-        if (queueBRecorder != null) {
-            queueBRecorder.recordValue(event.t2ServBEntry - event.t1ServAExit);
-        }
-        if (servBRecorder != null) {
-            servBRecorder.recordValue(event.t2ServBExit - event.t2ServBEntry);
-        }
+        StageMetrics.record(queueBRecorder, event.t1ServAExit, event.t2ServBEntry);
+        StageMetrics.record(servBRecorder, event.t2ServBEntry, event.t2ServBExit);
     }
 }

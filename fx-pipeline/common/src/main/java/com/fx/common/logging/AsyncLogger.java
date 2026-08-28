@@ -3,6 +3,7 @@ package com.fx.common.logging;
 import org.agrona.concurrent.ManyToOneConcurrentArrayQueue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@code AsyncLogger} — LMAX-style garbage-free asynchronous logger.
@@ -22,11 +23,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>
  * {@link #acquireEvent()} pulls a pre-allocated {@link LogEvent} from
  * {@code EVENT_POOL} (pre-filled with {@code QUEUE_CAPACITY} instances at class
- * load) instead of calling {@code new}. The one exception is the pool-exhaustion
- * fallback in {@link #acquireEvent()}, which allocates a {@code new LogEvent()}
- * only if the pool is empty — an extreme-load edge case, not the steady-state
- * path. If the shared queue itself is full, {@link #enqueue} drops the log entry
- * (returns the event to the pool) rather than blocking the caller's hot path.
+ * load) instead of calling {@code new}. If the pool is exhausted under extreme
+ * load, the call is dropped and counted via {@link #droppedEventCount()} rather
+ * than allocating a fallback {@code LogEvent} — this keeps the zero-allocation
+ * invariant strict even in that edge case. If the shared queue itself is full,
+ * {@link #enqueue} likewise drops the log entry (returns the event to the pool)
+ * rather than blocking the caller's hot path.
  * <p>
  * Uses Agrona's {@link ManyToOneConcurrentArrayQueue} to buffer log events
  * off the hot path. A background thread processes the events.
@@ -45,6 +47,9 @@ public final class AsyncLogger implements Logger {
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
     private static LogProcessor processor;
     private static Thread processorThread;
+
+    /** Count of log calls dropped due to pool exhaustion or a full shared queue. */
+    private static final AtomicLong DROPPED_EVENTS = new AtomicLong();
 
     @SuppressWarnings("unused")
     private final String name;
@@ -80,17 +85,26 @@ public final class AsyncLogger implements Logger {
         }, "AsyncLogProcessor-Shutdown"));
     }
 
+    /**
+     * Number of log calls dropped since JVM start — either the pool was exhausted
+     * (no event available to acquire) or the shared queue was full (event returned
+     * to the pool unlogged). Exposed for diagnostics/tests; not read on the hot path.
+     */
+    public static long droppedEventCount() {
+        return DROPPED_EVENTS.get();
+    }
+
     private LogEvent acquireEvent() {
-        LogEvent event = EVENT_POOL.poll();
-        if (event == null) {
-            // Fallback if pool is exhausted (should be rare if sized correctly)
-            return new LogEvent();
-        }
-        return event;
+        return EVENT_POOL.poll();
     }
 
     private void enqueue(LogLevel level, CharSequence message, long longArg, Object objArg, Throwable t) {
         LogEvent event = acquireEvent();
+        if (event == null) {
+            // Pool exhausted under extreme load: drop rather than allocate, preserving Zero-GC.
+            DROPPED_EVENTS.incrementAndGet();
+            return;
+        }
         event.timestamp = System.currentTimeMillis();
         event.level = level;
         event.message = message;
@@ -100,9 +114,8 @@ public final class AsyncLogger implements Logger {
         event.threadName = Thread.currentThread().getName();
 
         if (!LOG_QUEUE.offer(event)) {
-            // If the logging queue is full, we drop the log to save the hot path.
-            // Alternatively, we could block or fall back to SyncLogger.
-            // For ultra-low latency, dropping or writing a "dropped" metric is better.
+            // Shared queue full: drop the log to protect the hot path, return the event to the pool.
+            DROPPED_EVENTS.incrementAndGet();
             event.reset();
             EVENT_POOL.offer(event);
         }

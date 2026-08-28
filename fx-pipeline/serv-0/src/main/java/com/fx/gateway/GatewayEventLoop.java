@@ -6,6 +6,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.StageMetrics;
 import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
@@ -67,7 +68,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     private final CorrelationIdGenerator idGenerator;
 
     /** Optional zero-allocation latency recorder for serv-0 execution. */
-    private final TelemetryRecorder s0Recorder;
+    private final TelemetryRecorder serv0Recorder;
 
     /**
      * Constructs the gateway event loop.
@@ -81,11 +82,11 @@ public final class GatewayEventLoop extends AbstractEventLoop {
      *
      * @param messageSource the FIX byte message source
      * @param idGenerator   the correlation ID generator
-     * @param s0Recorder    optional telemetry recorder
+     * @param serv0Recorder optional telemetry recorder
      */
     public GatewayEventLoop(final FixMessageSource messageSource,
             final CorrelationIdGenerator idGenerator,
-            final TelemetryRecorder s0Recorder) {
+            final TelemetryRecorder serv0Recorder) {
         super(
                 "gateway",
                 // The gateway reads from the FIX source, not a Chronicle Queue.
@@ -98,7 +99,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
                 CPU_CORE);
         this.messageSource = messageSource;
         this.idGenerator = idGenerator;
-        this.s0Recorder = s0Recorder;
+        this.serv0Recorder = serv0Recorder;
         this.decoder = new FixDecoder();
         // Pre-allocate the decode frame once — reused across all messages.
         this.frame = new FixDecoder.FxMessageFrame();
@@ -198,9 +199,7 @@ public final class GatewayEventLoop extends AbstractEventLoop {
         appender.writeDocument(flyweight);
 
         // Step 9: Record processing latency (serv-0)
-        if (s0Recorder != null) {
-            s0Recorder.recordValue(System.nanoTime() - flyweight.ingressNanoTime);
-        }
+        StageMetrics.record(serv0Recorder, flyweight.ingressNanoTime, System.nanoTime());
     }
 
     /**

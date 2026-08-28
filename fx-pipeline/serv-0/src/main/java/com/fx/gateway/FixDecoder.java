@@ -1,5 +1,7 @@
 package com.fx.gateway;
 
+import com.fx.common.event.FxMarketEvent;
+
 /**
  * {@code FixDecoder} — High-performance FIX 4.4 tag=value byte-level parser.
  *
@@ -59,6 +61,18 @@ public final class FixDecoder {
     private static final int TAG_ORDER_QTY   = 38;
     private static final int TAG_PRICE       = 44;
 
+    // ── Mandatory-tag presence bit flags ──────────────────────────────────────
+    // One bit per mandatory tag, combined into parsedFlags in decode(). When every
+    // bit in ALL_MANDATORY_FLAGS is set, all mandatory fields have been parsed.
+    private static final int FLAG_MSG_TYPE      = 0x01;
+    private static final int FLAG_SYMBOL        = 0x02;
+    private static final int FLAG_SIDE          = 0x04;
+    private static final int FLAG_ORDER_QTY     = 0x08;
+    private static final int FLAG_PRICE         = 0x10;
+    private static final int FLAG_SENDER_COMP   = 0x20;
+    private static final int ALL_MANDATORY_FLAGS = FLAG_MSG_TYPE | FLAG_SYMBOL | FLAG_SIDE
+            | FLAG_ORDER_QTY | FLAG_PRICE | FLAG_SENDER_COMP;
+
     /** FIX field delimiter: SOH (Start Of Header) byte, ASCII 0x01. */
     private static final byte SOH = 0x01;
 
@@ -105,9 +119,8 @@ public final class FixDecoder {
         }
 
         // Track which mandatory tags have been parsed — using bit flags on a single int.
-        // Bit 0 = TAG_MSG_TYPE, Bit 1 = TAG_SYMBOL, Bit 2 = TAG_SIDE,
-        // Bit 3 = TAG_ORDER_QTY, Bit 4 = TAG_PRICE, Bit 5 = TAG_SENDER_COMP.
-        // When all 6 bits are set (0x3F = 63), all mandatory fields are present.
+        // See FLAG_* constants above. When all bits in ALL_MANDATORY_FLAGS are set,
+        // all mandatory fields are present.
         int parsedFlags = 0;
 
         int pos = offset;
@@ -143,7 +156,7 @@ public final class FixDecoder {
                     if (valueLength >= 1) {
                         // MsgType is a single character (e.g., 'D' for NewOrderSingle)
                         target.msgType = buffer[valueStart];
-                        parsedFlags |= 0x01;
+                        parsedFlags |= FLAG_MSG_TYPE;
                     }
                 }
                 case TAG_MSG_SEQ_NUM -> {
@@ -153,7 +166,7 @@ public final class FixDecoder {
                     // Map SenderCompID bytes to a deterministic long hash.
                     // This avoids storing the String while preserving uniqueness.
                     target.clientId = hashBytes(buffer, valueStart, valueLength);
-                    parsedFlags |= 0x20;
+                    parsedFlags |= FLAG_SENDER_COMP;
                 }
                 case TAG_SYMBOL -> {
                     // Parse "EUR/USD" into base + quote byte arrays, then encode to long.
@@ -161,14 +174,14 @@ public final class FixDecoder {
                         target.currencyPairCode =
                                 com.fx.common.event.FxMarketEvent.CurrencyPairCodec
                                         .encode(baseCurrencyBuffer, quoteCurrencyBuffer);
-                        parsedFlags |= 0x02;
+                        parsedFlags |= FLAG_SYMBOL;
                     }
                 }
                 case TAG_SIDE -> {
                     // FIX tag 54: 1 = Buy, 2 = Sell. Map to +1 / -1 byte.
                     if (valueLength == 1) {
-                        target.side = (buffer[valueStart] == '1') ? (byte) 1 : (byte) -1;
-                        parsedFlags |= 0x04;
+                        target.side = (buffer[valueStart] == '1') ? FxMarketEvent.SIDE_BUY : FxMarketEvent.SIDE_SELL;
+                        parsedFlags |= FLAG_SIDE;
                     }
                 }
                 case TAG_ORDER_QTY -> {
@@ -176,14 +189,14 @@ public final class FixDecoder {
                     // Stored as notional in minor units: qty * lot_size * 100 (cents).
                     // For simplicity in this demo, 1 lot = 100,000 units, 1 unit = 1 cent.
                     target.notionalMinorUnits = parseLong(buffer, valueStart, valueLength);
-                    parsedFlags |= 0x08;
+                    parsedFlags |= FLAG_ORDER_QTY;
                 }
                 case TAG_PRICE -> {
                     // Price is a decimal ASCII string: "1.0850"
                     // Parse it into a scaled long (× PRICE_SCALE_FACTOR).
                     target.requestedPriceScaled =
                             parseScaledPrice(buffer, valueStart, valueLength);
-                    parsedFlags |= 0x10;
+                    parsedFlags |= FLAG_PRICE;
                 }
                 default -> { /* Unknown tags are silently skipped per FIX spec. */ }
             }
@@ -192,7 +205,7 @@ public final class FixDecoder {
         // All 6 mandatory tags must be present for a valid New Order Single.
         // Returning false here routes the event to the error queue without allocating
         // an exception object — fail-fast, zero-cost on the success path.
-        return parsedFlags == 0x3F;
+        return parsedFlags == ALL_MANDATORY_FLAGS;
     }
 
     /**

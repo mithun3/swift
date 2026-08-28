@@ -43,6 +43,15 @@ public final class CreditCheckEngine {
     // boxing, HashMap node allocation, and pointer chasing.
     // The entire array (4 longs = 32 bytes) fits in a single cache line.
 
+    /** Tier index sentinel: unset/unknown client tier (no credit extended). */
+    private static final int TIER_UNKNOWN = 0;
+
+    /** Tier index: standard retail client. */
+    private static final int TIER_RETAIL = 1;
+
+    /** Tier index: institutional client — highest credit tier. */
+    private static final int TIER_INSTITUTIONAL = 3;
+
     private static final long[] CREDIT_LIMIT_BY_TIER = {
             0L,                    // Tier 0: UNKNOWN — no credit
             10_000_000_00L,        // Tier 1: RETAIL — $10M notional cap
@@ -51,7 +60,7 @@ public final class CreditCheckEngine {
     };
 
     /** Maximum allowed client tier index. Tiers above this are rejected. */
-    private static final int MAX_TIER = 3;
+    private static final int MAX_TIER = TIER_INSTITUTIONAL;
 
     /**
      * Maximum orders per rolling time window (rate limit).
@@ -80,7 +89,7 @@ public final class CreditCheckEngine {
     public boolean validate(final FxMarketEvent event) {
         // Guard: unknown tier → immediate rejection.
         // Tier 0 is the zero-sentinel (unset), not a valid client classification.
-        if (event.clientTier < 1 || event.clientTier > MAX_TIER) {
+        if (event.clientTier <= TIER_UNKNOWN || event.clientTier > MAX_TIER) {
             return false;
         }
 
@@ -124,6 +133,6 @@ public final class CreditCheckEngine {
     public static int resolveTier(final long clientId) {
         // Deterministic tier resolution: maps any clientId to a tier in [1, 3].
         // The absolute value guard prevents negative modulo on negative hash values.
-        return (int) (Math.abs(clientId) % MAX_TIER) + 1;
+        return (int) (Math.abs(clientId) % MAX_TIER) + TIER_RETAIL;
     }
 }

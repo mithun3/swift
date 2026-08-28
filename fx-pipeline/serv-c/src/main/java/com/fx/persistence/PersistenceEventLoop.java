@@ -5,6 +5,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.StageMetrics;
 import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
@@ -160,9 +161,7 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
         // Recorded via SingleWriterRecorder — zero-allocation, wait-free.
         // Queue-a/serv-a and queue-b/serv-b are recorded upstream by serv-a and serv-b
         // themselves — see RiskValidationEventLoop and PricingEventLoop.
-        if (queueCRecorder != null) {
-            queueCRecorder.recordValue(event.t3ServCEntry - event.t2ServBExit);
-        }
+        StageMetrics.record(queueCRecorder, event.t2ServBExit, event.t3ServCEntry);
 
         try {
             // Accumulate the event — zero-allocation primitive copy into batch buffer.
@@ -176,12 +175,8 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
         }
 
         long t3ServCExit = System.nanoTime();
-        if (servCRecorder != null) {
-            servCRecorder.recordValue(t3ServCExit - event.t3ServCEntry);
-        }
-        if (e2eRecorder != null) {
-            e2eRecorder.recordValue(t3ServCExit - event.ingressNanoTime);
-        }
+        StageMetrics.record(servCRecorder, event.t3ServCEntry, t3ServCExit);
+        StageMetrics.record(e2eRecorder, event.ingressNanoTime, t3ServCExit);
     }
 
     /**

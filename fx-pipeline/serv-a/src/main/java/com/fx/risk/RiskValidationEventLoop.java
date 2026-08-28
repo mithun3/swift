@@ -6,6 +6,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.StageMetrics;
 import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
@@ -134,12 +135,8 @@ public final class RiskValidationEventLoop extends AbstractEventLoop {
 
         // Recorded here (not downstream at serv-c) so the sample count reflects events
         // actually processed by serv-a, independent of later pipeline stages.
-        if (queueARecorder != null) {
-            queueARecorder.recordValue(event.t1ServAEntry - event.ingressNanoTime);
-        }
-        if (servARecorder != null) {
-            servARecorder.recordValue(event.t1ServAExit - event.t1ServAEntry);
-        }
+        StageMetrics.record(queueARecorder, event.ingressNanoTime, event.t1ServAEntry);
+        StageMetrics.record(servARecorder, event.t1ServAEntry, event.t1ServAExit);
 
         // Note: We intentionally write BOTH accepted and credit-rejected events to
         // queue-b. This gives serv-c (persistence) a complete audit trail of all
