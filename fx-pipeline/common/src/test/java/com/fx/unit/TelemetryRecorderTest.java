@@ -82,4 +82,45 @@ class TelemetryRecorderTest {
                     logFile.getAbsolutePath(), "Log file path should match the provided path");
         }
     }
+
+    @Test
+    @DisplayName("recordValue() swallows out-of-range values instead of throwing")
+    void testRecordValueSwallowsOutOfRangeValues() throws Exception {
+        final File logFile = tempDir.resolve("out-of-range.hlog").toFile();
+        // A deliberately tiny highestValue makes recordValue()'s internal
+        // IllegalArgumentException/ArrayIndexOutOfBoundsException path reachable.
+        try (final TelemetryRecorder recorder = new TelemetryRecorder(logFile, 1_000L, 100L)) {
+            assertDoesNotThrow(() -> recorder.recordValue(10_000_000L),
+                    "values beyond highestValue must be swallowed, not thrown, to protect the hot path");
+        }
+    }
+
+    @Test
+    @DisplayName("the background flush loop writes a non-empty interval while still running (not only at close())")
+    void testBackgroundFlushLoopWritesIntervalWhileRunning() throws Exception {
+        final File logFile = tempDir.resolve("background-flush.hlog").toFile();
+        try (final TelemetryRecorder recorder = new TelemetryRecorder(logFile, 10_000_000_000L, 50L)) {
+            // The constructor already writes the HDR log header synchronously, so the file
+            // is non-empty from the start — capture that baseline before asserting growth.
+            final long sizeAfterHeader = logFile.length();
+            recorder.recordValue(1_000L);
+            recorder.recordValue(2_000L);
+
+            // Give the 50ms background flusher multiple opportunities to run before we
+            // record the pre-close file size — this exercises flushLoop()'s in-loop
+            // outputIntervalHistogram() branch, distinct from close()'s final flush.
+            final long deadline = System.nanoTime() + 2_000_000_000L; // 2s bound
+            long sizeAfterBackgroundFlush = sizeAfterHeader;
+            while (System.nanoTime() < deadline) {
+                sizeAfterBackgroundFlush = logFile.length();
+                if (sizeAfterBackgroundFlush > sizeAfterHeader) {
+                    break;
+                }
+                Thread.sleep(20L);
+            }
+
+            assertTrue(sizeAfterBackgroundFlush > sizeAfterHeader,
+                    "the background thread must flush a recorded interval before close() runs");
+        }
+    }
 }

@@ -7,6 +7,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * {@code AsyncLogger} — LMAX-style garbage-free asynchronous logger.
  *
+ * <h2>Thread Ownership</h2>
+ * <p>
+ * {@code LOG_QUEUE}, {@code EVENT_POOL}, and the background {@link LogProcessor}
+ * thread are {@code static} — shared by <b>every</b> {@code AsyncLogger} instance
+ * in the JVM, not one per instance. Any number of hot-path threads may call
+ * {@code info}/{@code warn}/{@code error} concurrently (each enqueue is a single
+ * lock-free offer to {@link ManyToOneConcurrentArrayQueue}); exactly one
+ * background thread ({@code AsyncLogProcessor}) drains the queue and performs
+ * the actual formatting/I/O. This is a multi-producer, single-consumer analogue
+ * of the pipeline's single-writer event loops — many producers, one consumer.
+ *
+ * <h2>Zero-GC Invariant</h2>
+ * <p>
+ * {@link #acquireEvent()} pulls a pre-allocated {@link LogEvent} from
+ * {@code EVENT_POOL} (pre-filled with {@code QUEUE_CAPACITY} instances at class
+ * load) instead of calling {@code new}. The one exception is the pool-exhaustion
+ * fallback in {@link #acquireEvent()}, which allocates a {@code new LogEvent()}
+ * only if the pool is empty — an extreme-load edge case, not the steady-state
+ * path. If the shared queue itself is full, {@link #enqueue} drops the log entry
+ * (returns the event to the pool) rather than blocking the caller's hot path.
  * <p>
  * Uses Agrona's {@link ManyToOneConcurrentArrayQueue} to buffer log events
  * off the hot path. A background thread processes the events.

@@ -16,12 +16,15 @@ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governo
 ```
 
 ## 3. JVM Flags (Production & Benchmark)
-The pipeline should be run with the following JVM flags (included in `scripts/deploy.sh` and `pom.xml`):
-- `-XX:+UseZGC`: Z Garbage Collector for sub-millisecond pause times.
-- `-XX:+AlwaysPreTouch`: Touch all allocated memory pages at startup to avoid page faults during runtime.
-- `-XX:-UseBiasedLocking`: (If using JDK < 15) Disable biased locking which can cause safepoint pauses when revoking locks.
-- `-XX:CompileThreshold=10000`: Force earlier C2 compilation (or use `-Xcomp` with care) to avoid JIT compilation on the hot path.
-- `-XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints`: Improve async profiler visibility.
+The flags actually applied differ by script/module — there is no `scripts/deploy.sh`
+(that script does not exist in this repo). What's really configured today:
+- **`scripts/start.sh`** (launches the 4 pipeline services): `-XX:+UseZGC -XX:+ZGenerational -Xmx512m -Xms512m -XX:+AlwaysPreTouch -XX:+DisableExplicitGC`.
+- **`pom.xml`** (Surefire/Failsafe test JVMs): `-XX:+UseZGC -Xmx512m -Xms512m -XX:+AlwaysPreTouch` (plus Chronicle `--add-exports`/`--add-opens`; Surefire additionally sets `-XX:+DisableExplicitGC`).
+- **`scripts/run_load_generator.sh`**: `-XX:+UseZGC -XX:+AlwaysPreTouch -XX:CompileThreshold=10000 -Xmx2G -Xms2G`.
+
+Notes on flags not currently used anywhere in this repo:
+- `-XX:-UseBiasedLocking` — biased locking was removed entirely in Java 21 (JEP 374); this project targets Java 21, so omit this flag rather than pass it (it would fail JVM startup with `-XX:+UnlockExperimentalVMOptions` needed, or simply be rejected as unrecognized).
+- `-XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints` — useful for async-profiler runs but not wired into any script here; add them manually to your own profiling invocation if needed.
 
 ## 4. Running the Benchmark
 1. Start the pipeline: `./scripts/start.sh`

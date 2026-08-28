@@ -101,7 +101,11 @@ A background daemon thread (inside `TelemetryRecorder`) wakes up every second, c
 // From common/src/main/java/com/fx/common/telemetry/TelemetryRecorder.java
 Histogram intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
 if (intervalHistogram.getTotalCount() > 0) {
-    logWriter.outputIntervalHistogram(startTimeSec, endTimeSec, intervalHistogram);
+    // Single-argument overload: reads start/end timestamps from the histogram's
+    // own internal fields. An earlier 3-arg overload that computed a wall-clock
+    // offset from a base time produced near-zero values and collapsed all
+    // percentiles to 0.00 µs — replaced with this overload.
+    logWriter.outputIntervalHistogram(intervalHistogram);
 }
 ```
 
@@ -109,7 +113,9 @@ The background thread allocates freely (String, I/O) — this is acceptable beca
 
 ### Enabling Telemetry
 
-Telemetry is enabled by default in `PersistenceMain`. Control it via system properties:
+Telemetry is enabled by default in every pipeline service main (`GatewayMain`,
+`RiskMain`, `PricingMain`, `PersistenceMain`) — each stamps and records its own
+per-stage latency independently. Control it via system properties:
 
 ```bash
 # Disable telemetry (e.g., in CI)

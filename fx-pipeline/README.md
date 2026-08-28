@@ -71,13 +71,13 @@ scripts/build.sh
 
 ## Running the Pipeline
 
-The easiest way to run the pipeline locally is the provided deployment script. It configures OS-specific JVM arguments (ZGC tuning, Chronicle module exports) and launches all four services in reverse order (consumers first):
+The easiest way to run the pipeline locally is the provided startup script. It configures OS-specific JVM arguments (ZGC tuning, Chronicle module exports) and launches all four services in reverse order (consumers first):
 
 ```bash
-scripts/deploy.sh
+scripts/start.sh
 ```
 
-*Pressing `Ctrl+C` cleanly stops all background services.*
+*Run `scripts/stop.sh` to cleanly stop all background services.*
 
 ### Manual Execution (Alternative)
 
@@ -85,31 +85,31 @@ Open 5 separate terminals and run in this order:
 
 **Terminal 1 (serv-c — Persistence):**
 ```bash
-java $JVM_OPTS -cp serv-c/target/serv-c-1.0-SNAPSHOT.jar:serv-c/target/dependency/* com.fx.persistence.PersistenceMain
+java $JVM_OPTS -cp serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/* com.fx.persistence.PersistenceMain
 ```
 
 **Terminal 2 (Telemetry Stitcher):**
 ```bash
-java $JVM_OPTS -cp common/target/common-1.0-SNAPSHOT.jar:common/target/dependency/* com.fx.common.telemetry.TelemetryMain
+java $JVM_OPTS -cp common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/* com.fx.common.telemetry.TelemetryMain
 ```
 
 **Terminal 3 (serv-b — Pricing):**
 ```bash
-java $JVM_OPTS -cp serv-b/target/serv-b-1.0-SNAPSHOT.jar:serv-b/target/dependency/* com.fx.pricing.PricingMain
+java $JVM_OPTS -cp serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/* com.fx.pricing.PricingMain
 ```
 
 **Terminal 4 (serv-a — Risk):**
 ```bash
-java $JVM_OPTS -cp serv-a/target/serv-a-1.0-SNAPSHOT.jar:serv-a/target/dependency/* com.fx.risk.RiskMain
+java $JVM_OPTS -cp serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/* com.fx.risk.RiskMain
 ```
 
 **Terminal 5 (serv-0 — Gateway):**
 ```bash
 # Synthetic mode (default — generates messages internally):
-java $JVM_OPTS -cp serv-0/target/serv-0-1.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain
+java $JVM_OPTS -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain
 
 # TCP mode (waits for a real FIX client connection on port 5001):
-java $JVM_OPTS -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain
+java $JVM_OPTS -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain
 ```
 
 ---
@@ -284,7 +284,7 @@ On macOS, `AffinityLock` thread-pinning is advisory — the OS scheduler can pre
 
 ### No Messages Appearing in Database During Load Generation
 
-Check that you are sending to the correct queue path. By default, `scripts/deploy.sh` starts services reading from `/tmp/fx-queues/`:
+Check that you are sending to the correct queue path. By default, `scripts/start.sh` starts services reading from `/tmp/fx-queues/`:
 
 ```bash
 # Correct:

@@ -82,4 +82,15 @@ class QueueFactoryTest {
             assertTrue(new java.io.File(defaultPath).exists());
         }
     }
+
+    @Test
+    @DisplayName("create() throws IllegalStateException when the queue directory cannot be created")
+    void testCreateThrowsWhenDirectoryCreationFails() throws java.io.IOException {
+        // A regular file occupying the parent path makes mkdirs() fail for the child path.
+        final Path blockingFile = tempDir.resolve("blocking-file");
+        java.nio.file.Files.createFile(blockingFile);
+        final String unreachablePath = blockingFile.resolve("subdir").toString();
+
+        assertThrows(IllegalStateException.class, () -> QueueFactory.create(unreachablePath));
+    }
 }

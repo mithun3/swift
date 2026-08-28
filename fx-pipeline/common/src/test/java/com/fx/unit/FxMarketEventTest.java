@@ -153,4 +153,13 @@ class FxMarketEventTest {
                         new byte[]{'E','U','R'}, new byte[]{'U','S'}),
                 "Should throw for 2-byte quote currency");
     }
+
+    @Test
+    @DisplayName("CurrencyPairCodec private constructor throws UnsupportedOperationException (utility-class contract)")
+    void testCurrencyPairCodecConstructorThrows() throws Exception {
+        final var constructor = FxMarketEvent.CurrencyPairCodec.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        final var thrown = assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);
+        assertInstanceOf(UnsupportedOperationException.class, thrown.getCause());
+    }
 }

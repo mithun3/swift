@@ -21,7 +21,8 @@ import com.fx.common.logging.LoggerFactory;
  */
 public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, AutoCloseable {
 
-    private static final int BUFFER_SIZE = 1024;
+    /** Fixed wire length of a single FIX message frame this source expects, in bytes. */
+    private static final int MESSAGE_LENGTH = 76;
     private static final Logger logger = LoggerFactory.getLogger(TcpFixSource.class);
 
     private final byte[] messageBuffer = new byte[8192];
@@ -68,15 +69,15 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
             }
 
             // If we have a full message buffered, return it immediately
-            if (bufferPosition - readPosition >= 76) {
-                System.arraycopy(messageBuffer, readPosition, buf, offset, 76);
-                readPosition += 76;
+            if (bufferPosition - readPosition >= MESSAGE_LENGTH) {
+                System.arraycopy(messageBuffer, readPosition, buf, offset, MESSAGE_LENGTH);
+                readPosition += MESSAGE_LENGTH;
                 // Compact buffer if fully read
                 if (readPosition == bufferPosition) {
                     readPosition = 0;
                     bufferPosition = 0;
                 }
-                return 76;
+                return MESSAGE_LENGTH;
             }
 
             // We need more data. First, compact any partial message to the front of the buffer
@@ -108,14 +109,14 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
             }
 
             // Check again if we now have a complete message
-            if (bufferPosition - readPosition >= 76) {
-                System.arraycopy(messageBuffer, readPosition, buf, offset, 76);
-                readPosition += 76;
+            if (bufferPosition - readPosition >= MESSAGE_LENGTH) {
+                System.arraycopy(messageBuffer, readPosition, buf, offset, MESSAGE_LENGTH);
+                readPosition += MESSAGE_LENGTH;
                 if (readPosition == bufferPosition) {
                     readPosition = 0;
                     bufferPosition = 0;
                 }
-                return 76;
+                return MESSAGE_LENGTH;
             }
 
             return 0; // Not enough bytes yet

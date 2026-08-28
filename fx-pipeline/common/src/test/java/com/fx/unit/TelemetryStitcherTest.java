@@ -66,4 +66,32 @@ class TelemetryStitcherTest {
         assertTrue(json.contains("\"timestampNs\":3000"), "JSON should contain serv-b timestamp");
         assertTrue(json.contains("\"timestampNs\":4000"), "JSON should contain serv-c timestamp");
     }
+
+    @Test
+    @DisplayName("totalLatencyNs stays 0 for an event that has not yet reached serv-c")
+    void testTotalLatencyIsZeroWhenNotYetPersisted() throws Exception {
+        final File queueDir = tempDir.resolve("test-queue-inflight").toFile();
+        final File logFile = tempDir.resolve("traces-inflight.jsonl").toFile();
+
+        try (ChronicleQueue queue = net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
+                .binary(queueDir)
+                .build()) {
+            ExcerptAppender appender = queue.createAppender();
+            FxMarketEvent event = new FxMarketEvent();
+            event.reset();
+            event.correlationId = 999L;
+            event.ingressNanoTime = 1000L;
+            // t3ServCEntry intentionally left at 0 — event has not reached serv-c yet.
+            appender.writeDocument(event);
+        }
+
+        try (TelemetryStitcher stitcher = new TelemetryStitcher(queueDir.getAbsolutePath(), logFile.getAbsolutePath())) {
+            Thread.sleep(500);
+        }
+
+        List<String> lines = Files.readAllLines(logFile.toPath());
+        assertFalse(lines.isEmpty());
+        assertTrue(lines.get(0).contains("\"totalLatencyNs\":0"),
+                "an event with t3ServCEntry == 0 must report zero total latency, not a negative/garbage value");
+    }
 }

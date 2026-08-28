@@ -15,7 +15,7 @@ import java.io.File;
  *   <li>Construct the {@link GatewayEventLoop} with injected dependencies.</li>
  *   <li>Register a JVM shutdown hook for clean teardown.</li>
  *   <li>Start the event loop (spawns the pinned platform thread).</li>
- *   <li>Block the main thread indefinitely via {@link Thread#sleep}.</li>
+ *   <li>Block the main thread indefinitely via {@link Thread#join()} on itself.</li>
  * </ol>
  *
  * <h2>JVM Launch Arguments</h2>
@@ -42,6 +42,18 @@ public final class GatewayMain {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayMain.class);
 
+    /** Default TCP listen port when {@code fx.gateway.mode=tcp} and no override is given. */
+    private static final int DEFAULT_TCP_PORT = 5001;
+
+    /** Default synthetic message count when no {@code fx.gateway.messages} override is given. */
+    private static final long DEFAULT_SYNTHETIC_MESSAGE_COUNT = 10_000_000L;
+
+    /** Highest trackable latency for the serv-0 telemetry histogram: 60 seconds in nanos. */
+    private static final long TELEMETRY_HIGHEST_LATENCY_NANOS = 60_000_000_000L;
+
+    /** Background flush interval for the serv-0 telemetry recorder. */
+    private static final long TELEMETRY_FLUSH_INTERVAL_MILLIS = 1_000L;
+
     private GatewayMain() {
         throw new UnsupportedOperationException("Main class; not instantiable");
     }
@@ -60,11 +72,11 @@ public final class GatewayMain {
         final GatewayEventLoop.FixMessageSource source;
 
         if ("tcp".equalsIgnoreCase(mode)) {
-            final int port = Integer.getInteger("fx.gateway.port", 5001);
+            final int port = Integer.getInteger("fx.gateway.port", DEFAULT_TCP_PORT);
             source = new TcpFixSource(port);
         } else {
             // Synthetic source for demonstration
-            final long messagesToGenerate = Long.getLong("fx.gateway.messages", 10_000_000L);
+            final long messagesToGenerate = Long.getLong("fx.gateway.messages", DEFAULT_SYNTHETIC_MESSAGE_COUNT);
             source = new SyntheticFixSource(messagesToGenerate);
             logger.info("[serv-0] Mode: Synthetic (generating " + messagesToGenerate + " messages)");
         }
@@ -81,7 +93,8 @@ public final class GatewayMain {
             try {
                 String basePath = telemetryLogPath.replace(".hlog", "");
                 s0Recorder = new TelemetryRecorder(
-                        new File(basePath + "-serv-0.hlog"), 60_000_000_000L, 1_000L);
+                        new File(basePath + "-serv-0.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS,
+                        TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 logger.info("[serv-0] Telemetry enabled. Writing latency logs to: " + basePath + "-serv-0.hlog");
             } catch (final Exception e) {
                 logger.warn("[serv-0] WARNING: Failed to init TelemetryRecorder: "

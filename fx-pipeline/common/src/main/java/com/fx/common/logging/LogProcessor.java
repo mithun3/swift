@@ -7,11 +7,21 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
- * {@code LogProcessor} — The background thread that drains the async log queue.
+ * {@code LogProcessor} — The single background thread that drains the shared async log queue.
  *
- * <p>This thread takes events off the lock-free queue, formats them using a
- * pre-allocated StringBuilder, writes them to standard out, and returns the
- * event flyweight back to the object pool.
+ * <p>Exactly one instance runs per JVM (started once by the first
+ * {@link AsyncLogger} construction) as the sole consumer of the {@code LOG_QUEUE}
+ * that every {@code AsyncLogger} producer thread writes to — the single-consumer
+ * side of that multi-producer/single-consumer queue. It takes events off the
+ * lock-free queue, formats them using a pre-allocated {@code StringBuilder}
+ * (reset via {@code setLength(0)}, never reallocated), writes them to standard
+ * out, and returns the event flyweight back to the object pool. Formatting and
+ * I/O here allocate freely — this thread is off the hot path by design.
+ *
+ * <p>Wait strategy: when the queue is empty it calls {@link Thread#yield()}
+ * rather than busy-spinning or blocking — the same latency/CPU trade-off as a
+ * {@code YieldingWaitStrategy}, appropriate here since logging is not on the
+ * pipeline's critical path.
  */
 public final class LogProcessor implements Runnable {
     

@@ -21,8 +21,13 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  * handler needs in one shot, avoiding expensive cache misses. The fields are
  * ordered by access frequency and logical group:
  * <ol>
- *   <li><b>Identity group</b> ({@code correlationId}, {@code ingressNanoTime})
- *       — needed by every service for correlation and latency measurement.</li>
+ *   <li><b>Identity &amp; timing group</b> ({@code correlationId},
+ *       {@code ingressNanoTime}, and the five {@code t1Serv*}/{@code t2Serv*}/
+ *       {@code t3ServCEntry} per-stage timestamps) — {@code correlationId} and
+ *       {@code ingressNanoTime} are read by every service; the timestamps are
+ *       write-once-per-stage. Together these 7 longs span 56 bytes, so only
+ *       the first two fields reliably share a cache line with the object
+ *       header — the timestamps beyond them may spill into a second line.</li>
  *   <li><b>FX instrument group</b> ({@code currencyPair}, {@code side},
  *       {@code notional}) — needed for all business logic.</li>
  *   <li><b>Pricing group</b> ({@code requestedPrice}, {@code executedPrice},
@@ -52,10 +57,12 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 public final class FxMarketEvent extends SelfDescribingMarshallable {
 
     // ─────────────────────────────────────────────────────────────────────────
-    // IDENTITY GROUP  (offset 0 in Chronicle Wire binary layout)
-    // These two longs occupy the first 16 bytes. On a 64-byte cache line,
-    // they arrive with the object header, minimising cache misses for
-    // the most universally accessed fields.
+    // IDENTITY & TIMING GROUP  (offset 0 in Chronicle Wire binary layout)
+    // correlationId + ingressNanoTime occupy the first 16 bytes and arrive with
+    // the object header on a 64-byte cache line. The five per-stage timestamp
+    // fields below them (t1ServAEntry..t2ServBExit) bring this group to 56
+    // bytes total — they do NOT all fit in the same cache line as the two
+    // identity fields; only correlationId/ingressNanoTime are guaranteed to.
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
@@ -99,7 +106,7 @@ public final class FxMarketEvent extends SelfDescribingMarshallable {
     public long t2ServBExit;
 
     // ─────────────────────────────────────────────────────────────────────────
-    // FX INSTRUMENT GROUP  (offset 16)
+    // FX INSTRUMENT GROUP  (offset ~56, immediately after the identity/timing group)
     // ─────────────────────────────────────────────────────────────────────────
 
     /**

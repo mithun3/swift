@@ -25,24 +25,26 @@ Run the service using the required JVM arguments to support Chronicle Queue and 
 export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED \
 --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED \
+--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED \
 --add-opens=java.base/java.lang=ALL-UNNAMED \
 --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
 --add-opens=java.base/java.io=ALL-UNNAMED \
 --add-opens=java.base/java.util=ALL-UNNAMED \
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED \
 -XX:+UseZGC -XX:+ZGenerational -Xmx512m -Xms512m \
 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC \
 -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider"
 
 # Synthetic Mode
-java $JVM_OPTS -cp target/serv-0-1.0-SNAPSHOT.jar:target/dependency/* com.fx.gateway.GatewayMain
+java $JVM_OPTS -cp target/serv-0-1.0.0-SNAPSHOT.jar:target/dependency/* com.fx.gateway.GatewayMain
 
 # TCP Client Mode (listens on port 5001)
-java $JVM_OPTS -Dfx.gateway.mode=tcp -cp target/serv-0-1.0-SNAPSHOT.jar:target/dependency/* com.fx.gateway.GatewayMain
+java $JVM_OPTS -Dfx.gateway.mode=tcp -cp target/serv-0-1.0.0-SNAPSHOT.jar:target/dependency/* com.fx.gateway.GatewayMain
 ```
 *(Make sure to run the downstream services `serv-c`, `serv-b`, and `serv-a` first so no messages are dropped.)*
 
 > [!TIP]
-> **Easier Execution**: Rather than running these manually, use the `scripts/deploy.sh` script from the project root to start all services in the correct order. 
+> **Easier Execution**: Rather than running these manually, use the `scripts/start.sh` script from the project root to start all services in the correct order (downstream services first, gateway last).
 > To test the TCP Gateway once running, use `scripts/send_test_message.sh` from the root directory instead of configuring the Java client manually.
 
 ---
