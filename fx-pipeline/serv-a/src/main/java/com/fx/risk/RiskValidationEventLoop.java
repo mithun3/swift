@@ -6,6 +6,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
 /**
@@ -45,10 +46,31 @@ public final class RiskValidationEventLoop extends AbstractEventLoop {
      */
     private final CreditCheckEngine creditCheckEngine;
 
+    /** Optional zero-allocation latency recorder for queue-a wait time (T1Entry - T0). */
+    private final TelemetryRecorder queueARecorder;
+
+    /** Optional zero-allocation latency recorder for serv-a duration (T1Exit - T1Entry). */
+    private final TelemetryRecorder servARecorder;
+
     /**
-     * Constructs the risk validation event loop, connecting queue-a → queue-b.
+     * Constructs the risk validation event loop, connecting queue-a → queue-b, with no telemetry.
      */
     public RiskValidationEventLoop() {
+        this(null, null);
+    }
+
+    /**
+     * Constructs the risk validation event loop with optional per-stage telemetry recording.
+     *
+     * <p>Recording independently at this stage (rather than downstream at serv-c) ensures the
+     * sample count reflects events actually processed by serv-a, regardless of whether they
+     * later complete the rest of the pipeline before the benchmark run ends.
+     *
+     * @param queueARecorder optional HdrHistogram recorder for queue-a wait time
+     * @param servARecorder  optional HdrHistogram recorder for serv-a processing duration
+     */
+    public RiskValidationEventLoop(final TelemetryRecorder queueARecorder,
+                                    final TelemetryRecorder servARecorder) {
         super(
                 "risk-a",
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_A, "queue-a"),
@@ -57,6 +79,8 @@ public final class RiskValidationEventLoop extends AbstractEventLoop {
                 CPU_CORE
         );
         this.creditCheckEngine = new CreditCheckEngine();
+        this.queueARecorder = queueARecorder;
+        this.servARecorder = servARecorder;
     }
 
     /**
@@ -107,6 +131,15 @@ public final class RiskValidationEventLoop extends AbstractEventLoop {
         // The appender serialises the flyweight's fields directly into the
         // off-heap Chronicle buffer. No intermediate byte[] is created.
         appender.writeDocument(event);
+
+        // Recorded here (not downstream at serv-c) so the sample count reflects events
+        // actually processed by serv-a, independent of later pipeline stages.
+        if (queueARecorder != null) {
+            queueARecorder.recordValue(event.t1ServAEntry - event.ingressNanoTime);
+        }
+        if (servARecorder != null) {
+            servARecorder.recordValue(event.t1ServAExit - event.t1ServAEntry);
+        }
 
         // Note: We intentionally write BOTH accepted and credit-rejected events to
         // queue-b. This gives serv-c (persistence) a complete audit trail of all

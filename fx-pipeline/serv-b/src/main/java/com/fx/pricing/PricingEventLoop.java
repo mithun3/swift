@@ -6,6 +6,7 @@ import com.fx.common.event.FxMarketEvent;
 import com.fx.common.handler.AbstractEventLoop;
 import com.fx.common.queue.QueueFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryRecorder;
 import net.openhft.chronicle.queue.ExcerptAppender;
 
 /**
@@ -35,10 +36,31 @@ public final class PricingEventLoop extends AbstractEventLoop {
     /** Stateless spread computation engine — pre-allocated once. */
     private final SpreadEngine spreadEngine;
 
+    /** Optional zero-allocation latency recorder for queue-b wait time (T2Entry - T1Exit). */
+    private final TelemetryRecorder queueBRecorder;
+
+    /** Optional zero-allocation latency recorder for serv-b duration (T2Exit - T2Entry). */
+    private final TelemetryRecorder servBRecorder;
+
     /**
-     * Constructs the pricing event loop, connecting queue-b → queue-c.
+     * Constructs the pricing event loop, connecting queue-b → queue-c, with no telemetry.
      */
     public PricingEventLoop() {
+        this(null, null);
+    }
+
+    /**
+     * Constructs the pricing event loop with optional per-stage telemetry recording.
+     *
+     * <p>Recording independently at this stage (rather than downstream at serv-c) ensures the
+     * sample count reflects events actually processed by serv-b, regardless of whether they
+     * later complete the rest of the pipeline before the benchmark run ends.
+     *
+     * @param queueBRecorder optional HdrHistogram recorder for queue-b wait time
+     * @param servBRecorder  optional HdrHistogram recorder for serv-b processing duration
+     */
+    public PricingEventLoop(final TelemetryRecorder queueBRecorder,
+                             final TelemetryRecorder servBRecorder) {
         super(
                 "pricing-b",
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_B, "queue-b"),
@@ -47,6 +69,8 @@ public final class PricingEventLoop extends AbstractEventLoop {
                 CPU_CORE
         );
         this.spreadEngine = new SpreadEngine();
+        this.queueBRecorder = queueBRecorder;
+        this.servBRecorder = servBRecorder;
     }
 
     /**
@@ -73,6 +97,7 @@ public final class PricingEventLoop extends AbstractEventLoop {
         if (EventStatus.isTerminalFailure(event.eventStatus)) {
             event.t2ServBExit = System.nanoTime();
             appender.writeDocument(event);
+            recordTelemetry(event);
             return;
         }
 
@@ -85,5 +110,21 @@ public final class PricingEventLoop extends AbstractEventLoop {
         // Forward to queue-c regardless of pricing outcome — for full audit trail.
         event.t2ServBExit = System.nanoTime();
         appender.writeDocument(event);
+        recordTelemetry(event);
+    }
+
+    /**
+     * Recorded here (not downstream at serv-c) so the sample count reflects events
+     * actually processed by serv-b, independent of later pipeline stages.
+     *
+     * @param event the event just forwarded to queue-c
+     */
+    private void recordTelemetry(final FxMarketEvent event) {
+        if (queueBRecorder != null) {
+            queueBRecorder.recordValue(event.t2ServBEntry - event.t1ServAExit);
+        }
+        if (servBRecorder != null) {
+            servBRecorder.recordValue(event.t2ServBExit - event.t2ServBEntry);
+        }
     }
 }

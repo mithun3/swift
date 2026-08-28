@@ -64,8 +64,8 @@ echo "    Mode: $LOAD_MODE_FLAG"
 echo "==========================================="
 ./scripts/run_load_generator.sh "$QUEUE_PATH" "$TARGET_RATE" "$MESSAGE_COUNT" "$LOAD_MODE_FLAG"
 
-echo "  Waiting 5 seconds for pipeline to drain queues before stopping..."
-sleep 5
+echo "  Waiting 1 second for the load generator's final writes to settle..."
+sleep 1
 
 # ── Step 1.5: Stop all services before processing hlogs ──────────────────────
 # CRITICAL ORDERING: All TelemetryRecorder instances hold a BufferedPrintStream
@@ -76,9 +76,18 @@ sleep 5
 #   2. the PrintStream is explicitly closed, ensuring all bytes reach the OS
 # Without this step, fx-latency-serv-0.hlog and fx-latency-serv-c.hlog will
 # be missing or empty when process_latency.sh runs.
+#
+# NOTE: We no longer sleep for a fixed guess at the pipeline's drain time. Each
+# service's AbstractEventLoop now drains any backlog remaining in its own input
+# queue before it actually stops (bounded by -Dfx.eventloop.drainTimeoutMillis,
+# default 30s), and stop.sh stops services one at a time in strict producer-first
+# order (serv-0 -> serv-a -> serv-b -> serv-c), waiting for each to fully exit
+# before signalling the next. That combination is what guarantees the backlog is
+# actually drained — a fixed sleep here was only ever a best-effort guess and,
+# under sustained backpressure, undercounted how long draining actually takes.
 echo "==========================================="
 echo "    Benchmark Suite: Step 1.5/3"
-echo "    Stopping Services (flushing telemetry)"
+echo "    Stopping Services (draining backlog + flushing telemetry)"
 echo "==========================================="
 if [ -f "logs/services.pid" ]; then
     ./scripts/stop.sh

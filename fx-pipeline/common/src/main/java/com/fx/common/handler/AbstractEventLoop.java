@@ -2,6 +2,8 @@ package com.fx.common.handler;
 
 import com.fx.common.error.ErrorQueueWriter;
 import com.fx.common.event.FxMarketEvent;
+import com.fx.common.logging.Logger;
+import com.fx.common.logging.LoggerFactory;
 import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptAppender;
@@ -53,6 +55,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @version 1.0.0
  */
 public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractEventLoop.class);
+
+    /**
+     * Maximum time (ms) {@link #run()} will spend draining backlog already sitting in the
+     * input queue after {@link #stop()} is called, before giving up and exiting anyway.
+     *
+     * <p>Without this drain phase, a service stopped while its input queue still has a
+     * backlog (e.g. under sustained producer/consumer rate mismatch) would abandon those
+     * events mid-pipeline: they would never be processed, and would silently disappear from
+     * every downstream latency histogram with no error or log line. Override via
+     * {@code -Dfx.eventloop.drainTimeoutMillis=<ms>}.
+     */
+    private static final long DRAIN_TIMEOUT_MILLIS =
+            Long.getLong("fx.eventloop.drainTimeoutMillis", 30_000L);
 
     /** Human-readable name for this event loop (used in thread naming and logs). */
     protected final String name;
@@ -218,6 +235,12 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                     Thread.onSpinWait();
                 }
             }
+
+            // Drain-then-stop: stop() only signals "accept no new work" — it must not abandon
+            // events already sitting in the input queue. Continue processing whatever backlog
+            // exists right now (bounded by DRAIN_TIMEOUT_MILLIS) so a service stopped mid-backlog
+            // doesn't silently drop events from the pipeline and its telemetry.
+            drainRemainingBacklog(tailer, appender);
         } finally {
             // Release the CPU affinity lock before the thread exits,
             // returning the core to the system for potential reassignment.
@@ -250,10 +273,52 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                                    ExcerptAppender appender);
 
     /**
-     * Signals the event loop to stop after completing its current event.
+     * Drains any backlog already sitting in the input queue after {@link #stop()} has been
+     * signalled, instead of abandoning it mid-pipeline.
      *
-     * <p>This method is safe to call from any thread. The loop will exit cleanly
-     * after the current {@link #handle} invocation completes.
+     * <p>Bounded by {@link #DRAIN_TIMEOUT_MILLIS} so a queue that never quiesces (e.g. an
+     * upstream producer that is still actively writing) cannot hang shutdown indefinitely.
+     * Exits as soon as the tailer reports no more currently-available data — it does not wait
+     * for future writes.
+     *
+     * @param tailer   the input queue tailer, still open at this point
+     * @param appender the output queue appender to forward drained events to; may be {@code null}
+     */
+    private void drainRemainingBacklog(final ExcerptTailer tailer, final ExcerptAppender appender) {
+        final long deadlineNanos = System.nanoTime() + (DRAIN_TIMEOUT_MILLIS * 1_000_000L);
+        long drainedCount = 0L;
+
+        while (System.nanoTime() < deadlineNanos) {
+            flyweight.reset();
+            final boolean eventRead = tailer.readDocument(flyweight);
+            if (!eventRead) {
+                // Tailer has caught up — no backlog remains. Drain complete.
+                break;
+            }
+            drainedCount++;
+            final long sequence = tailer.index();
+            try {
+                handle(flyweight, sequence, true, appender);
+            } catch (final Exception ex) {
+                errorWriter.write(flyweight, name, ex.getMessage());
+            }
+        }
+
+        if (drainedCount > 0) {
+            logger.info("[" + name + "] Drained backlog event(s) before shutdown: ", drainedCount);
+        }
+        if (System.nanoTime() >= deadlineNanos) {
+            logger.warn("[" + name + "] Drain timeout (" + DRAIN_TIMEOUT_MILLIS
+                    + "ms) reached — backlog may remain unprocessed in the input queue.");
+        }
+    }
+
+    /**
+     * Signals the event loop to stop accepting new work.
+     *
+     * <p>This method is safe to call from any thread. It does not abandon events already
+     * sitting in the input queue — {@link #run()} continues draining any existing backlog
+     * (see {@link #drainRemainingBacklog}) before the loop actually exits.
      */
     public void stop() {
         running.set(false);

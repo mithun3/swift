@@ -128,6 +128,85 @@ def file_to_base64(filepath: str) -> str:
         return ""
 
 
+# Known per-stage .hlog filename suffixes, as produced by GatewayMain/PersistenceMain.
+# Whichever report doesn't match any of these is assumed to be the end-to-end file.
+_STAGE_SUFFIXES = (
+    "-serv-0.hlog", "-queue-a.hlog", "-serv-a.hlog",
+    "-queue-b.hlog", "-serv-b.hlog", "-queue-c.hlog", "-serv-c.hlog",
+)
+
+
+def _find_by_suffix(reports: list, suffix: str):
+    """Returns the first report whose name ends with suffix, or None."""
+    for r in reports:
+        if r["name"].endswith(suffix):
+            return r
+    return None
+
+
+def _find_e2e(reports: list):
+    """Returns the end-to-end report — the one file that isn't a per-stage suffix."""
+    for r in reports:
+        if not any(r["name"].endswith(s) for s in _STAGE_SUFFIXES):
+            return r
+    return None
+
+
+def build_reconciliation_banner(reports_data: list) -> str:
+    """
+    Compares serv-0's ingress sample count against the terminal stage's completed
+    sample count and returns an HTML callout describing the result.
+
+    A gap here means events were still in flight in queue-a/queue-b/queue-c when the
+    benchmark was stopped — see AbstractEventLoop's drain-then-stop shutdown phase and
+    stop.sh's staged shutdown order. Returns an empty string if serv-0 or a terminal
+    stage report is missing from the supplied .hlog files (nothing to reconcile).
+    """
+    serv0 = _find_by_suffix(reports_data, "-serv-0.hlog")
+    terminal = _find_by_suffix(reports_data, "-serv-c.hlog") or _find_e2e(reports_data)
+
+    if serv0 is None or terminal is None:
+        return ""
+
+    ingress_count = serv0["total"]
+    completed_count = terminal["total"]
+    missing = ingress_count - completed_count
+
+    if missing > 0:
+        pct = (missing / ingress_count * 100) if ingress_count else 0.0
+        return f"""
+        <div class="warn">
+            <h3>&#9888; {missing:,} event(s) unaccounted for ({pct:.1f}% of ingress)</h3>
+            <p><strong>serv-0</strong> (<code>{serv0['name']}</code>) ingested
+            <strong>{ingress_count:,}</strong> event(s), but only
+            <strong>{completed_count:,}</strong> event(s) completed the full pipeline
+            (<code>{terminal['name']}</code>). The difference means events were still in
+            flight in queue-a/queue-b/queue-c when the benchmark was stopped.</p>
+            <p>Check each service's stdout log for a
+            <code>"Drain timeout (...) reached"</code> warning
+            (see <code>AbstractEventLoop.drainRemainingBacklog</code>) to confirm which
+            stage(s) did not fully drain within
+            <code>-Dfx.eventloop.drainTimeoutMillis</code>.</p>
+        </div>
+"""
+    if missing < 0:
+        return f"""
+        <div class="warn">
+            <h3>&#9888; Terminal stage count ({completed_count:,}) exceeds serv-0 ingress count ({ingress_count:,})</h3>
+            <p>This is unexpected and indicates either a telemetry double-recording bug or
+            stale <code>.hlog</code> files from a previous run mixed into this report's
+            file list — clear <code>/tmp/fx-latency*.hlog*</code> before the next run.</p>
+        </div>
+"""
+    return f"""
+        <div class="fix">
+            <h3>&#10003; All {ingress_count:,} ingested event(s) accounted for</h3>
+            <p>serv-0's ingress count matches the terminal stage's completed count exactly —
+            the pipeline fully drained before the benchmark run was stopped.</p>
+        </div>
+"""
+
+
 def main():
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <path_to1.hlog> [path_to2.hlog ...]",
@@ -173,6 +252,8 @@ def main():
     if not reports_data:
         print("No valid reports generated.", file=sys.stderr)
         sys.exit(1)
+
+    reconciliation_banner = build_reconciliation_banner(reports_data)
 
     # ── HTML header + styles ──────────────────────────────────────────────────
     html_content = """<!DOCTYPE html>
@@ -332,6 +413,9 @@ def main():
     html_content += """
             </tbody>
         </table>
+"""
+    html_content += reconciliation_banner
+    html_content += """
     </div>
 
     <!-- ── Section 2: Root-Cause Analysis ───────────────────────────────── -->

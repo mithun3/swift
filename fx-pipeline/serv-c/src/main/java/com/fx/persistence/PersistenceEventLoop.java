@@ -76,26 +76,6 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
     private final TelemetryRecorder e2eRecorder;
 
     /**
-     * Optional zero-allocation latency recorder for queue-a wait time (T1 - T0).
-     */
-    private final TelemetryRecorder queueARecorder;
-
-    /**
-     * Optional zero-allocation latency recorder for serv-a duration (T2 - T1).
-     */
-    private final TelemetryRecorder servARecorder;
-
-    /**
-     * Optional zero-allocation latency recorder for queue-b wait time.
-     */
-    private final TelemetryRecorder queueBRecorder;
-
-    /**
-     * Optional zero-allocation latency recorder for serv-b duration (T2Exit - T2Entry).
-     */
-    private final TelemetryRecorder servBRecorder;
-
-    /**
      * Optional zero-allocation latency recorder for queue-c wait time.
      */
     private final TelemetryRecorder queueCRecorder;
@@ -108,31 +88,31 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
     /**
      * Constructs the persistence event loop with no telemetry recording.
      *
-     * <p>Equivalent to {@code PersistenceEventLoop(jdbcUrl, null, null, null, null)}.
+     * <p>Equivalent to {@code PersistenceEventLoop(jdbcUrl, null, null, null)}.
      *
      * @param jdbcUrl JDBC URL for the database sink
      * @throws SQLException if the database connection cannot be established
      */
     public PersistenceEventLoop(final String jdbcUrl) throws SQLException {
-        this(jdbcUrl, null, null, null, null, null, null, null);
+        this(jdbcUrl, null, null, null);
     }
 
     /**
      * Constructs the persistence event loop with optional telemetry recording.
      *
-     * @param jdbcUrl           JDBC URL for the database sink
-     * @param e2eRecorder       optional HdrHistogram recorder for end-to-end latency
-     * @param queueARecorder    optional HdrHistogram recorder for queue-a latency
-     * @param servARecorder     optional HdrHistogram recorder for serv-a latency
-     * @param servBRecorder     optional HdrHistogram recorder for serv-b latency
+     * <p>Queue-a/serv-a and queue-b/serv-b latencies are recorded independently by serv-a
+     * and serv-b themselves (at the point each stage actually processes the event) rather
+     * than here, so that per-stage sample counts reflect events actually processed by that
+     * stage instead of only events that reach this terminal stage.
+     *
+     * @param jdbcUrl        JDBC URL for the database sink
+     * @param e2eRecorder    optional HdrHistogram recorder for end-to-end latency
+     * @param queueCRecorder optional HdrHistogram recorder for queue-c latency
+     * @param servCRecorder  optional HdrHistogram recorder for serv-c latency
      * @throws SQLException if the database connection cannot be established
      */
     public PersistenceEventLoop(final String jdbcUrl,
                                  final TelemetryRecorder e2eRecorder,
-                                 final TelemetryRecorder queueARecorder,
-                                 final TelemetryRecorder servARecorder,
-                                 final TelemetryRecorder queueBRecorder,
-                                 final TelemetryRecorder servBRecorder,
                                  final TelemetryRecorder queueCRecorder,
                                  final TelemetryRecorder servCRecorder) throws SQLException {
         super(
@@ -144,10 +124,6 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
         );
         this.persistenceEngine  = new BatchPersistenceEngine(jdbcUrl);
         this.e2eRecorder        = e2eRecorder;
-        this.queueARecorder     = queueARecorder;
-        this.servARecorder      = servARecorder;
-        this.queueBRecorder     = queueBRecorder;
-        this.servBRecorder      = servBRecorder;
         this.queueCRecorder     = queueCRecorder;
         this.servCRecorder      = servCRecorder;
     }
@@ -182,18 +158,8 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
 
         // End-to-end pipeline latency = time from FIX ingress (T0) to persistence entry (T3).
         // Recorded via SingleWriterRecorder — zero-allocation, wait-free.
-        if (queueARecorder != null) {
-            queueARecorder.recordValue(event.t1ServAEntry - event.ingressNanoTime);
-        }
-        if (servARecorder != null) {
-            servARecorder.recordValue(event.t1ServAExit - event.t1ServAEntry);
-        }
-        if (queueBRecorder != null) {
-            queueBRecorder.recordValue(event.t2ServBEntry - event.t1ServAExit);
-        }
-        if (servBRecorder != null) {
-            servBRecorder.recordValue(event.t2ServBExit - event.t2ServBEntry);
-        }
+        // Queue-a/serv-a and queue-b/serv-b are recorded upstream by serv-a and serv-b
+        // themselves — see RiskValidationEventLoop and PricingEventLoop.
         if (queueCRecorder != null) {
             queueCRecorder.recordValue(event.t3ServCEntry - event.t2ServBExit);
         }
