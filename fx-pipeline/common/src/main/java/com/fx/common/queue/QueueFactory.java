@@ -35,6 +35,12 @@ import java.io.File;
  * latency spikes) but increases virtual address space consumption. 64 MB is a balanced
  * default for high-throughput FX pipelines.
  *
+ * <h2>Book/LMAX Mapping</h2>
+ * <p>
+ * The {@link ChronicleQueue} instances built here play the role of the Disruptor's
+ * RingBuffer: a pre-allocated, durable, append-only backing store shared between
+ * exactly one producer and its consumer(s).
+ *
  * @author FX Pipeline Team
  * @version 1.0.0
  */

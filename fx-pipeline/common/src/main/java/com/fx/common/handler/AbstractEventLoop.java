@@ -51,6 +51,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *   start() → [pinned thread] → eventLoop() → [busy-spin tail] → stop() → shutdown
  * </pre>
  *
+ * <h2>Book/LMAX Disruptor Concept Mapping</h2>
+ * <table border="1">
+ * <caption>Disruptor concept to code mapping</caption>
+ * <tr><th>Disruptor concept</th><th>This codebase</th></tr>
+ * <tr><td>RingBuffer</td><td>{@link ChronicleQueue} (memory-mapped append-only log)</td></tr>
+ * <tr><td>Sequencer / cursor</td><td>{@link ExcerptAppender} write position / {@link ExcerptTailer#index()}</td></tr>
+ * <tr><td>SequenceBarrier</td><td>{@link ExcerptTailer} (gates what this consumer may read next)</td></tr>
+ * <tr><td>EventProcessor</td><td>{@code AbstractEventLoop} (runs the poll/dispatch loop on one thread)</td></tr>
+ * <tr><td>EventHandler</td><td>{@link #handle} (subclass business-logic hook)</td></tr>
+ * <tr><td>EventFactory / Flyweight</td><td>{@link FxMarketEvent} (pre-allocated, reused in place)</td></tr>
+ * <tr><td>WaitStrategy</td><td>{@link WaitStrategy} / {@link BusySpinWaitStrategy}</td></tr>
+ * </table>
+ *
  * @author FX Pipeline Team
  * @version 1.0.0
  */
@@ -99,6 +112,12 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
     protected final FxMarketEvent flyweight;
 
     /**
+     * Idle behavior invoked when the poll source has no event ready.
+     * Stateless singleton — selecting it never allocates.
+     */
+    protected final WaitStrategy waitStrategy;
+
+    /**
      * Volatile flag controlling the event loop lifecycle.
      * Using {@code AtomicBoolean} ensures the loop thread sees the stop signal
      * written by the shutdown thread without requiring synchronisation or locks.
@@ -140,6 +159,7 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
         // heap allocation for event data — all subsequent processing is done by
         // mutating this single instance in-place.
         this.flyweight   = new FxMarketEvent();
+        this.waitStrategy = BusySpinWaitStrategy.INSTANCE;
     }
 
     /**
@@ -266,10 +286,8 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                         // Swallow — the loop continues with the next event.
                     }
                 } else {
-                    // No event available — busy-spin with a CPU hint.
-                    // Thread.onSpinWait() maps to PAUSE (x86) / YIELD (ARM),
-                    // reducing memory-bus contention while keeping the thread hot.
-                    Thread.onSpinWait();
+                    // No event available — defer to the configured WaitStrategy.
+                    waitStrategy.idle();
                 }
             }
 

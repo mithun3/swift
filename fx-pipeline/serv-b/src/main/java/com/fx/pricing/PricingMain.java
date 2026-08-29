@@ -3,6 +3,7 @@ package com.fx.pricing;
 import com.fx.common.logging.Logger;
 import com.fx.common.logging.LoggerFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryBootstrap;
 import com.fx.common.telemetry.TelemetryRecorder;
 
 import java.io.File;
@@ -28,16 +29,13 @@ public final class PricingMain {
         logger.info("[serv-b] Tailing queue-b: " + QueuePaths.QUEUE_B);
         logger.info("[serv-b] Writing queue-c: " + QueuePaths.QUEUE_C);
 
-        final boolean telemetryEnabled = Boolean.parseBoolean(
-                System.getProperty("fx.telemetry.enabled", "true"));
-        final String telemetryLogPath = System.getProperty(
-                "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
+        final boolean telemetryEnabled = TelemetryBootstrap.isEnabled();
 
         TelemetryRecorder queueBRecorder = null;
         TelemetryRecorder servBRecorder = null;
         if (telemetryEnabled) {
             try {
-                final String basePath = telemetryLogPath.replace(".hlog", "");
+                final String basePath = TelemetryBootstrap.basePath();
                 queueBRecorder = new TelemetryRecorder(
                         new File(basePath + "-queue-b.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 servBRecorder = new TelemetryRecorder(

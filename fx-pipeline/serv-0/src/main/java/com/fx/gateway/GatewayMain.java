@@ -3,6 +3,7 @@ package com.fx.gateway;
 import com.fx.common.logging.Logger;
 import com.fx.common.logging.LoggerFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryBootstrap;
 import com.fx.common.telemetry.TelemetryRecorder;
 import java.io.File;
 /**
@@ -83,15 +84,12 @@ public final class GatewayMain {
 
         final CorrelationIdGenerator idGen    = new CorrelationIdGenerator();
         
-        final boolean telemetryEnabled = Boolean.parseBoolean(
-                System.getProperty("fx.telemetry.enabled", "true"));
-        final String telemetryLogPath = System.getProperty(
-                "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
+        final boolean telemetryEnabled = TelemetryBootstrap.isEnabled();
 
         TelemetryRecorder serv0Recorder = null;
         if (telemetryEnabled) {
             try {
-                String basePath = telemetryLogPath.replace(".hlog", "");
+                final String basePath = TelemetryBootstrap.basePath();
                 serv0Recorder = new TelemetryRecorder(
                         new File(basePath + "-serv-0.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS,
                         TELEMETRY_FLUSH_INTERVAL_MILLIS);

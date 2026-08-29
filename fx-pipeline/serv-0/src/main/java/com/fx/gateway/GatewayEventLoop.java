@@ -129,10 +129,8 @@ public final class GatewayEventLoop extends AbstractEventLoop {
                 // A FIX message is available — process it.
                 processFixMessage(appender, bytesRead);
             } else {
-                // No data available — busy-spin with CPU hint.
-                // This avoids an OS context switch at the cost of one CPU core
-                // spinning continuously. Acceptable for a dedicated pinned core.
-                Thread.onSpinWait();
+                // No data available — defer to the inherited WaitStrategy.
+                waitStrategy.idle();
             }
         }
     }

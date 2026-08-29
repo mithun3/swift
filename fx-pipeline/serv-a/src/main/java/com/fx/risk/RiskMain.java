@@ -3,6 +3,7 @@ package com.fx.risk;
 import com.fx.common.logging.Logger;
 import com.fx.common.logging.LoggerFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryBootstrap;
 import com.fx.common.telemetry.TelemetryRecorder;
 
 import java.io.File;
@@ -38,16 +39,13 @@ public final class RiskMain {
         logger.info("[serv-a] Tailing queue-a: " + QueuePaths.QUEUE_A);
         logger.info("[serv-a] Writing queue-b: " + QueuePaths.QUEUE_B);
 
-        final boolean telemetryEnabled = Boolean.parseBoolean(
-                System.getProperty("fx.telemetry.enabled", "true"));
-        final String telemetryLogPath = System.getProperty(
-                "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
+        final boolean telemetryEnabled = TelemetryBootstrap.isEnabled();
 
         TelemetryRecorder queueARecorder = null;
         TelemetryRecorder servARecorder = null;
         if (telemetryEnabled) {
             try {
-                final String basePath = telemetryLogPath.replace(".hlog", "");
+                final String basePath = TelemetryBootstrap.basePath();
                 queueARecorder = new TelemetryRecorder(
                         new File(basePath + "-queue-a.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 servARecorder = new TelemetryRecorder(

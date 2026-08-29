@@ -3,6 +3,7 @@ package com.fx.persistence;
 import com.fx.common.logging.Logger;
 import com.fx.common.logging.LoggerFactory;
 import com.fx.common.queue.QueuePaths;
+import com.fx.common.telemetry.TelemetryBootstrap;
 import com.fx.common.telemetry.TelemetryRecorder;
 import org.h2.tools.Server;
 
@@ -78,10 +79,8 @@ public final class PersistenceMain {
         // end-to-end latencies (T3 - T0) on the hot path without any allocation.
         // A background daemon thread flushes interval histograms to an .hlog file
         // every second for offline visualisation via scripts/process_latency.sh.
-        final boolean telemetryEnabled = Boolean.parseBoolean(
-                System.getProperty("fx.telemetry.enabled", "true"));
-        final String telemetryLogPath = System.getProperty(
-                "fx.telemetry.log.path", "/tmp/fx-latency.hlog");
+        final boolean telemetryEnabled = TelemetryBootstrap.isEnabled();
+        final String telemetryLogPath = TelemetryBootstrap.logPath();
 
         TelemetryRecorder e2eRecorder = null;
         TelemetryRecorder queueCRecorder = null;
@@ -91,7 +90,7 @@ public final class PersistenceMain {
             try {
                 // highestTrackableValue: 10 seconds in nanoseconds (covers extreme outliers).
                 // intervalMillis: flush histogram to disk every 1000ms.
-                String basePath = telemetryLogPath.replace(".hlog", "");
+                final String basePath = TelemetryBootstrap.basePath();
                 
                 e2eRecorder = new TelemetryRecorder(
                         new File(telemetryLogPath), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
