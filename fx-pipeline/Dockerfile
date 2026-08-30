@@ -64,7 +64,7 @@ ENV JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
               --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
               --add-opens=java.base/java.io=ALL-UNNAMED \
               --add-opens=java.base/java.util=ALL-UNNAMED \
-              -XX:+UseZGC -Xmx512m -Xms512m -XX:+AlwaysPreTouch \
+              -XX:+UseZGC -XX:+ZGenerational -Xmx512m -Xms512m -XX:+AlwaysPreTouch \
               -XX:+DisableExplicitGC"
 
 # Command is provided by docker-compose.yml

@@ -421,3 +421,106 @@ I validated the project state by running the relevant compile/test command:
 - `cd /Users/mithunselvan/swift/fx-pipeline && mvn clean test`
 
 This completed successfully with `BUILD SUCCESS`, confirming the current project is stable after the documented fixes and validations.
+
+---
+
+## 11. Update — Docker Desktop CPU Self-Contention (2026-08-30)
+
+### 11.1 Matched low-rate observation
+
+The original Docker and macOS reports used different event counts and could not establish an
+environmental root cause. The comparison was repeated through the same TCP pipeline at **10,000
+messages/sec** and **10,000 events**. At this rate, producer saturation is not a credible explanation.
+
+Docker Desktop on Apple Silicon reported an end-to-end P50 of **21.725 ms** and P99 of
+**197.394 ms**. Native macOS reported a P50 of **19.295 µs** and P99 of **43.614 ms**. In Docker,
+the service medians remained between **0.042 µs** and **2.583 µs**, while the three queue medians
+were **5.943 ms**, **4.903 ms**, and **12.812 ms**. Queue residence therefore explains the end-to-end
+median; the business handlers do not.
+
+Increasing Docker Desktop to 12 CPUs and 16 GB did not materially change the result. The issue was
+not a simple shortage of VM-wide CPU or memory capacity.
+
+### 11.2 Controlled experiments
+
+The one-second, 10,000-event run overemphasised startup effects, so the workload was extended to
+**100,000 events at 10,000 messages/sec**.
+
+| Configuration | E2E P50 | E2E P90 | E2E P99 | Max | Samples |
+|---|---:|---:|---:|---:|---:|
+| One vCPU per JVM (existing map) | 5.243 ms | 13.148 ms | 208.273 ms | 239.600 ms | 100,000 |
+| Paired cpusets, run 1 | 55.487 µs | 3.248 ms | 47.907 ms | 107.086 ms | 100,000 |
+| Paired cpusets, run 2 | 162.815 µs | 4.207 ms | 113.574 ms | 131.465 ms | 100,000 |
+| Paired cpusets, run 3 | 107.327 µs | 3.815 ms | 82.444 ms | 114.229 ms | 100,000 |
+| Paired cpusets, run 4 | 127.231 µs | 3.807 ms | 83.100 ms | 102.171 ms | 100,000 |
+| Paired cpusets, run 5 | 361.983 µs | 4.207 ms | 87.753 ms | 123.339 ms | 100,000 |
+
+Only the cpusets changed. Tracing, HdrHistogram telemetry, TCP mode, rate, event count, Java code,
+and affinity setting remained unchanged. All eight histograms contained exactly 100,000 samples in
+every sustained run.
+
+An additional 10,000-event run omitted the standalone JSON trace stitcher. End-to-end P50 worsened
+from **21.725 ms** to **57.049 ms**, so tracing was not identified as the cause and remains enabled by
+default.
+
+### 11.3 Root cause
+
+The evidence supports **CPU self-contention created by the container CPU map**.
+
+Each service JVM was restricted to one vCPU while its LMAX-style event loop continuously used
+`BusySpinWaitStrategy`. The same vCPU also had to execute that JVM's JIT, ZGC, telemetry flusher,
+asynchronous logger, and other support threads. `serv-c` additionally runs the independent database
+writer. A cpuset restricts the entire container; it does not reserve that CPU exclusively for the
+event-loop thread. Docker Desktop also runs through a Linux VM and cannot provide native Linux
+`isolcpus` guarantees.
+
+Busy-spin is correct when the event processor owns a dedicated physical core. Restricting the whole
+JVM to that same single CPU prevents its housekeeping threads from making progress without
+preempting the event loop. The resulting pauses appear as queue latency while the allocation-free
+business handlers remain fast.
+
+The following explanations were rejected or reduced in priority for this run:
+
+- **Producer saturation:** rejected at 10,000 messages/sec.
+- **Slow service logic:** rejected by sub-microsecond service medians.
+- **Standalone JSON tracing:** rejected by the tracing-off A/B result.
+- **Insufficient Docker Desktop resources:** rejected by the 12-CPU/16-GB rerun.
+- **GC mode mismatch:** Docker lacked generational ZGC, but this can affect tails rather than explain
+	the consistent queue-median improvement caused by cpusets.
+
+### 11.4 Remediation implemented
+
+No event-processing logic, wait strategy, timestamp, Chronicle Queue setting, telemetry
+implementation, persistence batch, or ring-buffer protocol was changed.
+
+- `run_docker_benchmark.sh` now selects a CPU profile. `auto` uses paired cpusets on macOS Docker
+	Desktop (`0,5`, `1,6`, `2,7`, `3,8`, and `4,9`) and retains the original isolated-core map on
+	Linux. `FX_CPU_PROFILE=desktop|isolated` and the individual `FX_*_CPUSET` variables remain explicit
+	overrides.
+- `FX_TRACE_ENABLED=false` provides a controlled tracing experiment, while tracing remains enabled
+	by default.
+- The Compose benchmark service no longer embeds a conflicting 500,000-message/sec, 5,000,000-event
+	workload. `scripts/run_docker_benchmark.sh` is the canonical entry point.
+- Docker now uses `-XX:+UseZGC -XX:+ZGenerational`, matching native Java 21 startup. Runtime flag
+	inspection confirmed both options are enabled.
+
+After rebuilding with the aligned JVM flags, the automatic Desktop profile completed another
+100,000-event run with all samples reconciled: P50 **86.143 µs**, P90 **4.592 ms**, P99
+**140.509 ms**, and Max **156.893 ms**. This remains variable at the tail, as expected on Docker
+Desktop, but is materially better than the one-vCPU sustained baseline.
+
+### 11.5 Operational guidance
+
+Use the longer calibration for meaningful comparisons:
+
+```bash
+FX_SKIP_BUILD=true ./scripts/run_docker_benchmark.sh 10000 100000
+```
+
+The measured Desktop profile requires at least 10 CPUs in Docker Desktop because it uses CPU indices
+0 through 9. The benchmark fails early with an actionable message when that allocation is unavailable.
+
+Use `FX_CPU_PROFILE=isolated` only on a Linux host whose event CPUs are genuinely isolated. For
+production latency acceptance, validate on native Linux with `isolcpus`, `nohz_full`, `rcu_nocbs`,
+the performance governor, controlled C-states, and separate housekeeping CPUs. Docker Desktop is
+suitable for functional checks and relative experiments, not deterministic tail-latency guarantees.

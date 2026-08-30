@@ -6,7 +6,7 @@ services:
     cap_add:
       - SYS_NICE
       - IPC_LOCK
-    cpuset: "3"
+    cpuset: "${FX_SERV_C_CPUSET:-3}"
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-data:/opt/fx-data
@@ -30,7 +30,7 @@ services:
     cap_add:
       - SYS_NICE
       - IPC_LOCK
-    cpuset: "2"
+    cpuset: "${FX_SERV_B_CPUSET:-2}"
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
@@ -45,7 +45,7 @@ services:
     cap_add:
       - SYS_NICE
       - IPC_LOCK
-    cpuset: "1"
+    cpuset: "${FX_SERV_A_CPUSET:-1}"
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
@@ -60,7 +60,7 @@ services:
     cap_add:
       - SYS_NICE
       - IPC_LOCK
-    cpuset: "0"
+    cpuset: "${FX_SERV_0_CPUSET:-0}"
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
@@ -73,13 +73,13 @@ services:
     container_name: fx-benchmark
     profiles: ["benchmark"]
     network_mode: "host"
-    cpuset: "4"
+    cpuset: "${FX_BENCHMARK_CPUSET:-4}"
     environment:
       JAVA_TOOL_OPTIONS: "-Dfx.affinity.enabled=false"
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
-    command: ["sh", "-c", "export JVM_OPTS=\"$$JVM_OPTS -Dfx.affinity.enabled=false -Dfx.load.mode=tcp\"; /app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-0.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency-serv-c.hlog /tmp/fx-telemetry/fx-latency.hlog"]
+    command: ["echo", "Use scripts/run_docker_benchmark.sh to run an explicit workload."]
 
 volumes:
   fx-queues:

@@ -9,9 +9,67 @@ MESSAGE_COUNT=${2:-100000}
 STARTUP_TIMEOUT_SECONDS=${FX_STARTUP_TIMEOUT_SECONDS:-30}
 STOP_TIMEOUT_SECONDS=${FX_STOP_TIMEOUT_SECONDS:-40}
 SKIP_BUILD=${FX_SKIP_BUILD:-false}
+TRACE_ENABLED=${FX_TRACE_ENABLED:-true}
+CPU_PROFILE=${FX_CPU_PROFILE:-auto}
 
-SERVICES=(serv-c telemetry serv-b serv-a serv-0)
-STOP_ORDER=(serv-0 serv-a serv-b serv-c telemetry)
+if [ "$CPU_PROFILE" = "auto" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
+        CPU_PROFILE=desktop
+    else
+        CPU_PROFILE=isolated
+    fi
+fi
+
+case "$CPU_PROFILE" in
+    desktop)
+        : "${FX_SERV_0_CPUSET:=0,5}"
+        : "${FX_SERV_A_CPUSET:=1,6}"
+        : "${FX_SERV_B_CPUSET:=2,7}"
+        : "${FX_SERV_C_CPUSET:=3,8}"
+        : "${FX_BENCHMARK_CPUSET:=4,9}"
+        ;;
+    isolated)
+        : "${FX_SERV_0_CPUSET:=0}"
+        : "${FX_SERV_A_CPUSET:=1}"
+        : "${FX_SERV_B_CPUSET:=2}"
+        : "${FX_SERV_C_CPUSET:=3}"
+        : "${FX_BENCHMARK_CPUSET:=4}"
+        ;;
+    *)
+        echo "FX_CPU_PROFILE must be 'auto', 'desktop', or 'isolated'." >&2
+        exit 1
+        ;;
+esac
+
+export FX_SERV_0_CPUSET FX_SERV_A_CPUSET FX_SERV_B_CPUSET
+export FX_SERV_C_CPUSET FX_BENCHMARK_CPUSET
+
+PIPELINE_SERVICES=(serv-c serv-b serv-a serv-0)
+SERVICES=("${PIPELINE_SERVICES[@]}")
+STOP_ORDER=(serv-0 serv-a serv-b serv-c)
+
+case "$TRACE_ENABLED" in
+    true)
+        SERVICES+=(telemetry)
+        STOP_ORDER+=(telemetry)
+        ;;
+    false)
+        ;;
+    *)
+        echo "FX_TRACE_ENABLED must be 'true' or 'false'." >&2
+        exit 1
+        ;;
+esac
+
+if [ "$CPU_PROFILE" = "desktop" ]; then
+    AVAILABLE_CPUS=$(docker info --format '{{.NCPU}}')
+    if ! [[ "$AVAILABLE_CPUS" =~ ^[0-9]+$ ]] || [ "$AVAILABLE_CPUS" -lt 10 ]; then
+        echo "The desktop CPU profile requires at least 10 Docker CPUs; found '${AVAILABLE_CPUS:-unknown}'." >&2
+        echo "Increase Docker Desktop's CPU limit or select FX_CPU_PROFILE=isolated explicitly." >&2
+        exit 1
+    fi
+fi
+
 HLOG_FILES=(
     /tmp/fx-telemetry/fx-latency-queue-a.hlog
     /tmp/fx-telemetry/fx-latency-serv-0.hlog
@@ -22,6 +80,13 @@ HLOG_FILES=(
     /tmp/fx-telemetry/fx-latency-serv-c.hlog
     /tmp/fx-telemetry/fx-latency.hlog
 )
+
+echo "Benchmark configuration:"
+echo "  Rate: $TARGET_RATE msg/s"
+echo "  Count: $MESSAGE_COUNT"
+echo "  CPU profile: $CPU_PROFILE"
+echo "  CPU sets: serv-0=$FX_SERV_0_CPUSET serv-a=$FX_SERV_A_CPUSET serv-b=$FX_SERV_B_CPUSET serv-c=$FX_SERV_C_CPUSET benchmark=$FX_BENCHMARK_CPUSET"
+echo "  JSON tracing: $TRACE_ENABLED"
 
 stop_pipeline() {
     for service in "${STOP_ORDER[@]}"; do
@@ -42,7 +107,7 @@ fi
 # them. Graceful producer-first shutdown is used after the measured run.
 docker compose kill 2>/dev/null || true
 docker compose down --volumes --remove-orphans
-docker compose up -d
+docker compose up -d "${SERVICES[@]}"
 
 deadline=$((SECONDS + STARTUP_TIMEOUT_SECONDS))
 while true; do
