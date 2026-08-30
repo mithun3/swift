@@ -124,6 +124,7 @@ public final class GatewayMain {
         logger.info("[serv-0] Event loop started on CPU core ", GatewayEventLoop.CPU_CORE);
 
         // Block the main thread indefinitely.
-        Thread.currentThread().join();
+        loop.awaitTermination();
+        loop.throwIfTerminatedUnexpectedly();
     }
 }

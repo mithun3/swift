@@ -63,6 +63,7 @@ public final class PricingMain {
 
         loop.start();
         logger.info("[serv-b] Event loop started on CPU core ", PricingEventLoop.CPU_CORE);
-        Thread.currentThread().join();
+        loop.awaitTermination();
+        loop.throwIfTerminatedUnexpectedly();
     }
 }

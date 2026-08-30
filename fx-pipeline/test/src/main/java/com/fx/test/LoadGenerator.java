@@ -77,6 +77,10 @@ import java.util.concurrent.locks.LockSupport;
 public final class LoadGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadGenerator.class);
+    private static final int CONNECT_TIMEOUT_MILLIS =
+        Integer.getInteger("fx.load.connectTimeoutMillis", 5_000);
+    private static final long WRITE_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(
+        Long.getLong("fx.load.writeTimeoutMillis", 5_000L));
 
     /**
      * Number of warmup events written to the ephemeral warmup queue.
@@ -104,11 +108,15 @@ public final class LoadGenerator {
         logger.info(String.format("Starting LoadGenerator (Mode: %s) to [%s] at %,d msgs/sec. Target count: %s", 
                 mode.toUpperCase(), queuePath, targetRate, messageCount == -1 ? "Infinite" : String.format("%,d", messageCount)));
 
-        try (AffinityLock lock = AffinityLock.acquireLock();
+        try (AffinityLock lock = acquireAffinityLock();
              ChronicleQueue queue = !isTcp ? QueueFactory.create(queuePath) : null;
              SocketChannel socketChannel = isTcp ? createSocketChannel() : null) {
 
-            logger.info("Locked load generator to CPU: ", lock.cpuId());
+            if (lock != null) {
+                logger.info("Locked load generator to CPU: ", lock.cpuId());
+            } else {
+                logger.info("Load-generator CPU affinity disabled or unavailable.");
+            }
 
             final ExcerptAppender appender = !isTcp ? queue.createAppender() : null;
             final FxMarketEvent flyweight = new FxMarketEvent();
@@ -181,14 +189,7 @@ public final class LoadGenerator {
                             seq /= 10;
                         }
                         tcpBuffer.clear();
-                        while (tcpBuffer.hasRemaining()) {
-                            try {
-                                socketChannel.write(tcpBuffer);
-                            } catch (IOException e) {
-                                logger.error("TCP write failed: " + e.getMessage());
-                                break;
-                            }
-                        }
+                        writeWithTimeout(socketChannel, tcpBuffer);
                     } else {
                         flyweight.reset();
                         flyweight.correlationId = count;
@@ -227,13 +228,43 @@ public final class LoadGenerator {
             }
         } catch (IOException e) {
             logger.error("Failed to acquire lock or open TCP connection: " + e.getMessage());
+            throw new IllegalStateException("Load generator TCP transport failed", e);
+        }
+    }
+
+    private static AffinityLock acquireAffinityLock() {
+        if (!Boolean.parseBoolean(System.getProperty("fx.affinity.enabled", "true"))) {
+            return null;
+        }
+        try {
+            return AffinityLock.acquireLock();
+        } catch (final RuntimeException ex) {
+            logger.warn("CPU affinity unavailable; continuing unpinned: " + ex.getMessage());
+            return null;
         }
     }
 
     private static SocketChannel createSocketChannel() throws IOException {
         int port = Integer.getInteger("fx.load.port", 5001);
-        SocketChannel channel = SocketChannel.open(new InetSocketAddress("127.0.0.1", port));
-        channel.configureBlocking(true); // Blocking writes to respect network backpressure
+        SocketChannel channel = SocketChannel.open();
+        channel.socket().connect(new InetSocketAddress("127.0.0.1", port), CONNECT_TIMEOUT_MILLIS);
+        channel.configureBlocking(false);
         return channel;
+    }
+
+    private static void writeWithTimeout(final SocketChannel channel,
+                                         final ByteBuffer buffer) throws IOException {
+        long progressDeadline = System.nanoTime() + WRITE_TIMEOUT_NANOS;
+        while (buffer.hasRemaining()) {
+            final int bytesWritten = channel.write(buffer);
+            if (bytesWritten > 0) {
+                progressDeadline = System.nanoTime() + WRITE_TIMEOUT_NANOS;
+            } else if (System.nanoTime() >= progressDeadline) {
+                throw new IOException("TCP write made no progress for "
+                        + TimeUnit.NANOSECONDS.toMillis(WRITE_TIMEOUT_NANOS) + "ms");
+            } else {
+                LockSupport.parkNanos(100_000L);
+            }
+        }
     }
 }

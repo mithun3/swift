@@ -141,6 +141,7 @@ public final class PersistenceMain {
         logger.info("[serv-c] Event loop started on CPU core ", PersistenceEventLoop.CPU_CORE);
 
         // Block the main thread indefinitely — the event loop runs on its own pinned thread.
-        Thread.currentThread().join();
+        loop.awaitTermination();
+        loop.throwIfTerminatedUnexpectedly();
     }
 }

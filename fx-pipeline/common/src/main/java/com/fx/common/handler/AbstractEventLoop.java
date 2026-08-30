@@ -84,6 +84,9 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
     private static final long DRAIN_TIMEOUT_MILLIS =
             Long.getLong("fx.eventloop.drainTimeoutMillis", 30_000L);
 
+        private static final boolean AFFINITY_ENABLED =
+            Boolean.parseBoolean(System.getProperty("fx.affinity.enabled", "true"));
+
     /** Human-readable name for this event loop (used in thread naming and logs). */
     protected final String name;
 
@@ -134,6 +137,9 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
 
     /** The platform thread executing this event loop. */
     private Thread eventLoopThread;
+
+    /** Unexpected failure that terminated the event-loop thread, if any. */
+    private volatile Throwable terminationFailure;
 
     /**
      * Constructs a new event loop for a pipeline service.
@@ -206,25 +212,34 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
         // calling thread. On macOS, affinity is advisory; on Linux with isolcpus,
         // it is strict. A cpuCore of -1 disables pinning (used in tests and
         // environments without dedicated cores).
-        final AffinityLock affinityLock = (cpuCore >= 0)
-                ? AffinityLock.acquireLock(cpuCore)
-                : null;
-
-        // A single ExcerptAppender reused across all writes to the output queue.
-        // ExcerptAppender is NOT thread-safe — but that is fine here because this
-        // method runs on exactly one thread (the single-writer principle).
-        // Chronicle Queue 2026.6: createAppender() is the correct API.
-        final ExcerptAppender appender = (outputQueue != null)
-                ? outputQueue.createAppender()
-                : null;
+        AffinityLock affinityLock = null;
+        ExcerptAppender appender = null;
 
         try {
+            if (AFFINITY_ENABLED && cpuCore >= 0) {
+                try {
+                    affinityLock = AffinityLock.acquireLock(cpuCore);
+                } catch (final RuntimeException ex) {
+                    logger.warn("[" + name + "] CPU affinity unavailable; continuing unpinned: "
+                            + ex.getMessage());
+                }
+            }
+
+            // A single ExcerptAppender reused across all writes to the output queue.
+            // ExcerptAppender is NOT thread-safe — but that is fine here because this
+            // method runs on exactly one thread (the single-writer principle).
+            appender = (outputQueue != null) ? outputQueue.createAppender() : null;
+
             // Delegate the poll/dispatch loop to the subclass hook below. Every
             // service shares CPU-affinity pinning and appender lifecycle from
             // this method uniformly; only the poll source and dispatch body
             // (Chronicle tailer vs. GatewayEventLoop's FixMessageSource) differ.
             runLoop(appender);
+        } catch (final Throwable failure) {
+            terminationFailure = failure;
+            logger.error("[" + name + "] Event loop terminated unexpectedly.", failure);
         } finally {
+            running.set(false);
             // Release the CPU affinity lock before the thread exits,
             // returning the core to the system for potential reassignment.
             if (affinityLock != null) {
@@ -376,6 +391,14 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
     public void awaitTermination() throws InterruptedException {
         if (eventLoopThread != null) {
             eventLoopThread.join();
+        }
+    }
+
+    /** Throws if this event loop stopped because of an unexpected failure. */
+    public void throwIfTerminatedUnexpectedly() {
+        if (terminationFailure != null) {
+            throw new IllegalStateException(name + " event loop terminated unexpectedly",
+                    terminationFailure);
         }
     }
 

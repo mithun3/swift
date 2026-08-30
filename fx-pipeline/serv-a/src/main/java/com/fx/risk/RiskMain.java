@@ -77,6 +77,7 @@ public final class RiskMain {
 
         loop.start();
         logger.info("[serv-a] Event loop started on CPU core ", RiskValidationEventLoop.CPU_CORE);
-        Thread.currentThread().join();
+        loop.awaitTermination();
+        loop.throwIfTerminatedUnexpectedly();
     }
 }

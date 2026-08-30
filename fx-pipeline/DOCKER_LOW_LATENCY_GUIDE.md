@@ -39,31 +39,67 @@ This ensures that your pipeline threads have exclusive access to the physical co
 
 Once the host is tuned, you can launch the pipeline. The `docker-compose.yml` is already configured to request explicit CPU affinities via `cpuset` and `SYS_NICE` capabilities.
 
+Docker owns CPU placement for container runs. JVM-level OpenHFT affinity is disabled inside the containers because combining it with `cpuset` can select a CPU outside the container's allowed mask and terminate the event-loop worker with `sched_setaffinity(...)=EINVAL`.
+
 Build the image:
 ```bash
 docker build -t fx-pipeline:latest .
 ```
 
-Start the services:
+Start the services without the benchmark profile:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Monitor logs:
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
+Verify that every service is running and that no event-loop exception occurred:
+```bash
+docker compose ps -a
+docker compose logs --tail=100 serv-0 serv-a serv-b serv-c
+```
 
-# 1. Bring down the environment AND remove the full volumes (-v)
+## 5. Running a Benchmark
+
+Use the Docker-native benchmark wrapper. It rebuilds the image, recreates the queue volume, waits for every event loop, runs the TCP load, stops services in producer-first order so queues drain and telemetry flushes, and generates the report.
+
+For a macOS or Docker Desktop calibration run:
 ```bash
-docker-compose down -v
+./scripts/run_docker_benchmark.sh 150000 100000
 ```
-# 2. Bring it back up fresh
+
+To reuse an image that was already built from the current sources:
 ```bash
-docker-compose up -d
+FX_SKIP_BUILD=true ./scripts/run_docker_benchmark.sh 150000 100000
 ```
-# 3. Run the benchmark again
+
+For the larger Linux-host run:
 ```bash
-docker-compose run --rm benchmark /app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency.hlog
+./scripts/run_docker_benchmark.sh 500000 5000000
+```
+
+The report is written to `fx-telemetry/latency_report.html`.
+
+Do not use `docker compose --profile benchmark up`. It starts the benchmark alongside services without application-readiness ordering and remains attached to the long-running service containers. Do not invoke `run_benchmark_suite.sh` inside the benchmark container either: that script calls the bare-metal `stop.sh`, which manages `logs/services.pid` rather than Compose containers.
+
+## 6. Cleanup
+
+Stop containers and remove the named queue volume:
+```bash
+docker compose down --volumes --remove-orphans
+```
+
+This removes `fx-pipeline_fx-queues`. It does not remove the bind-mounted `fx-data` or `fx-telemetry` host directories. To clear those outputs too:
+```bash
+rm -rf ./fx-data/* ./fx-telemetry/*
+```
+
+If Docker reports that the volume is still in use, identify the remaining container before removing it:
+```bash
+docker ps -a --filter volume=fx-pipeline_fx-queues
+docker rm -f <container-id>
+docker volume rm fx-pipeline_fx-queues
 ```

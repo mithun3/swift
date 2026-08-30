@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   serv-c:
     image: fx-pipeline:latest
@@ -13,7 +11,7 @@ services:
       - fx-queues:/tmp/fx-queues/
       - ./fx-data:/opt/fx-data
       - ./fx-telemetry:/tmp/fx-telemetry
-    command: ["sh", "-c", "java $$JVM_OPTS -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/* com.fx.persistence.PersistenceMain"]
+    command: ["sh", "-c", "exec java $$JVM_OPTS -Dfx.affinity.enabled=false -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/* com.fx.persistence.PersistenceMain"]
 
   telemetry:
     image: fx-pipeline:latest
@@ -21,7 +19,7 @@ services:
     network_mode: "host"
     volumes:
       - fx-queues:/tmp/fx-queues/
-    command: ["sh", "-c", "java $$JVM_OPTS -cp common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/* com.fx.common.telemetry.TelemetryMain"]
+    command: ["sh", "-c", "exec java $$JVM_OPTS -Dfx.affinity.enabled=false -cp common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/* com.fx.common.telemetry.TelemetryMain"]
     depends_on:
       - serv-c
 
@@ -35,7 +33,8 @@ services:
     cpuset: "2"
     volumes:
       - fx-queues:/tmp/fx-queues/
-    command: ["sh", "-c", "java $$JVM_OPTS -cp serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/* com.fx.pricing.PricingMain"]
+      - ./fx-telemetry:/tmp/fx-telemetry
+    command: ["sh", "-c", "exec java $$JVM_OPTS -Dfx.affinity.enabled=false -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/* com.fx.pricing.PricingMain"]
     depends_on:
       - serv-c
 
@@ -49,7 +48,8 @@ services:
     cpuset: "1"
     volumes:
       - fx-queues:/tmp/fx-queues/
-    command: ["sh", "-c", "java $$JVM_OPTS -cp serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/* com.fx.risk.RiskMain"]
+      - ./fx-telemetry:/tmp/fx-telemetry
+    command: ["sh", "-c", "exec java $$JVM_OPTS -Dfx.affinity.enabled=false -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/* com.fx.risk.RiskMain"]
     depends_on:
       - serv-b
 
@@ -64,7 +64,7 @@ services:
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
-    command: ["sh", "-c", "java $$JVM_OPTS -Dfx.telemetry.enabled=true -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain"]
+    command: ["sh", "-c", "exec java $$JVM_OPTS -Dfx.affinity.enabled=false -Dfx.telemetry.enabled=true -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain"]
     depends_on:
       - serv-a
 
@@ -73,10 +73,13 @@ services:
     container_name: fx-benchmark
     profiles: ["benchmark"]
     network_mode: "host"
+    cpuset: "4"
+    environment:
+      JAVA_TOOL_OPTIONS: "-Dfx.affinity.enabled=false"
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
-    command: ["sh", "-c", "export JVM_OPTS=\"$$JVM_OPTS -Dfx.load.mode=tcp\"; /app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-0.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency-serv-c.hlog /tmp/fx-telemetry/fx-latency.hlog"]
+    command: ["sh", "-c", "export JVM_OPTS=\"$$JVM_OPTS -Dfx.affinity.enabled=false -Dfx.load.mode=tcp\"; /app/scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 500000 5000000 /tmp/fx-telemetry/fx-latency-queue-a.hlog /tmp/fx-telemetry/fx-latency-serv-0.hlog /tmp/fx-telemetry/fx-latency-serv-a.hlog /tmp/fx-telemetry/fx-latency-serv-b.hlog /tmp/fx-telemetry/fx-latency-serv-c.hlog /tmp/fx-telemetry/fx-latency.hlog"]
 
 volumes:
   fx-queues:
