@@ -15,6 +15,8 @@ sub-microsecond precision is never lost in the display layer:
 import sys
 import os
 import base64
+import html
+import json
 
 # ── Nanosecond boundary constants for adaptive unit selection ─────────────────
 _NS_PER_US       = 1_000          # 1 µs  = 1,000 ns
@@ -128,6 +130,73 @@ def file_to_base64(filepath: str) -> str:
         return ""
 
 
+def parse_arguments(argv: list[str]):
+    """Returns an optional manifest path and the positional histogram logs."""
+    manifest_path = None
+    hlog_files = []
+    index = 0
+    while index < len(argv):
+        argument = argv[index]
+        if argument == "--manifest":
+            index += 1
+            if index >= len(argv):
+                raise ValueError("--manifest requires a JSON file path")
+            manifest_path = argv[index]
+        elif argument.startswith("--"):
+            raise ValueError(f"Unknown option: {argument}")
+        else:
+            hlog_files.append(argument)
+        index += 1
+    return manifest_path, hlog_files
+
+
+def load_manifest(manifest_path: str | None) -> dict:
+    """Loads run metadata from JSON, or returns an empty manifest."""
+    if manifest_path is None:
+        return {}
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as manifest_file:
+            manifest = json.load(manifest_file)
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"Unable to load manifest {manifest_path}: {error}") from error
+    if not isinstance(manifest, dict):
+        raise ValueError("Run manifest must contain a JSON object")
+    return manifest
+
+
+def build_manifest_card(manifest: dict) -> str:
+    """Renders benchmark provenance as an HTML-safe table."""
+    if not manifest:
+        return ""
+
+    rows = []
+    for key, value in manifest.items():
+        if isinstance(value, (dict, list)):
+            display_value = json.dumps(value, sort_keys=True)
+        elif isinstance(value, bool):
+            display_value = str(value).lower()
+        elif isinstance(value, int):
+            display_value = f"{value:,}"
+        else:
+            display_value = str(value)
+        label = key.replace("_", " ").title()
+        rows.append(
+            f"<tr><th>{html.escape(label)}</th>"
+            f"<td>{html.escape(display_value)}</td></tr>"
+        )
+
+    return """
+    <div class="card">
+        <h2>Run Configuration</h2>
+        <table class="metadata">
+            <tbody>
+                %s
+            </tbody>
+        </table>
+    </div>
+""" % "\n                ".join(rows)
+
+
 # Known per-stage .hlog filename suffixes, as produced by GatewayMain/PersistenceMain.
 # Whichever report doesn't match any of these is assumed to be the end-to-end file.
 _STAGE_SUFFIXES = (
@@ -208,12 +277,17 @@ def build_reconciliation_banner(reports_data: list) -> str:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <path_to1.hlog> [path_to2.hlog ...]",
+    try:
+        manifest_path, hlog_files = parse_arguments(sys.argv[1:])
+        manifest = load_manifest(manifest_path)
+    except ValueError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        sys.exit(2)
+
+    if not hlog_files:
+        print(f"Usage: {sys.argv[0]} [--manifest run.json] <path_to1.hlog> [path_to2.hlog ...]",
               file=sys.stderr)
         sys.exit(1)
-
-    hlog_files = sys.argv[1:]
     reports_data = []
 
     for hlog in hlog_files:
@@ -254,6 +328,7 @@ def main():
         sys.exit(1)
 
     reconciliation_banner = build_reconciliation_banner(reports_data)
+    manifest_card = build_manifest_card(manifest)
 
     # ── HTML header + styles ──────────────────────────────────────────────────
     html_content = """<!DOCTYPE html>
@@ -313,6 +388,7 @@ def main():
 <body>
 <div class="container">
     <h1>High-Throughput Latency Benchmark Report</h1>
+""" + manifest_card + """
 
     <!-- ── Section 1: Metric explanation ─────────────────────────────────── -->
     <div class="card">

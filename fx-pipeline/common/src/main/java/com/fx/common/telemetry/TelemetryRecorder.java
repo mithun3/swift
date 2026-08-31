@@ -24,10 +24,12 @@ public final class TelemetryRecorder implements AutoCloseable {
     private final SingleWriterRecorder recorder;
     private final Thread backgroundThread;
     private final AtomicBoolean running = new AtomicBoolean(true);
-    private final HistogramLogWriter logWriter;
-    /** Retained so we can explicitly flush and close the stream on shutdown. */
-    private final PrintStream printStream;
     private final long intervalMillis;
+    private final File logFile;
+
+    private HistogramLogWriter logWriter;
+    /** Retained so we can explicitly flush and close the stream on shutdown. */
+    private PrintStream printStream;
 
     /**
      * Creates a new TelemetryRecorder.
@@ -40,8 +42,16 @@ public final class TelemetryRecorder implements AutoCloseable {
         // 3 significant digits provide ~0.1% accuracy.
         this.recorder = new SingleWriterRecorder(highestValue, 3);
         this.intervalMillis = intervalMillis;
-        // Retain the PrintStream so we can flush and close it explicitly in close().
-        // Without this, bytes buffered inside PrintStream are silently lost on JVM exit.
+        this.logFile = logFile;
+        
+        openStreamAndWriteHeader();
+
+        this.backgroundThread = new Thread(this::flushLoop, "telemetry-flusher");
+        this.backgroundThread.setDaemon(true);
+        this.backgroundThread.start();
+    }
+    
+    private void openStreamAndWriteHeader() throws FileNotFoundException {
         this.printStream = new PrintStream(logFile);
         this.logWriter = new HistogramLogWriter(this.printStream);
 
@@ -52,10 +62,6 @@ public final class TelemetryRecorder implements AutoCloseable {
         this.logWriter.outputLegend();
         this.logWriter.outputBaseTime(System.currentTimeMillis());
         this.logWriter.outputStartTime(System.currentTimeMillis());
-
-        this.backgroundThread = new Thread(this::flushLoop, "telemetry-flusher");
-        this.backgroundThread.setDaemon(true);
-        this.backgroundThread.start();
     }
 
     /**
@@ -77,6 +83,15 @@ public final class TelemetryRecorder implements AutoCloseable {
         while (running.get()) {
             try {
                 Thread.sleep(intervalMillis);
+                
+                // If the benchmark script deleted the file to clear warmup data, reopen it.
+                if (!logFile.exists()) {
+                    if (printStream != null) {
+                        printStream.close();
+                    }
+                    openStreamAndWriteHeader();
+                }
+
                 // getIntervalHistogram() safely swaps the underlying histogram structures
                 // and returns the inactive one, populated with the latest interval's data.
                 intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
@@ -120,7 +135,9 @@ public final class TelemetryRecorder implements AutoCloseable {
         // PrintStream is internally buffered — without this, any bytes not yet written
         // to the OS page cache will be silently lost when the JVM exits.
         logWriter.outputComment("TelemetryRecorder closed — all intervals flushed.");
-        printStream.flush();
-        printStream.close();
+        if (printStream != null) {
+            printStream.flush();
+            printStream.close();
+        }
     }
 }

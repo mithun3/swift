@@ -1,0 +1,52 @@
+{
+  "actual_load_duration_seconds": 102.0,
+  "cpu_count": 12,
+  "cpu_profile": "host",
+  "cpusets": {},
+  "effective_jvm_options": "configured by scripts/start.sh and scripts/run_load_generator.sh",
+  "environment_label": "local",
+  "expected_duration_seconds": 100.0,
+  "git_dirty": true,
+  "git_sha": "c3a39117155e913dc64b78decb1739dc87ec9ec8",
+  "hlog_mtimes_utc": {
+    "end-to-end": "2026-08-31T04:22:59.719150+00:00",
+    "queue-a": "2026-08-31T04:22:58.672739+00:00",
+    "queue-b": "2026-08-31T04:22:59.195492+00:00",
+    "queue-c": "2026-08-31T04:22:59.719365+00:00",
+    "serv-0": "2026-08-31T04:22:58.151241+00:00",
+    "serv-a": "2026-08-31T04:22:58.672930+00:00",
+    "serv-b": "2026-08-31T04:22:59.195689+00:00",
+    "serv-c": "2026-08-31T04:22:59.719556+00:00"
+  },
+  "hlog_paths": [
+    "/tmp/fx-latency-queue-a.hlog",
+    "/tmp/fx-latency-serv-0.hlog",
+    "/tmp/fx-latency-serv-a.hlog",
+    "/tmp/fx-latency-queue-b.hlog",
+    "/tmp/fx-latency-serv-b.hlog",
+    "/tmp/fx-latency-queue-c.hlog",
+    "/tmp/fx-latency-serv-c.hlog",
+    "/tmp/fx-latency.hlog"
+  ],
+  "jdk_version": "openjdk version \"21.0.12\" 2026-07-21",
+  "message_count": 1000000,
+  "queue_path": "/tmp/fx-queues/queue-a",
+  "run_id": "local-20260831T042046Z",
+  "runtime_arch": "arm64",
+  "runtime_os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "sample_counts": {
+    "end-to-end": 1000130,
+    "queue-a": 1000173,
+    "queue-b": 1000272,
+    "queue-c": 1000130,
+    "serv-0": 1000178,
+    "serv-a": 1000170,
+    "serv-b": 1000286,
+    "serv-c": 1000117
+  },
+  "schema_version": 1,
+  "target_rate_msgs_sec": 10000,
+  "timestamp_utc": "2026-08-31T04:23:11.451677+00:00",
+  "trace_enabled": true,
+  "transport_mode": "tcp"
+}

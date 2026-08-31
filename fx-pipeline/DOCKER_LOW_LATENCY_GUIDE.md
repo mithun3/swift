@@ -64,7 +64,9 @@ docker compose logs --tail=100 serv-0 serv-a serv-b serv-c
 
 ## 5. Running a Benchmark
 
-Use the Docker-native benchmark wrapper. It rebuilds the image, recreates the queue volume, waits for every event loop, runs the TCP load, stops services in producer-first order so queues drain and telemetry flushes, and generates the report.
+Use the Docker-native benchmark wrapper. It rebuilds the image, recreates the queue volume,
+waits for every event loop, runs the TCP load, stops services in producer-first order so queues
+drain and telemetry flushes, and generates the report on the host from the current scripts.
 
 For a macOS or Docker Desktop calibration run:
 ```bash
@@ -81,7 +83,21 @@ For the larger Linux-host run:
 ./scripts/run_docker_benchmark.sh 500000 5000000
 ```
 
-The report is written to `fx-telemetry/latency_report.html`.
+The current report is written to `fx-telemetry/latency_report.html`, with provenance in
+`fx-telemetry/run_manifest.json`. Both files, the raw histograms, percentile files, and plots
+are copied to `benchmark-runs/<run-id>/docker/`. Override the identifier with `FX_RUN_ID` or
+the destination with `FX_RUN_OUTPUT_DIR`.
+
+For a fair native comparison, use the same explicit workload in both environments:
+
+```bash
+FX_RUN_ID=baseline-10k ./scripts/run_local_benchmark.sh 10000 1000000
+FX_RUN_ID=baseline-10k ./scripts/run_docker_benchmark.sh 10000 1000000
+```
+
+Before comparing percentiles, inspect the **Run Configuration** card and require matching rate,
+message count, TCP mode, tracing setting, source revision, and eight-stage sample counts. The
+HTML report exposes these fields but does not yet reject incompatible reports automatically.
 
 Do not use `docker compose --profile benchmark up`. It starts the benchmark alongside services without application-readiness ordering and remains attached to the long-running service containers. Do not invoke `run_benchmark_suite.sh` inside the benchmark container either: that script calls the bare-metal `stop.sh`, which manages `logs/services.pid` rather than Compose containers.
 

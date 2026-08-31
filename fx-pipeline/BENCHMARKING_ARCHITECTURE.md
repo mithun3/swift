@@ -189,10 +189,44 @@ The `.hlog` outputs from `TelemetryRecorder` are HdrHistogram log files. Use the
 
 In high-throughput systems, latency is usually stable up to the 99th percentile, after which it spikes exponentially (the "hockey stick" curve). By using a logarithmic X-axis for percentiles (90%, 99%, 99.9%, 99.99%), the script clearly visualises the exact tail latencies where the system begins to saturate.
 
-To generate a consolidated, human-readable **`latency_report.html`** file, use the separate Python script:
+To generate a consolidated, human-readable **`latency_report.html`** file, use the separate Python script. A manifest is optional for legacy/manual runs, but recommended because it preserves provenance in the report:
 ```bash
-python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
+python3 scripts/generate_html_report.py \
+    --manifest /tmp/run_manifest.json \
+    /tmp/fx-latency*.hlog
 ```
+
+### Run provenance
+
+`generate_run_manifest.py` writes a JSON record derived from both the invocation and the
+generated artifacts. It includes:
+
+- run ID and UTC timestamp, Git SHA, and dirty-worktree state
+- environment, OS, architecture, JDK, CPU count/profile/cpusets, and JVM options
+- transport mode, target rate, message count, expected duration, and observed launcher duration
+- queue path plus the exact `.hlog` paths, modification times, and `.hgrm` sample counts
+
+`generate_html_report.py --manifest <path>` renders these fields in a **Run Configuration**
+card. This makes provenance visible for individual runs.
+
+### Historical Comparison & Streamlit Dashboard
+
+To interactively compare multiple historical runs and overlay their latency distributions across different environments (e.g., `local` vs `docker`), use the built-in Streamlit dashboard:
+
+```bash
+# Install dependencies (only needed once)
+pip3 install -r reporting/requirements.txt
+
+# Start the dashboard
+streamlit run reporting/app.py
+```
+
+The dashboard automatically discovers all archived runs in `benchmark-runs/`, calculates statistical deltas for P50/P90/P99/Max, and renders interactive Plotly charts overlaying the HdrHistogram curves. It is the recommended tool for tracking performance regressions and containerization overhead over time.
+
+The report also reconciles gateway ingress (`serv-0`) against terminal completion
+(`serv-c`). A green banner confirms that all events were accounted for. A warning means
+the pipeline did not fully drain, while a terminal count greater than ingress usually means
+stale histogram files were mixed into the input list.
 
 ---
 
@@ -204,22 +238,22 @@ python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
 # 1. Build all modules
 scripts/build.sh
 
-# 2. Start the pipeline
-scripts/start.sh
+# 2. Run a clean local TCP benchmark. Defaults are 10K msg/s and 1M messages.
+./scripts/run_local_benchmark.sh 10000 1000000
 
-# 3. Run the full benchmark suite
-#    Default mode: --tcp (load routes through serv-0, all 6 services record telemetry)
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000
-
-#    Downstream-only mode: --direct (bypasses serv-0, serv-a/b/c telemetry only)
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
-
-# 4. Stop the pipeline
-scripts/stop.sh
+# 3. Run Docker with the exact same workload for an environment comparison.
+./scripts/run_docker_benchmark.sh 10000 1000000
 ```
 
-> The benchmark suite automatically stops services after the load run to flush
-> all `TelemetryRecorder` buffers to disk before processing `.hlog` files.
+`run_local_benchmark.sh` rejects an existing `logs/services.pid`, starts from the cleanup
+performed by `start.sh`, waits until all four event-loop logs report readiness, and delegates
+the measured run to `run_benchmark_suite.sh`. Both local and Docker flows stop services in
+producer-first order, process exactly eight stage histograms, generate a manifest and report,
+and archive all artifacts under `benchmark-runs/<run-id>/<environment>/`.
+
+Set `FX_RUN_ID` to pair runs under one identifier, or set `FX_RUN_OUTPUT_DIR` to choose an
+archive directory explicitly. `run_benchmark_suite.sh` remains available for an already-running
+pipeline and for `--direct` downstream-only measurements.
 
 ### Standalone (manual steps)
 

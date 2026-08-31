@@ -1,10 +1,12 @@
 # FX Pipeline Latency Investigation and Root-Cause Analysis
 
-> **Status (2026-08-28):** RCA-2 through RCA-6 below have been resolved in code (verified against the
+> **Status (2026-08-31):** RCA-2 through RCA-6 below have been resolved in code (verified against the
 > current implementation — see the ✅ markers on each). RCA-1 (producer/consumer rate mismatch) remains
 > an operational calibration concern rather than a code defect. A separate, previously-unrelated issue —
 > a **sample-count discrepancy** between `serv-0` and every downstream stage — was investigated and fixed
 > after this report was originally written; see [Section 9](#9-update--sample-count-discrepancy-between-serv-0-and-downstream-stages) for that RCA and fix.
+> Benchmark runners now emit and embed a run manifest and create run-scoped artifact archives; environment
+> comparisons must use matching manifest workload and mode fields.
 
 ## Executive Summary
 
@@ -524,3 +526,30 @@ Use `FX_CPU_PROFILE=isolated` only on a Linux host whose event CPUs are genuinel
 production latency acceptance, validate on native Linux with `isolcpus`, `nohz_full`, `rcu_nocbs`,
 the performance governor, controlled C-states, and separate housekeeping CPUs. Docker Desktop is
 suitable for functional checks and relative experiments, not deterministic tail-latency guarantees.
+
+### 11.6 Run provenance and the current local/Docker comparison
+
+The benchmark tooling now generates `run_manifest.json` for every orchestrated run and embeds it in
+the HTML report. The manifest records the workload, transport, runtime, CPU/JVM configuration, Git
+state, exact histogram files and timestamps, and per-stage sample counts. Local and Docker artifacts
+are archived under `benchmark-runs/<run-id>/<environment>/`.
+
+This was added after reviewing a Docker report with 100,000 samples at 150,000 messages/sec against a
+native report with 1,000,000 samples at a higher transaction rate. Those reports are useful forensic
+evidence but are **not a controlled environment comparison** because their workloads and measured
+durations differ. They nevertheless show where Docker lost time: Docker queue-a P50 was 342.098 ms and
+end-to-end P50 was also 342.098 ms, while native queue-a P50 was 5.543 microseconds and end-to-end P50
+was 19.887 microseconds. The matching Docker queue-a/end-to-end median identifies backlog before
+`serv-a`; sub-microsecond `serv-a` processing rules out risk logic as the cause.
+
+Use a shared run ID and identical parameters for the controlled baseline:
+
+```bash
+FX_RUN_ID=baseline-10k ./scripts/run_local_benchmark.sh 10000 1000000
+FX_RUN_ID=baseline-10k ./scripts/run_docker_benchmark.sh 10000 1000000
+```
+
+Only compare runs when target rate, message count, TCP/direct mode, tracing setting, source revision,
+stage set, and reconciled sample counts agree. Prefer repeated 60–100 second runs and alternate the
+environment order. The report surfaces compatibility evidence; automatic two-manifest comparison is
+not implemented yet.

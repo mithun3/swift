@@ -165,9 +165,14 @@ public final class BatchPersistenceEngine implements AutoCloseable {
             ringBuffer[i] = new BatchRow();
         }
 
-        // Start the background JDBC writer thread
+        // Start the background JDBC writer thread.
+        // Priority is set one notch below NORM_PRIORITY so the event loop thread
+        // (which runs at NORM_PRIORITY) gets scheduler preference on the shared cpuset.
+        // On Linux, CFS assigns proportionally more CPU time to the event loop,
+        // reducing preemption frequency of the hot-path Chronicle tailer.
         this.dbThread = new Thread(this::flushLoop, "db-writer");
         this.dbThread.setDaemon(true);
+        this.dbThread.setPriority(Thread.NORM_PRIORITY - 1);
         this.dbThread.start();
     }
 

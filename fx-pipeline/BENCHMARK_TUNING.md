@@ -27,25 +27,28 @@ Notes on flags not currently used anywhere in this repo:
 - `-XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints` — useful for async-profiler runs but not wired into any script here; add them manually to your own profiling invocation if needed.
 
 ## 4. Running the Benchmark
-1. Start the pipeline: `./scripts/start.sh`
-2. Pin the `LoadGenerator` to an isolated core — handled automatically via `AffinityLock` inside the JVM.
-3. Run the load generator through serv-0 (TCP mode, default):
-   ```bash
-   ./scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000 10000000
-   ```
-   Or bypass serv-0 for downstream-only measurement (direct mode):
-   ```bash
-   ./scripts/run_load_generator.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
-   ```
-4. Stop the pipeline to flush all telemetry buffers: `./scripts/stop.sh`
-5. Process the output `.hlog` files using the provided Python visualization script:
-   ```bash
-   ./scripts/process_latency.sh /tmp/fx-latency*.hlog
-   python3 scripts/generate_html_report.py /tmp/fx-latency*.hlog
-   ```
-
-Or use the full orchestrated suite (handles steps 3–5 automatically):
+Use the lifecycle-managed TCP runner for repeatable local measurements:
 ```bash
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000          # --tcp default
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct  # downstream only
+./scripts/run_local_benchmark.sh 10000 1000000
 ```
+
+It starts from clean queue/telemetry state, waits for event-loop readiness, drains services
+producer-first, and archives the manifest, report, and raw histograms. Use an explicit run ID
+when collecting a paired local/Docker result:
+
+```bash
+FX_RUN_ID=baseline-10k ./scripts/run_local_benchmark.sh 10000 1000000
+FX_RUN_ID=baseline-10k ./scripts/run_docker_benchmark.sh 10000 1000000
+```
+
+For downstream-only testing, start the pipeline and use the advanced suite with `--direct`.
+Do not compare it with a TCP report because the measured path excludes `serv-0`.
+
+```bash
+./scripts/start.sh
+./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
+```
+
+For latency comparisons, use the same rate, count, transport mode, tracing setting, source
+revision, and stage set. Prefer a 60–100 second send window so JVM startup and the TCP-mode
+500 ms settle period do not dominate a short burst.

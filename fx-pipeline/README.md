@@ -229,14 +229,34 @@ scripts/stop.sh
 The pipeline includes a coordinated-omission-aware load generator and an HdrHistogram telemetry recorder. See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for full details.
 
 ```bash
-# Run the full benchmark suite (Load generation -> Latency processing -> HTML report)
-# Default mode is --tcp: load is routed through serv-0. All 6 services record telemetry.
-# Ensure the full pipeline is running first: ./scripts/start.sh
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000
+# Clean local TCP benchmark. Starts the pipeline, waits for all event loops,
+# runs the load, drains producer-first, generates the report, and archives it.
+./scripts/run_local_benchmark.sh 10000 1000000
 
-# Downstream-only mode: bypasses serv-0 and writes directly to queue-a.
+# Docker benchmark with the same workload.
+./scripts/run_docker_benchmark.sh 10000 1000000
+
+# Advanced downstream-only mode: start the pipeline, then bypass serv-0.
+./scripts/start.sh
 ./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
 ```
+
+Each orchestrated run writes `run_manifest.json` and embeds it as a **Run Configuration**
+table in `latency_report.html`. The manifest records the run ID, Git state, runtime,
+workload, transport, CPU and JVM configuration, exact histogram paths and timestamps,
+and per-stage sample counts. Local and Docker runs are archived to
+`benchmark-runs/<run-id>/<environment>/`.
+
+To interactively compare these historical runs across different environments, use the built-in Streamlit dashboard:
+
+```bash
+# Install dependencies (only needed once)
+pip3 install -r reporting/requirements.txt
+
+# Start the dashboard
+streamlit run reporting/app.py
+```
+This launches a browser-based visualization that automatically discovers archived runs, calculates statistical deltas, and overlays multiple HdrHistogram latency curves.
 
 ---
 

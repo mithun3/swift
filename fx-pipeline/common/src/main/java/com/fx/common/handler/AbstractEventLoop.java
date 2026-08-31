@@ -116,7 +116,14 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
 
     /**
      * Idle behavior invoked when the poll source has no event ready.
-     * Stateless singleton — selecting it never allocates.
+     * Selected at startup via {@link WaitStrategy#fromSystemProperty()} so the
+     * strategy can be changed per environment without recompilation:
+     * <ul>
+     *   <li>{@code -Dfx.waitstrategy=busyspin} (default) — {@link BusySpinWaitStrategy}
+     *       for native Linux with {@code isolcpus}</li>
+     *   <li>{@code -Dfx.waitstrategy=phased} — {@link PhasedBackOffWaitStrategy}
+     *       for Docker / VM shared-CPU environments</li>
+     * </ul>
      */
     protected final WaitStrategy waitStrategy;
 
@@ -165,7 +172,11 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
         // heap allocation for event data — all subsequent processing is done by
         // mutating this single instance in-place.
         this.flyweight   = new FxMarketEvent();
-        this.waitStrategy = BusySpinWaitStrategy.INSTANCE;
+        // Select the wait strategy based on the fx.waitstrategy system property.
+        // BusySpinWaitStrategy (default) is optimal on native Linux with isolcpus.
+        // PhasedBackOffWaitStrategy is optimal in Docker / VM shared-CPU environments.
+        // Set -Dfx.waitstrategy=phased in docker-compose.yml service commands.
+        this.waitStrategy = WaitStrategy.fromSystemProperty();
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.fx.common.queue;
 
 import net.openhft.chronicle.queue.ChronicleQueue;
+import net.openhft.chronicle.queue.RollCycles;
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import net.openhft.chronicle.wire.WireType;
 
@@ -28,12 +30,29 @@ import java.io.File;
  *       is unnecessary overhead.</li>
  * </ul>
  *
- * <h2>Block Size</h2>
+ * <h2>Block Size (128 MB)</h2>
  * <p>
- * The block size (64 MB) determines how much of the queue file is memory-mapped at one
- * time. A larger block reduces the frequency of mmap remapping syscalls (which cause
- * latency spikes) but increases virtual address space consumption. 64 MB is a balanced
- * default for high-throughput FX pipelines.
+ * The block size determines how much of the queue file is memory-mapped at one time.
+ * At 10K events/sec × ~100 bytes/event, a 100-second 1M-event benchmark produces
+ * ~100 MB of data per queue — fitting entirely within a single 128 MB segment.
+ * <ul>
+ *   <li>Fewer segments = fewer segment rolls during a benchmark run.</li>
+ *   <li>Fewer rolls = fewer page-fault events (critical for Docker Desktop via VirtioFS,
+ *       where each segment-roll page fault costs 1-50 ms instead of 5-20 µs).</li>
+ *   <li>Doubled from the previous 64 MB default.</li>
+ * </ul>
+ *
+ * <h2>Roll Cycle: {@code FAST_DAILY}</h2>
+ * <p>
+ * {@link RollCycles#FAST_DAILY} rolls queue files daily rather than sub-hourly.
+ * For a benchmark run lasting 100-200 seconds, this means zero mid-run segment rolls —
+ * eliminating the largest source of page-fault latency spikes in Docker environments.
+ *
+ * <h2>Segment Pre-Touching ({@link QueuePreToucher})</h2>
+ * <p>
+ * After construction, a {@link QueuePreToucher} daemon is started automatically.
+ * It pre-faults the next mmap segment pages before the appender reaches them,
+ * hiding the VirtioFS page-fault latency from the hot-path producer.
  *
  * <h2>Book/LMAX Mapping</h2>
  * <p>
@@ -47,14 +66,21 @@ import java.io.File;
 public final class QueueFactory {
 
     /**
-     * Memory-mapped block size: 64 megabytes.
+     * Memory-mapped block size: 128 megabytes.
      *
-     * <p>Chronicle maps this many bytes from the store file into virtual address space.
-     * Larger values reduce re-mapping frequency (good for latency stability) at the cost
-     * of higher virtual memory usage. 64 MB is appropriate for a queue handling tens of
-     * millions of small FX events per roll cycle.
+     * <p>Doubled from the previous 64 MB to cover a full 1M-event benchmark run
+     * (10K events/sec × 100s × ~100 bytes/event ≈ 100 MB) within a single segment,
+     * eliminating mid-run segment rolls and their associated page-fault latency spikes.
+     *
+     * <p>Chronicle Queue requires {@code blockSize ≥ 4 × maxMessageSize}. At ~200 bytes
+     * maximum per {@link com.fx.common.event.FxMarketEvent}, 128 MB provides a 640,000×
+     * safety margin.
+     *
+     * <p><b>Consistency requirement:</b> all producers and consumers sharing a queue
+     * path must use the same {@code blockSize}. This factory is the single source of
+     * truth — all services construct queues through it.
      */
-    private static final long BLOCK_SIZE_BYTES = 64L * 1024L * 1024L; // 64 MB
+    private static final long BLOCK_SIZE_BYTES = 128L * 1024L * 1024L; // 128 MB
 
     private QueueFactory() {
         throw new UnsupportedOperationException("QueueFactory is a static factory class");
@@ -65,6 +91,10 @@ public final class QueueFactory {
      *
      * <p>The queue's store files ({@code .cq4}) will be created under {@code path}.
      * The directory is created if it does not exist.
+     *
+     * <p>A {@link QueuePreToucher} daemon is started automatically to pre-fault
+     * the next segment's mmap pages before the appender reaches them, hiding
+     * VirtioFS/page-fault latency from the hot-path producer.
      *
      * <p>The returned {@code ChronicleQueue} is an {@link AutoCloseable} resource.
      * Callers must close it (typically in a try-with-resources or shutdown hook) to
@@ -86,11 +116,19 @@ public final class QueueFactory {
             throw new IllegalStateException("Failed to create queue directory: " + path);
         }
 
-        return SingleChronicleQueueBuilder
-                .binary(path)                // Use binary (BINARY_LIGHT) wire format
-                .blockSize(BLOCK_SIZE_BYTES) // 64 MB mmap window per roll file
-                .wireType(WireType.BINARY_LIGHT) // Fastest, most compact format
+        final SingleChronicleQueue queue = SingleChronicleQueueBuilder
+                .binary(path)                        // Use binary (BINARY_LIGHT) wire format
+                .blockSize(BLOCK_SIZE_BYTES)          // 128 MB mmap window per roll file
+                .wireType(WireType.BINARY_LIGHT)      // Fastest, most compact format
+                .rollCycle(RollCycles.FAST_DAILY)    // Daily roll — zero mid-benchmark rolls
                 .build();
+
+        // Start the segment pre-toucher daemon for this queue.
+        // Runs at MIN_PRIORITY — does not compete with the event loop for CPU budget.
+        // Eliminates 1-50 ms VirtioFS page-fault spikes at segment roll boundaries.
+        QueuePreToucher.start(queue);
+
+        return queue;
     }
 
     /**
@@ -111,3 +149,5 @@ public final class QueueFactory {
         return create(resolvedPath);
     }
 }
+
+

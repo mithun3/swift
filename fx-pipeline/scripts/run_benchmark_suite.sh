@@ -42,6 +42,7 @@ elif [ -n "${1:-}" ] && [[ "${1:-}" == --* ]]; then
     echo "Error: Unknown flag '${1}'. Use --tcp or --direct."
     exit 1
 fi
+RUN_ID=${FX_RUN_ID:-local-$(date -u +%Y%m%dT%H%M%SZ)}
 
 # NOTE: If no hlog files are explicitly provided, we defer the default glob
 # expansion to AFTER services are stopped (see Step 1.5), so that all hlog
@@ -61,8 +62,11 @@ echo "==========================================="
 echo "    Benchmark Suite: Step 1/3"
 echo "    Running Load Generator"
 echo "    Mode: $LOAD_MODE_FLAG"
+echo "    Run ID: $RUN_ID"
 echo "==========================================="
+LOAD_START_SECONDS=$SECONDS
 ./scripts/run_load_generator.sh "$QUEUE_PATH" "$TARGET_RATE" "$MESSAGE_COUNT" "$LOAD_MODE_FLAG"
+LOAD_DURATION_SECONDS=$((SECONDS - LOAD_START_SECONDS))
 
 echo "  Waiting 1 second for the load generator's final writes to settle..."
 sleep 1
@@ -111,12 +115,35 @@ echo "    Processing Latency (.hlog to .hgrm and plots)"
 echo "==========================================="
 ./scripts/process_latency.sh "${HLOG_FILES[@]}"
 
+MANIFEST_PATH="$(dirname "${HLOG_FILES[0]}")/run_manifest.json"
+if [ "$(uname -s)" = "Darwin" ]; then
+    CPU_COUNT=$(sysctl -n hw.logicalcpu)
+else
+    CPU_COUNT=$(getconf _NPROCESSORS_ONLN)
+fi
+python3 scripts/generate_run_manifest.py \
+    --output "$MANIFEST_PATH" \
+    --run-id "$RUN_ID" \
+    --environment local \
+    --target-rate "$TARGET_RATE" \
+    --message-count "$MESSAGE_COUNT" \
+    --actual-load-duration "$LOAD_DURATION_SECONDS" \
+    --transport-mode "${LOAD_MODE_FLAG#--}" \
+    --trace-enabled true \
+    --queue-path "$QUEUE_PATH" \
+    --cpu-count "$CPU_COUNT" \
+    --cpu-profile host \
+    --cpusets '{}' \
+    --jvm-options "configured by scripts/start.sh and scripts/run_load_generator.sh" \
+    "${HLOG_FILES[@]}"
+
 echo "==========================================="
 echo "    Benchmark Suite: Step 3/3"
 echo "    Generating HTML Report"
 echo "==========================================="
 if command -v python3 &>/dev/null; then
-    python3 scripts/generate_html_report.py "${HLOG_FILES[@]}"
+    python3 scripts/generate_html_report.py \
+        --manifest "$MANIFEST_PATH" "${HLOG_FILES[@]}"
 else
     echo "Warning: python3 not found. Skipping HTML report generation."
     echo "To generate the report manually later, run: python3 scripts/generate_html_report.py ${HLOG_FILES[*]}"
