@@ -33,8 +33,24 @@ rm -f /tmp/fx-latency*
 OS=$(uname)
 if [ "$OS" = "Linux" ]; then
     SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider"
+    PREFIX_CMD=""
 else
-    SELECTOR_OPT=""
+    SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.KQueueSelectorProvider"
+    PREFIX_CMD="caffeinate -s"
+
+    echo "macOS detected. Creating 4GB RAM disk for /tmp/fx-queues/..."
+    mkdir -p logs
+    if [ -f "logs/ramdisk.dev" ]; then
+        OLD_DEV=$(cat logs/ramdisk.dev)
+        umount /tmp/fx-queues 2>/dev/null || true
+        hdiutil detach "$OLD_DEV" 2>/dev/null || true
+        rm -f logs/ramdisk.dev
+    fi
+    mkdir -p /tmp/fx-queues
+    RAMDISK_DEV=$(hdiutil attach -nomount ram://8388608 | tr -d ' \t')
+    newfs_hfs -v 'FX_QUEUES' "$RAMDISK_DEV" > /dev/null
+    mount -t hfs "$RAMDISK_DEV" /tmp/fx-queues
+    echo "$RAMDISK_DEV" > logs/ramdisk.dev
 fi
 
 export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
@@ -48,35 +64,38 @@ export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED \
 -XX:+UseZGC -XX:+ZGenerational -Xmx512m -Xms512m \
 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC \
+-XX:ZUncommitDelay=600 -XX:-ZUncommit \
+-XX:ZAllocationSpikeTolerance=3.0 -XX:CompileThreshold=500 -XX:+TieredCompilation \
+-Dfx.waitstrategy=${FX_WAIT_STRATEGY:-phased} \
+${FX_JVM_OPTS_OVERRIDE:-} \
 $SELECTOR_OPT"
-
 mkdir -p logs
 
 # Ensure traces.jsonl exists
 touch logs/traces.jsonl
 
 echo "Starting serv-c (Persistence Egress)..."
-java $JVM_OPTS -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/*" com.fx.persistence.PersistenceMain > logs/serv-c.log 2>&1 &
+$PREFIX_CMD java $JVM_OPTS -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/*" com.fx.persistence.PersistenceMain > logs/serv-c.log 2>&1 &
 echo "$! serv-c" >> "$PID_FILE"
 sleep 1
 
 echo "Starting Telemetry Stitcher (Distributed Tracing)..."
-java $JVM_OPTS -cp "common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/*" com.fx.common.telemetry.TelemetryMain > logs/telemetry.log 2>&1 &
+$PREFIX_CMD java $JVM_OPTS -cp "common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/*" com.fx.common.telemetry.TelemetryMain > logs/telemetry.log 2>&1 &
 echo "$! telemetry" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-b (Pricing Matching)..."
-java $JVM_OPTS -cp "serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/*" com.fx.pricing.PricingMain > logs/serv-b.log 2>&1 &
+$PREFIX_CMD java $JVM_OPTS -cp "serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/*" com.fx.pricing.PricingMain > logs/serv-b.log 2>&1 &
 echo "$! serv-b" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-a (Risk Validation)..."
-java $JVM_OPTS -cp "serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/*" com.fx.risk.RiskMain > logs/serv-a.log 2>&1 &
+$PREFIX_CMD java $JVM_OPTS -cp "serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/*" com.fx.risk.RiskMain > logs/serv-a.log 2>&1 &
 echo "$! serv-a" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-0 (Client Gateway) in TCP mode..."
-java $JVM_OPTS -Dfx.gateway.port=5001 -Dfx.gateway.mode=tcp -cp "serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/*" com.fx.gateway.GatewayMain > logs/serv-0.log 2>&1 &
+$PREFIX_CMD java $JVM_OPTS -Dfx.gateway.port=5001 -Dfx.gateway.mode=tcp -cp "serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/*" com.fx.gateway.GatewayMain > logs/serv-0.log 2>&1 &
 echo "$! serv-0" >> "$PID_FILE"
 
 echo "=========================================="

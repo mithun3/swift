@@ -229,16 +229,16 @@ scripts/stop.sh
 The pipeline includes a coordinated-omission-aware load generator and an HdrHistogram telemetry recorder. See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for full details.
 
 ```bash
-# Clean local TCP benchmark. Starts the pipeline, waits for all event loops,
+# Clean local native TCP benchmark. Starts the pipeline, waits for all event loops,
 # runs the load, drains producer-first, generates the report, and archives it.
-./scripts/run_local_benchmark.sh 10000 1000000
+./scripts/run_benchmark.sh --profile local 10000 1000000
 
 # Docker benchmark with the same workload.
-./scripts/run_docker_benchmark.sh 10000 1000000
+./scripts/run_benchmark.sh --profile docker 10000 1000000
 
 # Advanced downstream-only mode: start the pipeline, then bypass serv-0.
 ./scripts/start.sh
-./scripts/run_benchmark_suite.sh /tmp/fx-queues/queue-a 5000000 10000000 --direct
+./scripts/run_benchmark.sh --profile local 5000000 10000000 --direct
 ```
 
 Each orchestrated run writes `run_manifest.json` and embeds it as a **Run Configuration**

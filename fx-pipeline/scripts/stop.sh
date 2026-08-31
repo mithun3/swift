@@ -84,6 +84,14 @@ stop_service "telemetry"
 echo "Cleaning up $PID_FILE..."
 rm -f "$PID_FILE"
 
+if [ -f "logs/ramdisk.dev" ]; then
+    echo "Detaching RAM disk..."
+    RAMDISK_DEV=$(cat logs/ramdisk.dev)
+    umount /tmp/fx-queues 2>/dev/null || true
+    hdiutil detach "$RAMDISK_DEV" 2>/dev/null || true
+    rm -f logs/ramdisk.dev
+fi
+
 echo "=========================================="
 echo " All services stopped cleanly."
 echo "=========================================="
