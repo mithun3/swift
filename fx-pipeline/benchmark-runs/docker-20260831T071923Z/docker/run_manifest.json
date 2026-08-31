@@ -1,0 +1,59 @@
+{
+  "actual_load_duration_seconds": 102.0,
+  "cpu_count": 12,
+  "cpu_profile": "isolated",
+  "cpusets": {
+    "benchmark": "4",
+    "serv-0": "0",
+    "serv-a": "1",
+    "serv-b": "2",
+    "serv-c": "3",
+    "telemetry": "unconstrained"
+  },
+  "effective_jvm_options": "--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED               --add-exports=java.base/sun.nio.ch=ALL-UNNAMED               --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED               --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED               --add-opens=java.base/java.lang=ALL-UNNAMED               --add-opens=java.base/java.lang.reflect=ALL-UNNAMED               --add-opens=java.base/java.io=ALL-UNNAMED               --add-opens=java.base/java.util=ALL-UNNAMED               -XX:+UseZGC -XX:+ZGenerational               -Xmx512m -Xms512m               -XX:SoftMaxHeapSize=384m               -XX:+AlwaysPreTouch               -XX:+DisableExplicitGC               -XX:-ZUncommit               -XX:ZUncommitDelay=600               -XX:+UseContainerSupport               -XX:ActiveProcessorCount=2               -XX:ConcGCThreads=1               -XX:ParallelGCThreads=1               -XX:ZAllocationSpikeTolerance=3.0               -XX:CompileThreshold=500               -XX:+TieredCompilation",
+  "environment_label": "docker",
+  "expected_duration_seconds": 100.0,
+  "git_dirty": true,
+  "git_sha": "60c304089cad78bb24a7a14913df7959825f47c2",
+  "hlog_mtimes_utc": {
+    "end-to-end": "2026-08-31T07:21:37.355092+00:00",
+    "queue-a": "2026-08-31T07:21:36.914207+00:00",
+    "queue-b": "2026-08-31T07:21:37.134603+00:00",
+    "queue-c": "2026-08-31T07:21:37.355962+00:00",
+    "serv-0": "2026-08-31T07:21:36.670353+00:00",
+    "serv-a": "2026-08-31T07:21:36.916277+00:00",
+    "serv-b": "2026-08-31T07:21:37.135814+00:00",
+    "serv-c": "2026-08-31T07:21:37.356372+00:00"
+  },
+  "hlog_paths": [
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-queue-a.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-queue-b.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-queue-c.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-serv-0.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-serv-a.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-serv-b.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency-serv-c.hlog",
+    "/Users/mithunselvan/swift/fx-pipeline/fx-telemetry/fx-latency.hlog"
+  ],
+  "jdk_version": "openjdk version \"21.0.12\" 2026-07-21 LTS",
+  "message_count": 1000000,
+  "queue_path": "/tmp/fx-queues/queue-a",
+  "run_id": "docker-20260831T071923Z",
+  "runtime_arch": "aarch64",
+  "runtime_os": "linux",
+  "sample_counts": {
+    "end-to-end": 1000000,
+    "queue-a": 1000000,
+    "queue-b": 1000000,
+    "queue-c": 1000000,
+    "serv-0": 1000194,
+    "serv-a": 1000000,
+    "serv-b": 1000000,
+    "serv-c": 1000000
+  },
+  "schema_version": 1,
+  "target_rate_msgs_sec": 10000,
+  "timestamp_utc": "2026-08-31T07:21:49.927088+00:00",
+  "trace_enabled": true,
+  "transport_mode": "tcp"
+}

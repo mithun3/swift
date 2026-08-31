@@ -22,8 +22,9 @@ cd "$(dirname "$0")/.."
 
 # Resolve hlogs
 # shellcheck disable=SC2206
-HLOG_FILES=( "${FX_HLOG_DIR}"/fx-latency*.hlog )
-MANIFEST_PATH="${FX_HLOG_DIR}/run_manifest.json"
+HOST_HLOG_DIR="${FX_HOST_HLOG_DIR:-$FX_HLOG_DIR}"
+HLOG_FILES=( "${HOST_HLOG_DIR}"/fx-latency*.hlog )
+MANIFEST_PATH="${HOST_HLOG_DIR}/run_manifest.json"
 
 echo "==========================================="
 echo "    Processing Latency (.hlog to .hgrm)"
@@ -35,7 +36,7 @@ if [ "$FX_EXECUTION_MODE" = "docker" ]; then
     # We substitute FX_HLOG_DIR (e.g. fx-telemetry) to /tmp/fx-telemetry in container context
     DOCKER_HLOG_FILES=()
     for hlog in "${HLOG_FILES[@]}"; do
-        DOCKER_HLOG_FILES+=("${hlog/${FX_HLOG_DIR}/\/tmp\/fx-telemetry}")
+        DOCKER_HLOG_FILES+=("${hlog/${HOST_HLOG_DIR}/\/tmp\/fx-telemetry}")
     done
     docker compose run --rm --no-deps benchmark \
         /app/scripts/process_latency.sh "${DOCKER_HLOG_FILES[@]}"
@@ -106,7 +107,7 @@ for hlog in "${HLOG_FILES[@]}"; do
     cp "$hlog" "$hlog.hgrm" "$RUN_OUTPUT_DIR/"
     if [ -f "$hlog.png" ]; then cp "$hlog.png" "$RUN_OUTPUT_DIR/"; fi
 done
-cp "${FX_HLOG_DIR}/latency_report.html" "$MANIFEST_PATH" "$RUN_OUTPUT_DIR/"
+cp "${HOST_HLOG_DIR}/latency_report.html" "$MANIFEST_PATH" "$RUN_OUTPUT_DIR/"
 
-echo "Benchmark complete: ${FX_HLOG_DIR}/latency_report.html"
+echo "Benchmark complete: ${HOST_HLOG_DIR}/latency_report.html"
 echo "Archived run: $RUN_OUTPUT_DIR"
