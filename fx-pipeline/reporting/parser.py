@@ -100,6 +100,21 @@ def discover_runs(base_dir: str = None) -> List[Dict]:
                 commit = metadata.get("git_sha", metadata.get("commit", "unknown"))
                 run_id = metadata.get("run_id", run_id)
                 
+                duration = metadata.get("actual_load_duration_seconds", "N/A")
+                total_samples = metadata.get("message_count", "N/A")
+                if "sample_counts" in metadata and "end-to-end" in metadata["sample_counts"]:
+                    total_samples = metadata["sample_counts"]["end-to-end"]
+                
+                rate = "N/A"
+                if duration != "N/A" and total_samples != "N/A" and float(duration) > 0:
+                    rate = f"{int(total_samples / float(duration)):,}"
+                
+                if total_samples != "N/A":
+                    total_samples = f"{int(total_samples):,}"
+                
+                if duration != "N/A":
+                    duration = f"{float(duration):.1f}s"
+                
                 if not timestamp:
                     if run_id.startswith("run-"):
                         timestamp = run_id[4:]
@@ -111,6 +126,9 @@ def discover_runs(base_dir: str = None) -> List[Dict]:
                     "run_id": run_id,
                     "timestamp": timestamp,
                     "commit": commit,
+                    "duration": duration,
+                    "total_samples": total_samples,
+                    "samples_per_sec": rate,
                     "hgrm_path": str(hgrm_file),
                     "metadata_path": str(metadata_file) if metadata_file.exists() else None
                 })
@@ -121,15 +139,30 @@ def discover_runs(base_dir: str = None) -> List[Dict]:
 
 def load_run_data(run_info: Dict) -> Optional[Dict]:
     """
-    Loads the full .hgrm dataframe and summary stats for a run.
+    Loads the full .hgrm dataframe and summary stats for a run,
+    including individual pipeline stage breakdowns if available.
     """
     df = parse_hgrm_file(run_info["hgrm_path"])
     if df is None or df.empty:
         return None
         
     stats = extract_summary_stats(df)
+    
+    # Parse stage breakdowns
+    run_dir = Path(run_info["hgrm_path"]).parent
+    stages = {}
+    for stage_file in run_dir.glob("fx-latency-*.hlog.hgrm"):
+        if stage_file.name == "fx-latency.hlog.hgrm":
+            continue
+            
+        stage_name = stage_file.name.replace("fx-latency-", "").replace(".hlog.hgrm", "")
+        stage_df = parse_hgrm_file(str(stage_file))
+        if stage_df is not None and not stage_df.empty:
+            stages[stage_name] = extract_summary_stats(stage_df)
+            
     return {
         "info": run_info,
         "dataframe": df,
-        "stats": stats
+        "stats": stats,
+        "stages": stages
     }

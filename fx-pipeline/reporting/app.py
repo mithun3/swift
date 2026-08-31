@@ -94,6 +94,9 @@ for dataset in run_datasets:
         "Environment": info["env"],
         "Timestamp": info["timestamp"],
         "Commit": info["commit"][:7],
+        "Duration": info.get("duration", "N/A"),
+        "Total Samples": info.get("total_samples", "N/A"),
+        "Samples/Sec": info.get("samples_per_sec", "N/A"),
         "P50": f"{stats['P50']:,}",
         "P90": f"{stats['P90']:,}",
         "P99": f"{stats['P99']:,}",
@@ -164,3 +167,88 @@ st.plotly_chart(fig, use_container_width=True)
 # Instructions for user if they add too many
 if len(selected_run_infos) > 5:
     st.info("💡 You have selected more than 5 runs. You can click on the legend items above to toggle lines on and off for better readability.")
+
+# 7. Stage Breakdown
+st.header("Stage Breakdown")
+st.markdown("View latency breakdowns per pipeline stage, or diff two runs against each other.")
+
+if run_datasets:
+    options = {f"{d['info']['env'].upper()} - {d['info']['timestamp']}": d for d in run_datasets}
+    
+    tab1, tab2 = st.tabs(["Single Run View", "Diff Multiple Runs"])
+    
+    with tab1:
+        selected_label = st.selectbox("Select Run to Inspect", list(options.keys()), key="single_run_sel")
+        selected_dataset = options[selected_label]
+        stages = selected_dataset.get("stages", {})
+        
+        if stages:
+            stage_records = []
+            for stage_name, stats in stages.items():
+                stage_records.append({
+                    "Stage": stage_name,
+                    "P50": f"{stats['P50']:,}",
+                    "P90": f"{stats['P90']:,}",
+                    "P99": f"{stats['P99']:,}",
+                    "P99.9": f"{stats['P99.9']:,}",
+                    "Max": f"{stats['Max']:,}"
+                })
+                
+            stage_order = ['serv-0', 'queue-a', 'serv-a', 'queue-b', 'serv-b', 'queue-c', 'serv-c']
+            stage_records.sort(key=lambda x: stage_order.index(x['Stage']) if x['Stage'] in stage_order else 99)
+            st.dataframe(pd.DataFrame(stage_records), use_container_width=True)
+        else:
+            st.info("No stage breakdown data available for this run.")
+
+    with tab2:
+        if len(options) < 2:
+            st.info("Please select at least 2 runs in the sidebar to use the Diff feature.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                base_label = st.selectbox("Baseline Run", list(options.keys()), index=0, key="base_run_sel")
+            with col2:
+                comp_label = st.selectbox("Comparison Run", list(options.keys()), index=1, key="comp_run_sel")
+            with col3:
+                metric = st.selectbox("Metric to Diff", ["P50", "P90", "P99", "P99.9", "Max"], index=2)
+                
+            base_stages = options[base_label].get("stages", {})
+            comp_stages = options[comp_label].get("stages", {})
+            
+            if base_stages and comp_stages:
+                diff_records = []
+                all_stages = set(base_stages.keys()).intersection(set(comp_stages.keys()))
+                
+                for stage_name in all_stages:
+                    base_val = base_stages[stage_name][metric]
+                    comp_val = comp_stages[stage_name][metric]
+                    diff_val = comp_val - base_val
+                    pct_change = (diff_val / base_val * 100) if base_val > 0 else 0
+                    
+                    diff_records.append({
+                        "Stage": stage_name,
+                        f"Baseline {metric} (ns)": f"{base_val:,}",
+                        f"Comparison {metric} (ns)": f"{comp_val:,}",
+                        "Delta (ns)": f"{diff_val:,}",
+                        "% Change": pct_change
+                    })
+                
+                stage_order = ['serv-0', 'queue-a', 'serv-a', 'queue-b', 'serv-b', 'queue-c', 'serv-c']
+                diff_records.sort(key=lambda x: stage_order.index(x['Stage']) if x['Stage'] in stage_order else 99)
+                
+                diff_df = pd.DataFrame(diff_records)
+                
+                # Apply conditional formatting to the % Change column
+                def color_pct(val):
+                    if val > 5:
+                        color = 'red'
+                    elif val < -5:
+                        color = 'green'
+                    else:
+                        color = 'gray'
+                    return f'color: {color}'
+                    
+                formatted_df = diff_df.style.map(color_pct, subset=['% Change']).format({"% Change": "{:+.2f}%"})
+                st.dataframe(formatted_df, use_container_width=True)
+            else:
+                st.warning("One or both of the selected runs are missing stage breakdown data.")
