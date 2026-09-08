@@ -1,0 +1,53 @@
+{
+  "actual_load_duration_seconds": 106.0,
+  "cpu_count": 8,
+  "cpu_model": "Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz",
+  "cpu_profile": "host",
+  "cpusets": {},
+  "effective_jvm_options": "-XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysPreTouch -Xmx4G -Xms4G -XX:ActiveProcessorCount=2 -XX:ConcGCThreads=1 -XX:ParallelGCThreads=1 -XX:CICompilerCount=2",
+  "environment_label": "local_vultr_fix",
+  "expected_duration_seconds": 100.0,
+  "git_dirty": true,
+  "git_sha": "5ecc5ea82a598ad67e150d2bc7a56fd39278d16f",
+  "hlog_mtimes_utc": {
+    "end-to-end": "2026-09-08T13:14:08.146916+00:00",
+    "queue-a": "2026-09-08T13:14:05.015803+00:00",
+    "queue-b": "2026-09-08T13:14:06.087842+00:00",
+    "queue-c": "2026-09-08T13:14:08.147916+00:00",
+    "serv-0": "2026-09-08T13:14:03.434746+00:00",
+    "serv-a": "2026-09-08T13:14:05.021803+00:00",
+    "serv-b": "2026-09-08T13:14:06.088841+00:00",
+    "serv-c": "2026-09-08T13:14:08.147916+00:00"
+  },
+  "hlog_paths": [
+    "/tmp/fx-latency.hlog",
+    "/tmp/fx-latency-queue-a.hlog",
+    "/tmp/fx-latency-queue-b.hlog",
+    "/tmp/fx-latency-queue-c.hlog",
+    "/tmp/fx-latency-serv-0.hlog",
+    "/tmp/fx-latency-serv-a.hlog",
+    "/tmp/fx-latency-serv-b.hlog",
+    "/tmp/fx-latency-serv-c.hlog"
+  ],
+  "jdk_version": "openjdk version \"21.0.12.1\" 2026-08-18 LTS",
+  "message_count": 1000000,
+  "queue_path": "/tmp/fx-queues/queue-a",
+  "run_id": "local_vultr_fix-20260908T131139Z",
+  "runtime_arch": "x86_64",
+  "runtime_os": "Linux-6.12.0-211.50.1.el10_2.x86_64",
+  "sample_counts": {
+    "end-to-end": 1000223,
+    "queue-a": 1000220,
+    "queue-b": 1000000,
+    "queue-c": 1000203,
+    "serv-0": 1000000,
+    "serv-a": 1000250,
+    "serv-b": 1000000,
+    "serv-c": 1000235
+  },
+  "schema_version": 1,
+  "target_rate_msgs_sec": 10000,
+  "timestamp_utc": "2026-09-08T13:14:26.844801+00:00",
+  "trace_enabled": true,
+  "transport_mode": "tcp"
+}
