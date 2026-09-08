@@ -1,7 +1,13 @@
 # FX Pipeline Scripts
 
-This directory contains utility and automation scripts for the FX Pipeline. 
+This directory contains utility and automation scripts for the FX Pipeline.
 To adhere to the Single Responsibility Principle, each script is designed to perform a distinct, well-defined unit of work.
+
+## Configuration Profiles
+
+All benchmark runs are driven by environment-specific profiles in `config/profiles/*.env`.
+See [`CONFIG_PROFILES.md`](../CONFIG_PROFILES.md) for a full reference of every variable,
+the docker two-path hlog design, CPU profile semantics, and runtime override examples.
 
 ## Build and Lifecycle
 * `build.sh` - Compiles the Maven project and copies dependencies into the `target/dependency` directories.

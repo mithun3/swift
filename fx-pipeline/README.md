@@ -226,7 +226,7 @@ scripts/stop.sh
 
 ## High-Throughput Benchmarking & Telemetry
 
-The pipeline includes a coordinated-omission-aware load generator and an HdrHistogram telemetry recorder. See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for full details.
+The pipeline includes a coordinated-omission-aware load generator and an HdrHistogram telemetry recorder. See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for full details on the benchmarking architecture, and [`CONFIG_PROFILES.md`](./CONFIG_PROFILES.md) for the complete configuration profile reference.
 
 ```bash
 # Clean local native TCP benchmark. Starts the pipeline, waits for all event loops,

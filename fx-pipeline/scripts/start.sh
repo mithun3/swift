@@ -74,14 +74,7 @@ mkdir -p logs
 # Ensure traces.jsonl exists
 touch logs/traces.jsonl
 
-apply_taskset() {
-    local cpuset=$1
-    if [ -n "$cpuset" ] && command -v taskset >/dev/null 2>&1; then
-        echo "taskset -c $cpuset"
-    else
-        echo ""
-    fi
-}
+source "$(dirname "$0")/lib/common.sh"
 
 echo "Starting serv-c (Persistence Egress)..."
 TS_CMD=$(apply_taskset "${FX_SERV_C_CPUSET:-}")

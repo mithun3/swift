@@ -36,7 +36,7 @@ if [ "$FX_EXECUTION_MODE" = "docker" ]; then
     # We substitute FX_HLOG_DIR (e.g. fx-telemetry) to /tmp/fx-telemetry in container context
     DOCKER_HLOG_FILES=()
     for hlog in "${HLOG_FILES[@]}"; do
-        DOCKER_HLOG_FILES+=("${hlog/${HOST_HLOG_DIR}/\/tmp\/fx-telemetry}")
+        DOCKER_HLOG_FILES+=("${hlog/$HOST_HLOG_DIR//tmp/fx-telemetry}")
     done
     docker compose run --rm --no-deps benchmark \
         /app/scripts/process_latency.sh "${DOCKER_HLOG_FILES[@]}"

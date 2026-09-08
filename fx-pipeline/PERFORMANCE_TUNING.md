@@ -67,6 +67,10 @@ The flags actually applied differ by script/module:
 
 All benchmark executions are unified under `scripts/run_benchmark.sh`. It automatically handles environment differences by loading configuration profiles from `config/profiles/*.env`.
 
+> [!NOTE]
+> See [`CONFIG_PROFILES.md`](CONFIG_PROFILES.md) for a complete reference of every profile variable,
+> the docker two-path hlog design, CPU profile semantics, and runtime override examples.
+
 ### Local Native Benchmark
 Use the local profile for repeatable native (macOS/Linux) measurements:
 ```bash

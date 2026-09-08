@@ -81,14 +81,7 @@ fi
 echo "    Mode:  $LOAD_MODE"
 echo "=========================================="
 
-apply_taskset() {
-    local cpuset=$1
-    if [ -n "$cpuset" ] && command -v taskset >/dev/null 2>&1; then
-        echo "taskset -c $cpuset"
-    else
-        echo ""
-    fi
-}
+source "$(dirname "$0")/lib/common.sh"
 
 TS_CMD=$(apply_taskset "${FX_BENCHMARK_CPUSET:-}")
 $TS_CMD java $JVM_OPTS -Dfx.load.mode="$LOAD_MODE" -cp "test/target/test-1.0.0-SNAPSHOT.jar:test/target/dependency/*" com.fx.test.LoadGenerator "$QUEUE_PATH" "$TARGET_RATE" "$MESSAGE_COUNT"
