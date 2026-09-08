@@ -8,8 +8,11 @@ echo "2. Applying Enterprise Low-Latency Tuning (Tuned Daemon)..."
 sudo dnf install -y tuned tuned-profiles-cpu-partitioning
 sudo systemctl enable --now tuned
 
-# Configure tuned to isolate cores 1-5 (leaving 0 for the OS)
-sudo sed -i 's/^isolated_cores=.*/isolated_cores=1-5/' /etc/tuned/cpu-partitioning-variables.conf
+# Dynamically calculate the maximum core index (total cores - 1)
+MAX_CORE=$(($(nproc) - 1))
+
+# Configure tuned to isolate all cores except 0
+sudo sed -i "s/^isolated_cores=.*/isolated_cores=1-${MAX_CORE}/" /etc/tuned/cpu-partitioning-variables.conf
 sudo tuned-adm profile cpu-partitioning
 
 echo "3. Installing Docker and Dependencies..."
