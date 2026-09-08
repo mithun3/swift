@@ -4,6 +4,14 @@ This directory contains the interactive Streamlit dashboard for visualizing and 
 
 It dynamically scans the `../benchmark-runs/` directory for archived HdrHistogram (`.hgrm`) results and metadata, allowing you to overlay latency distributions across different environments (e.g., local vs Docker) to quantify containerization overhead and identify P99 tail latency spikes.
 
+## Key Features
+
+- **KPI Dashboard**: Instant visibility into top-level metrics such as Total Runs, Best P99 Latency, and Latest P99 Latency directly in the Summary tab.
+- **Dynamic Unit Formatting**: Select between Nanoseconds (ns), Microseconds (µs), and Milliseconds (ms) from the sidebar for readability.
+- **CSV Export**: Instantly download the summary metrics of all your filtered runs into a CSV for offline analysis.
+- **Percentile Tracking**: Tracks P50, P90, P99, P99.9, P99.99, and Max latencies for fine-grained performance visibility.
+- **A/B Diffing**: Granularly compare the latency characteristics of two pipeline stages side-by-side.
+
 ## Prerequisites
 
 You need Python 3.8+ installed on your system.

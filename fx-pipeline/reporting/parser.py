@@ -1,12 +1,22 @@
 import os
 import json
+import logging
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
+
+logger = logging.getLogger(__name__)
 
 def parse_hgrm_file(filepath: str) -> Optional[pd.DataFrame]:
     """
     Parses a standard HdrHistogram .hgrm file into a Pandas DataFrame.
+    
+    Args:
+        filepath: Absolute or relative path to the .hgrm file.
+        
+    Returns:
+        A Pandas DataFrame containing the parsed histogram data, 
+        or None if the file cannot be read or is empty.
     """
     try:
         # Read the file, skip lines starting with '#' or '"'
@@ -28,18 +38,28 @@ def parse_hgrm_file(filepath: str) -> Optional[pd.DataFrame]:
                         pass
         
         if not lines:
+            logger.warning("No valid data found in %s", filepath)
             return None
             
         df = pd.DataFrame(lines, columns=['Value', 'Percentile', 'TotalCount', '1/(1-Percentile)'])
         return df
+    except OSError as e:
+        logger.error("OS error reading %s: %s", filepath, e)
+        return None
     except Exception as e:
-        print(f"Error reading {filepath}: {e}")
+        logger.error("Unexpected error reading %s: %s", filepath, e)
         return None
 
 def extract_summary_stats(df: pd.DataFrame) -> Dict[str, float]:
     """
     Extracts standard summary percentiles from a parsed .hgrm DataFrame.
-    The values are in nanoseconds.
+    The values returned are in nanoseconds, maintaining the original scale.
+    
+    Args:
+        df: Pandas DataFrame containing the parsed .hgrm data.
+        
+    Returns:
+        Dictionary mapping percentile labels (e.g., 'P99') to latency values in nanoseconds.
     """
     def get_closest(target: float) -> float:
         # Find the row with Percentile closest to target
@@ -51,13 +71,86 @@ def extract_summary_stats(df: pd.DataFrame) -> Dict[str, float]:
         'P90': get_closest(0.90),
         'P99': get_closest(0.99),
         'P99.9': get_closest(0.999),
+        'P99.99': get_closest(0.9999),
         'Max': df['Value'].max()
     }
 
-def discover_runs(base_dir: str = None) -> List[Dict]:
+def _parse_run_metadata(metadata_file: Path, env_name: str, run_id: str) -> Dict[str, Any]:
+    """
+    Parses the run_manifest.json and extracts normalized metadata for the dashboard.
+    
+    Args:
+        metadata_file: Path object pointing to the run_manifest.json.
+        env_name: The name of the environment (e.g., 'docker', 'local').
+        run_id: The unique identifier for the run.
+        
+    Returns:
+        A normalized dictionary of run metadata.
+    """
+    metadata = {}
+    if metadata_file.exists():
+        try:
+            with open(metadata_file, 'r') as f:
+                metadata = json.load(f)
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse JSON in %s: %s", metadata_file, e)
+        except OSError as e:
+            logger.error("Failed to read metadata file %s: %s", metadata_file, e)
+            
+    env = metadata.get("environment_label", env_name)
+    timestamp = metadata.get("timestamp_utc", metadata.get("timestamp"))
+    commit = metadata.get("git_sha", metadata.get("commit", "unknown"))
+    run_id_val = metadata.get("run_id", run_id)
+    
+    duration = metadata.get("actual_load_duration_seconds", "N/A")
+    total_samples = metadata.get("message_count", "N/A")
+    if "sample_counts" in metadata and "end-to-end" in metadata["sample_counts"]:
+        total_samples = metadata["sample_counts"]["end-to-end"]
+    
+    rate = "N/A"
+    if duration != "N/A" and total_samples != "N/A" and float(duration) > 0:
+        rate = f"{int(total_samples / float(duration)):,}"
+    
+    if total_samples != "N/A":
+        total_samples = f"{int(total_samples):,}"
+    
+    if duration != "N/A":
+        duration = f"{float(duration):.1f}s"
+    
+    if not timestamp:
+        if run_id_val.startswith("run-"):
+            timestamp = run_id_val[4:]
+        else:
+            timestamp = run_id_val
+    
+    cpu_model = metadata.get("cpu_model", "Unknown")
+    target_rate = metadata.get("target_rate_msgs_sec", "N/A")
+    transport_mode = metadata.get("transport_mode", "tcp")
+    
+    return {
+        "cpu_model": cpu_model,
+        "target_rate": target_rate,
+        "transport_mode": transport_mode,
+        "env": env,
+        "run_id": run_id_val,
+        "timestamp": timestamp,
+        "commit": commit,
+        "duration": duration,
+        "total_samples": total_samples,
+        "samples_per_sec": rate,
+    }
+
+
+def discover_runs(base_dir: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Walks the benchmark-runs directory to find all archived runs.
-    Returns a list of dictionaries containing run metadata and paths.
+    
+    Args:
+        base_dir: Optional override for the root benchmark-runs directory.
+        
+    Returns:
+        A list of dictionaries containing parsed run metadata and paths. 
+        Sorted by timestamp descending.
     """
     runs = []
     if base_dir is None:
@@ -67,6 +160,7 @@ def discover_runs(base_dir: str = None) -> List[Dict]:
         base_path = Path(base_dir)
     
     if not base_path.exists():
+        logger.warning("Benchmark runs directory does not exist: %s", base_path)
         return runs
 
     # Directory structure: benchmark-runs/<env>/<run_id>/
@@ -86,71 +180,30 @@ def discover_runs(base_dir: str = None) -> List[Dict]:
             metadata_file = run_dir / "run_manifest.json"
             
             if hgrm_file.exists():
-                metadata = {}
-                if metadata_file.exists():
-                    try:
-                        with open(metadata_file, 'r') as f:
-                            metadata = json.load(f)
-                    except Exception:
-                        pass
-                
-                # Extract from run_manifest
-                env = metadata.get("environment_label", env_name)
-                timestamp = metadata.get("timestamp_utc", metadata.get("timestamp"))
-                commit = metadata.get("git_sha", metadata.get("commit", "unknown"))
-                run_id = metadata.get("run_id", run_id)
-                
-                duration = metadata.get("actual_load_duration_seconds", "N/A")
-                total_samples = metadata.get("message_count", "N/A")
-                if "sample_counts" in metadata and "end-to-end" in metadata["sample_counts"]:
-                    total_samples = metadata["sample_counts"]["end-to-end"]
-                
-                rate = "N/A"
-                if duration != "N/A" and total_samples != "N/A" and float(duration) > 0:
-                    rate = f"{int(total_samples / float(duration)):,}"
-                
-                if total_samples != "N/A":
-                    total_samples = f"{int(total_samples):,}"
-                
-                if duration != "N/A":
-                    duration = f"{float(duration):.1f}s"
-                
-                if not timestamp:
-                    if run_id.startswith("run-"):
-                        timestamp = run_id[4:]
-                    else:
-                        timestamp = run_id
-                
-                cpu_model = metadata.get("cpu_model", "Unknown")
-                target_rate = metadata.get("target_rate_msgs_sec", "N/A")
-                transport_mode = metadata.get("transport_mode", "tcp")
-                
-                runs.append({
-                    "cpu_model": cpu_model,
-                    "target_rate": target_rate,
-                    "transport_mode": transport_mode,
-                    "env": env,
-                    "run_id": run_id,
-                    "timestamp": timestamp,
-                    "commit": commit,
-                    "duration": duration,
-                    "total_samples": total_samples,
-                    "samples_per_sec": rate,
-                    "hgrm_path": str(hgrm_file),
-                    "metadata_path": str(metadata_file) if metadata_file.exists() else None
-                })
+                metadata = _parse_run_metadata(metadata_file, env_name, run_id)
+                metadata["hgrm_path"] = str(hgrm_file)
+                metadata["metadata_path"] = str(metadata_file) if metadata_file.exists() else None
+                runs.append(metadata)
                 
     # Sort by timestamp descending
     runs.sort(key=lambda x: x["timestamp"], reverse=True)
     return runs
 
-def load_run_data(run_info: Dict) -> Optional[Dict]:
+def load_run_data(run_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Loads the full .hgrm dataframe and summary stats for a run,
     including individual pipeline stage breakdowns if available.
+    
+    Args:
+        run_info: The metadata dictionary of a specific run (from discover_runs).
+        
+    Returns:
+        Dictionary containing the run info, parsed dataframe, summary stats, 
+        and stage breakdowns, or None if the main .hgrm could not be loaded.
     """
     df = parse_hgrm_file(run_info["hgrm_path"])
     if df is None or df.empty:
+        logger.error("Failed to load or empty dataframe for run: %s", run_info.get("run_id"))
         return None
         
     stats = extract_summary_stats(df)
