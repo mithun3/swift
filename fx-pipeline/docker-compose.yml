@@ -11,6 +11,9 @@ services:
       - fx-queues:/tmp/fx-queues/
       - ./fx-data:/opt/fx-data
       - ./fx-telemetry:/tmp/fx-telemetry
+    environment:
+      - FX_JVM_OPTS_OVERRIDE
+      - FX_WAIT_STRATEGY
     command: ["sh", "-c", "exec java $$JVM_OPTS $${FX_JVM_OPTS_OVERRIDE:-} -Dfx.affinity.enabled=false -Dfx.waitstrategy=$${FX_WAIT_STRATEGY:-phased} -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/* com.fx.persistence.PersistenceMain"]
 
   telemetry:
@@ -19,6 +22,9 @@ services:
     network_mode: "host"
     volumes:
       - fx-queues:/tmp/fx-queues/
+    environment:
+      - FX_JVM_OPTS_OVERRIDE
+      - FX_WAIT_STRATEGY
     command: ["sh", "-c", "exec java $$JVM_OPTS $${FX_JVM_OPTS_OVERRIDE:-} -Dfx.affinity.enabled=false -Dfx.waitstrategy=$${FX_WAIT_STRATEGY:-busyspin} -cp common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/* com.fx.common.telemetry.TelemetryMain"]
     depends_on:
       - serv-c
@@ -34,6 +40,9 @@ services:
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
+    environment:
+      - FX_JVM_OPTS_OVERRIDE
+      - FX_WAIT_STRATEGY
     command: ["sh", "-c", "exec java $$JVM_OPTS $${FX_JVM_OPTS_OVERRIDE:-} -Dfx.affinity.enabled=false -Dfx.waitstrategy=$${FX_WAIT_STRATEGY:-phased} -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/* com.fx.pricing.PricingMain"]
     depends_on:
       - serv-c
@@ -49,6 +58,9 @@ services:
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
+    environment:
+      - FX_JVM_OPTS_OVERRIDE
+      - FX_WAIT_STRATEGY
     command: ["sh", "-c", "exec java $$JVM_OPTS $${FX_JVM_OPTS_OVERRIDE:-} -Dfx.affinity.enabled=false -Dfx.waitstrategy=$${FX_WAIT_STRATEGY:-phased} -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -cp serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/* com.fx.risk.RiskMain"]
     depends_on:
       - serv-b
@@ -64,6 +76,9 @@ services:
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
+    environment:
+      - FX_JVM_OPTS_OVERRIDE
+      - FX_WAIT_STRATEGY
     command: ["sh", "-c", "exec java $$JVM_OPTS $${FX_JVM_OPTS_OVERRIDE:-} -Dfx.affinity.enabled=false -Dfx.waitstrategy=$${FX_WAIT_STRATEGY:-phased} -Dfx.telemetry.enabled=true -Dfx.telemetry.log.path=/tmp/fx-telemetry/fx-latency.hlog -Dfx.gateway.mode=tcp -cp serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/* com.fx.gateway.GatewayMain"]
     depends_on:
       - serv-a
