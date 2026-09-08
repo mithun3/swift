@@ -121,7 +121,14 @@ def discover_runs(base_dir: str = None) -> List[Dict]:
                     else:
                         timestamp = run_id
                 
+                cpu_model = metadata.get("cpu_model", "Unknown")
+                target_rate = metadata.get("target_rate_msgs_sec", "N/A")
+                transport_mode = metadata.get("transport_mode", "tcp")
+                
                 runs.append({
+                    "cpu_model": cpu_model,
+                    "target_rate": target_rate,
+                    "transport_mode": transport_mode,
                     "env": env,
                     "run_id": run_id,
                     "timestamp": timestamp,

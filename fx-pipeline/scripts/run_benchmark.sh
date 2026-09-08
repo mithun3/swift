@@ -35,8 +35,6 @@ if [ -z "$PROFILE" ] || [ -z "$TARGET_RATE" ] || [ -z "$MESSAGE_COUNT" ]; then
 fi
 
 export PROFILE
-export ENV_LABEL="${ENV_LABEL:-$PROFILE}"
-
 if [ ! -f "config/profiles/${PROFILE}.env" ]; then
     echo "Error: Profile config/profiles/${PROFILE}.env not found."
     exit 1
@@ -45,6 +43,8 @@ fi
 set -a
 source "config/profiles/${PROFILE}.env"
 set +a
+
+export ENV_LABEL="${ENV_LABEL:-${FX_ENV_LABEL:-$PROFILE}}"
 
 export FX_RUN_ID="${ENV_LABEL}-$(date -u +%Y%m%dT%H%M%SZ)"
 RUN_OUTPUT_DIR=${FX_RUN_OUTPUT_DIR:-benchmark-runs/$ENV_LABEL/$FX_RUN_ID}

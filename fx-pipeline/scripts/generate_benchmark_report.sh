@@ -49,6 +49,12 @@ echo "==========================================="
 echo "    Generating Run Manifest"
 echo "==========================================="
 
+if [ "$(uname -s)" = "Darwin" ]; then
+    HOST_CPU_MODEL=$(sysctl -n machdep.cpu.brand_string || echo "Unknown")
+else
+    HOST_CPU_MODEL=$(awk -F': ' '/model name/ {print $2; exit}' /proc/cpuinfo || echo "Unknown")
+fi
+
 if [ "$FX_EXECUTION_MODE" = "docker" ]; then
     RUNTIME_OS=$(docker info --format '{{.OSType}}')
     RUNTIME_ARCH=$(docker info --format '{{.Architecture}}')
@@ -86,6 +92,7 @@ python3 scripts/generate_run_manifest.py \
     --queue-path "${FX_QUEUE_DIR}/queue-a" \
     --cpu-count "$CPU_COUNT" \
     --cpu-profile "$CPU_PROFILE" \
+    --cpu-model "$HOST_CPU_MODEL" \
     --cpusets "$CPUSETS_JSON" \
     --jvm-options "$JVM_OPTIONS" \
     --jdk-version "$JDK_VERSION" \

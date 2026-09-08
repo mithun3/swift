@@ -106,6 +106,7 @@ def build_manifest(arguments: argparse.Namespace) -> dict:
         "queue_path": arguments.queue_path,
         "cpu_count": arguments.cpu_count,
         "cpu_profile": arguments.cpu_profile,
+        "cpu_model": arguments.cpu_model,
         "cpusets": json.loads(arguments.cpusets),
         "effective_jvm_options": arguments.jvm_options,
         "hlog_paths": hlog_paths,
@@ -127,6 +128,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--queue-path", required=True)
     parser.add_argument("--cpu-count", type=int)
     parser.add_argument("--cpu-profile", default="")
+    parser.add_argument("--cpu-model", default="Unknown")
     parser.add_argument("--cpusets", default="{}")
     parser.add_argument("--jvm-options", default="")
     parser.add_argument("--jdk-version", default="")

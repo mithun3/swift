@@ -74,28 +74,42 @@ mkdir -p logs
 # Ensure traces.jsonl exists
 touch logs/traces.jsonl
 
+apply_taskset() {
+    local cpuset=$1
+    if [ -n "$cpuset" ] && command -v taskset >/dev/null 2>&1; then
+        echo "taskset -c $cpuset"
+    else
+        echo ""
+    fi
+}
+
 echo "Starting serv-c (Persistence Egress)..."
-$PREFIX_CMD java $JVM_OPTS -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/*" com.fx.persistence.PersistenceMain > logs/serv-c.log 2>&1 &
+TS_CMD=$(apply_taskset "${FX_SERV_C_CPUSET:-}")
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/*" com.fx.persistence.PersistenceMain > logs/serv-c.log 2>&1 &
 echo "$! serv-c" >> "$PID_FILE"
 sleep 1
 
 echo "Starting Telemetry Stitcher (Distributed Tracing)..."
-$PREFIX_CMD java $JVM_OPTS -cp "common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/*" com.fx.common.telemetry.TelemetryMain > logs/telemetry.log 2>&1 &
+TS_CMD=$(apply_taskset "${FX_TELEMETRY_CPUSET:-}")
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/*" com.fx.common.telemetry.TelemetryMain > logs/telemetry.log 2>&1 &
 echo "$! telemetry" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-b (Pricing Matching)..."
-$PREFIX_CMD java $JVM_OPTS -cp "serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/*" com.fx.pricing.PricingMain > logs/serv-b.log 2>&1 &
+TS_CMD=$(apply_taskset "${FX_SERV_B_CPUSET:-}")
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/*" com.fx.pricing.PricingMain > logs/serv-b.log 2>&1 &
 echo "$! serv-b" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-a (Risk Validation)..."
-$PREFIX_CMD java $JVM_OPTS -cp "serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/*" com.fx.risk.RiskMain > logs/serv-a.log 2>&1 &
+TS_CMD=$(apply_taskset "${FX_SERV_A_CPUSET:-}")
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/*" com.fx.risk.RiskMain > logs/serv-a.log 2>&1 &
 echo "$! serv-a" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-0 (Client Gateway) in TCP mode..."
-$PREFIX_CMD java $JVM_OPTS -Dfx.gateway.port=5001 -Dfx.gateway.mode=tcp -cp "serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/*" com.fx.gateway.GatewayMain > logs/serv-0.log 2>&1 &
+TS_CMD=$(apply_taskset "${FX_SERV_0_CPUSET:-}")
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -Dfx.gateway.port=5001 -Dfx.gateway.mode=tcp -cp "serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/*" com.fx.gateway.GatewayMain > logs/serv-0.log 2>&1 &
 echo "$! serv-0" >> "$PID_FILE"
 
 echo "=========================================="
