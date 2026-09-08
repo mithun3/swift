@@ -239,6 +239,9 @@ The pipeline includes a coordinated-omission-aware load generator and an HdrHist
 # Advanced downstream-only mode: start the pipeline, then bypass serv-0.
 ./scripts/start.sh
 ./scripts/run_benchmark.sh --profile local 5000000 10000000 --direct
+
+# (Optional) Run with a custom environment label to distinguish baremetal servers:
+./scripts/run_benchmark.sh --profile docker --env-label baremetal_vultr 10000 1000000
 ```
 
 Each orchestrated run writes `run_manifest.json` and embeds it as a **Run Configuration**

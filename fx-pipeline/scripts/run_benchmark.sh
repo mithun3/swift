@@ -3,25 +3,39 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 --profile <profile> <target-rate> <message-count> [--tcp|--direct]"
-    echo "Example: $0 --profile local 10000 1000000"
-    exit 1
-fi
-
-if [ "$1" != "--profile" ]; then
-    echo "Error: Must specify --profile <profile> as first arguments."
-    exit 1
-fi
-export PROFILE=$2
-TARGET_RATE=$3
-MESSAGE_COUNT=$4
-shift 4
-
+PROFILE=""
+ENV_LABEL=""
+TARGET_RATE=""
+MESSAGE_COUNT=""
 LOAD_MODE_FLAG="--tcp"
-if [ "${1:-}" = "--tcp" ] || [ "${1:-}" = "--direct" ]; then
-    LOAD_MODE_FLAG="$1"
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --profile) PROFILE="$2"; shift 2 ;;
+        --env-label) ENV_LABEL="$2"; shift 2 ;;
+        --tcp|--direct) LOAD_MODE_FLAG="$1"; shift ;;
+        *) 
+            if [ -z "$TARGET_RATE" ]; then
+                TARGET_RATE="$1"
+            elif [ -z "$MESSAGE_COUNT" ]; then
+                MESSAGE_COUNT="$1"
+            else
+                echo "Unknown parameter passed: $1"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$PROFILE" ] || [ -z "$TARGET_RATE" ] || [ -z "$MESSAGE_COUNT" ]; then
+    echo "Usage: $0 --profile <profile> [--env-label <label>] <target-rate> <message-count> [--tcp|--direct]"
+    echo "Example: $0 --profile local --env-label baremetal_vultr 10000 1000000"
+    exit 1
 fi
+
+export PROFILE
+export ENV_LABEL="${ENV_LABEL:-$PROFILE}"
 
 if [ ! -f "config/profiles/${PROFILE}.env" ]; then
     echo "Error: Profile config/profiles/${PROFILE}.env not found."
@@ -32,8 +46,8 @@ set -a
 source "config/profiles/${PROFILE}.env"
 set +a
 
-export FX_RUN_ID="${PROFILE}-$(date -u +%Y%m%dT%H%M%SZ)"
-RUN_OUTPUT_DIR=${FX_RUN_OUTPUT_DIR:-benchmark-runs/$FX_RUN_ID/$PROFILE}
+export FX_RUN_ID="${ENV_LABEL}-$(date -u +%Y%m%dT%H%M%SZ)"
+RUN_OUTPUT_DIR=${FX_RUN_OUTPUT_DIR:-benchmark-runs/$ENV_LABEL/$FX_RUN_ID}
 QUEUE_PATH="${FX_QUEUE_DIR}/queue-a"
 
 source "scripts/runners/${FX_EXECUTION_MODE}_runner.sh"

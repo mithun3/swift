@@ -77,7 +77,7 @@ fi
 python3 scripts/generate_run_manifest.py \
     --output "$MANIFEST_PATH" \
     --run-id "$FX_RUN_ID" \
-    --environment "$PROFILE" \
+    --environment "${ENV_LABEL:-$PROFILE}" \
     --target-rate "$TARGET_RATE" \
     --message-count "$MESSAGE_COUNT" \
     --actual-load-duration "${LOAD_DURATION_SECONDS:-0}" \

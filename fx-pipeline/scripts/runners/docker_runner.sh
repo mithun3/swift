@@ -8,18 +8,37 @@ runner_start_services() {
     fi
 
     # Set up cpuset variables
+    local ncpu=$(docker info --format '{{.NCPU}}')
+    local max_cpu=$((ncpu - 1))
+
+    if [ "$FX_CPU_PROFILE" = "auto" ]; then
+        if [ "$ncpu" -ge 10 ]; then
+            FX_CPU_PROFILE="desktop"
+        elif [ "$ncpu" -ge 5 ]; then
+            FX_CPU_PROFILE="isolated"
+        else
+            FX_CPU_PROFILE="host"
+        fi
+    fi
+
     if [ "$FX_CPU_PROFILE" = "desktop" ]; then
         export FX_SERV_0_CPUSET="${FX_SERV_0_CPUSET:-0,5}"
         export FX_SERV_A_CPUSET="${FX_SERV_A_CPUSET:-1,6}"
         export FX_SERV_B_CPUSET="${FX_SERV_B_CPUSET:-2,7}"
         export FX_SERV_C_CPUSET="${FX_SERV_C_CPUSET:-3,8,9}"
         export FX_BENCHMARK_CPUSET="${FX_BENCHMARK_CPUSET:-4,10}"
-    else
+    elif [ "$FX_CPU_PROFILE" = "isolated" ]; then
         export FX_SERV_0_CPUSET="${FX_SERV_0_CPUSET:-0}"
         export FX_SERV_A_CPUSET="${FX_SERV_A_CPUSET:-1}"
         export FX_SERV_B_CPUSET="${FX_SERV_B_CPUSET:-2}"
         export FX_SERV_C_CPUSET="${FX_SERV_C_CPUSET:-3}"
         export FX_BENCHMARK_CPUSET="${FX_BENCHMARK_CPUSET:-4}"
+    else
+        export FX_SERV_0_CPUSET="${FX_SERV_0_CPUSET:-0-${max_cpu}}"
+        export FX_SERV_A_CPUSET="${FX_SERV_A_CPUSET:-0-${max_cpu}}"
+        export FX_SERV_B_CPUSET="${FX_SERV_B_CPUSET:-0-${max_cpu}}"
+        export FX_SERV_C_CPUSET="${FX_SERV_C_CPUSET:-0-${max_cpu}}"
+        export FX_BENCHMARK_CPUSET="${FX_BENCHMARK_CPUSET:-0-${max_cpu}}"
     fi
 
     PIPELINE_SERVICES=(serv-c serv-b serv-a serv-0)

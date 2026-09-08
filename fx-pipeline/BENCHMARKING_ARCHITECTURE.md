@@ -243,6 +243,9 @@ scripts/build.sh
 
 # 3. Run Docker with the exact same workload for an environment comparison.
 ./scripts/run_docker_benchmark.sh 10000 1000000
+
+# 4. (Optional) Run with a custom environment label to distinguish baremetal servers.
+./scripts/run_benchmark.sh --profile docker --env-label baremetal_vultr 10000 1000000
 ```
 
 `run_local_benchmark.sh` rejects an existing `logs/services.pid`, starts from the cleanup
