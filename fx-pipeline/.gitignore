@@ -13,6 +13,7 @@ __pycache__/
 
 # Build / Output
 target/
+benchmark-runs/
 logs/
 fx-telemetry/
 fx-data/
