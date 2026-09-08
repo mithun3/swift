@@ -34,4 +34,4 @@ streamlit run reporting/app.py
 Streamlit will boot up a local web server (typically on `http://localhost:8501`) and automatically open a browser window displaying the interactive charts.
 
 ## Adding New Data
-The dashboard discovers runs dynamically. Whenever you execute a benchmark via `scripts/run_local_benchmark.sh` or `scripts/run_docker_benchmark.sh`, the results are automatically archived into `benchmark-runs/`. Simply refresh the Streamlit browser window to see the new runs appear in the sidebar selection!
+The dashboard discovers runs dynamically. Whenever you execute a benchmark via `scripts/run_benchmark.sh`, the results are automatically archived into `benchmark-runs/`. Simply refresh the Streamlit browser window to see the new runs appear in the sidebar selection!

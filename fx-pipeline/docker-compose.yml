@@ -79,7 +79,7 @@ services:
     volumes:
       - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
-    command: ["echo", "Use scripts/run_docker_benchmark.sh to run an explicit workload."]
+    command: ["echo", "Use scripts/run_benchmark.sh --profile docker to run an explicit workload."]
 
 volumes:
   fx-queues:

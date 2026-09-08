@@ -501,11 +501,8 @@ def main():
         A flat, horizontal line indicates excellent consistency (no GC pauses, no scheduling jitter).
         A steep "hockey stick" rising at P99+ indicates tail events caused by GC,
         mmap page faults, or OS preemption.</p>
-        <p>For historical root-cause analysis and the fixes already applied to this pipeline
-        (producer/consumer rate mismatch, ring-buffer/commit coupling, warm-up contamination,
-        the serv-0-vs-downstream sample-count discrepancy, etc.), see
-        <code>LATENCY_RCA.md</code> in the project root — it is kept in sync with the current
-        codebase rather than duplicated here as static text that would drift from real run data.</p>
+        <p>See <code>PERFORMANCE_TUNING.md</code> in the project root — it is kept in sync with the current
+        architecture constraints.</p>
     </div>
 """
 

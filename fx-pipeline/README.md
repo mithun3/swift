@@ -52,7 +52,7 @@ The system consists of **6 runnable modules/processes** communicating sequential
 ## Technical Constraints
 - **LMAX Philosophy:** Single-writer principle per queue, busy-spin wait strategies (`Thread.onSpinWait()`), memory-mapped IPC via Chronicle Queue.
 - **Zero-Allocation:** Mutable `FxMarketEvent` flyweights, primitive arrays, no `java.util.stream` or `String` manipulation in the hot path.
-- **Mechanical Sympathy:** CPU pinning via `AffinityLock.acquireLock(cpuCore)` inside each service thread, sequential cache-friendly access, 64 MB mmap blocks.
+- **Mechanical Sympathy:** Automated CPU pinning via `taskset` in startup scripts (reading `FX_*_CPUSET` from `.env` profiles) alongside `AffinityLock.acquireLock(cpuCore)` inside each service thread, sequential cache-friendly access, 64 MB mmap blocks.
 - **Per-Stage Telemetry:** T0 (ingress), T1 (serv-a entry), T2 (serv-b entry), T3 (serv-c entry) timestamps on every event. End-to-end latency written to HdrHistogram `.hlog` for tail-latency analysis.
 
 ---
@@ -240,15 +240,16 @@ The pipeline includes a coordinated-omission-aware load generator and an HdrHist
 ./scripts/start.sh
 ./scripts/run_benchmark.sh --profile local 5000000 10000000 --direct
 
-# (Optional) Run with a custom environment label to distinguish baremetal servers:
-./scripts/run_benchmark.sh --profile docker --env-label baremetal_vultr 10000 1000000
+# Bare metal benchmark with the same workload.
+# The environment label (e.g. baremetal_vultr) is automatically pulled from config/profiles/baremetal.env.
+./scripts/run_benchmark.sh --profile baremetal 10000 1000000
 ```
 
 Each orchestrated run writes `run_manifest.json` and embeds it as a **Run Configuration**
 table in `latency_report.html`. The manifest records the run ID, Git state, runtime,
-workload, transport, CPU and JVM configuration, exact histogram paths and timestamps,
+workload, transport, CPU model and JVM configuration, exact histogram paths and timestamps,
 and per-stage sample counts. Local and Docker runs are archived to
-`benchmark-runs/<run-id>/<environment>/`.
+`benchmark-runs/<environment>/<run-id>/`.
 
 To interactively compare these historical runs across different environments, use the built-in Streamlit dashboard:
 
@@ -259,47 +260,7 @@ pip3 install -r reporting/requirements.txt
 # Start the dashboard
 streamlit run reporting/app.py
 ```
-This launches a browser-based visualization that automatically discovers archived runs, calculates statistical deltas, and overlays multiple HdrHistogram latency curves.
-
----
-
-## Benchmark Results & Latency Analysis
-
-> **Run config:** 2,000,000 events sent in direct mode (LoadGenerator → queue-a); 1,221,641 events persisted.  
-> See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for methodology and the full RCA.
-
-### Per-Stage Summary
-
-| Stage | Measures | P50 | P99 | Max | Health |
-|---|---|---|---|---|---|
-| `serv-0` | FIX decode → queue-a write | 1 µs | 6 µs | 26 ms | ✅ Healthy |
-| `queue-a` | Wait: serv-0 ingress → serv-a entry | **733 ms** | **1,125 ms** | **1,128 ms** | 🔴 Critical |
-| `serv-a` | Risk validation processing | < 1 µs | < 1 µs | 137 µs | ✅ Healthy |
-| `queue-b` | Wait: serv-a exit → serv-b entry | 7.6 ms | 57.9 ms | 93.1 ms | 🟡 Degraded |
-| `serv-b` | Pricing engine processing | < 1 µs | < 1 µs | 10.7 ms | ✅ Healthy |
-| `queue-c` | Wait: serv-b exit → serv-c entry | **25.7 ms** | **4,995 ms** | **5,302 ms** | 🔴 Critical |
-| `serv-c` | Persistence hot-path (ring enqueue) | < 1 µs | 2 µs | 586 ms | 🟠 Tail issue |
-
-### Root Causes Identified
-
-**Queue-A — Producer-Consumer Rate Mismatch**
-
-The flat distribution (P50 → Max spans only ~400 ms) is the fingerprint of a *steady-state backlog*, not random spikes. The load generator ran at 5M events/sec while the pipeline sustained ~1–2M events/sec, building an ever-growing queue-a backlog. The ~778K events that never reached serv-c confirm the unconsumed tail.
-
-On macOS, `AffinityLock` thread-pinning is advisory — the OS scheduler can preempt serv-a threads for hundreds of milliseconds. True isolation requires Linux `isolcpus` (see `BENCHMARK_TUNING.md`).
-
-**Queue-C — Ring Buffer Saturation**
-
-`BatchPersistenceEngine.accumulate()` spin-waits when its async ring buffer is full. At 1M events/sec the previous 65,536-slot ring absorbed only ~65 ms of H2 commit burst. Any `executeBatch() + commit()` call longer than ~65 ms filled the ring, blocking the serv-c event loop and preventing it from draining queue-c — hence the P99 = 5 s cascade.
-
-### Fixes Applied
-
-| Fix | Location | Change |
-|---|---|---|
-| Ring buffer 8× larger | `BatchPersistenceEngine.java` | `RING_SIZE` 65,536 → 524,288 (covers ~524 ms burst @ 1M evt/sec) |
-| JDBC batch 8× larger | `BatchPersistenceEngine.java` | `MAX_BATCH` 4,096 → 32,768 — fewer H2 commits per unit time |
-| H2 URL fix | `PersistenceEventLoop.java` | Reverted invalid H2 1.x params (`LOG=0;UNDO_LOG=0`) — unsupported in H2 2.x MVStore |
-| Adaptive unit display | `scripts/generate_html_report.py` | Report now shows µs / ms / s per cell with severity heat-map and embedded RCA |
+This launches a browser-based visualization that automatically discovers archived runs, extracts CPU hardware information, calculates statistical deltas, and overlays multiple HdrHistogram latency curves utilizing Pandas Data-Grid Heatmaps, multi-dimensional filtering, and Variance Box Plots.
 
 ---
 

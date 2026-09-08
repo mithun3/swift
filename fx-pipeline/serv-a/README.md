@@ -53,4 +53,4 @@ Metrics from `fx-latency-serv-a.hlog` and `fx-latency-queue-a.hlog` (1,221,641 s
 
 **The queue-a wait time is the primary pipeline bottleneck.** The 733 ms P50 is not caused by serv-a running slowly — it is caused by the load generator injecting events faster than the downstream pipeline can consume them (producer-consumer rate mismatch). When serv-a *does* pick up an event, it processes it instantly; the 733 ms was spent sitting in the queue.
 
-On macOS, `AffinityLock` thread-pinning is advisory. The OS scheduler can preempt the serv-a thread for tens to hundreds of milliseconds, further compounding the backlog. True deterministic scheduling requires Linux `isolcpus` (see `BENCHMARK_TUNING.md`).
+On macOS, `AffinityLock` thread-pinning is advisory. The OS scheduler can preempt the serv-a thread for tens to hundreds of milliseconds, further compounding the backlog. True deterministic scheduling requires Linux `isolcpus` (see `PERFORMANCE_TUNING.md`).

@@ -8,6 +8,9 @@ To adhere to the Single Responsibility Principle, each script is designed to per
 * `start.sh` - Starts all native pipeline services (serv-c, serv-b, serv-a, serv-0, telemetry) in the correct consumer-first order.
 * `stop.sh` - Cleanly terminates all native pipeline services and cleans up PID files.
 
+## Infrastructure & Provisioning
+* `provision_rocky.sh` - Automates the configuration of a Rocky Linux host for ultra-low latency tuning (disabling hyperthreading, C-states, and isolating CPU cores).
+
 ## Benchmarking & Orchestration
 * `run_benchmark.sh` - The unified entrypoint for benchmarking. Orchestrates the end-to-end execution of a benchmark run based on a given configuration profile (`local`, `docker`, etc.).
 * `runners/native_runner.sh` - Execution strategy for native environments (macOS/Linux). Implements starting, warming up, measuring, and stopping native services.
