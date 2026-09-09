@@ -8,7 +8,7 @@ services:
       - IPC_LOCK
     cpuset: "${FX_SERV_C_CPUSET:-3}"
     volumes:
-      - fx-queues:/dev/shm/fx-queues/
+      - fx-queues:/tmp/fx-queues/
       - ./fx-data:/opt/fx-data
       - ./fx-telemetry:/tmp/fx-telemetry
     environment:
@@ -21,7 +21,7 @@ services:
     container_name: fx-telemetry
     network_mode: "host"
     volumes:
-      - fx-queues:/dev/shm/fx-queues/
+      - fx-queues:/tmp/fx-queues/
     environment:
       - FX_JVM_OPTS_OVERRIDE
       - FX_WAIT_STRATEGY
@@ -38,7 +38,7 @@ services:
       - IPC_LOCK
     cpuset: "${FX_SERV_B_CPUSET:-2}"
     volumes:
-      - fx-queues:/dev/shm/fx-queues/
+      - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
     environment:
       - FX_JVM_OPTS_OVERRIDE
@@ -56,7 +56,7 @@ services:
       - IPC_LOCK
     cpuset: "${FX_SERV_A_CPUSET:-1}"
     volumes:
-      - fx-queues:/dev/shm/fx-queues/
+      - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
     environment:
       - FX_JVM_OPTS_OVERRIDE
@@ -74,7 +74,7 @@ services:
       - IPC_LOCK
     cpuset: "${FX_SERV_0_CPUSET:-0}"
     volumes:
-      - fx-queues:/dev/shm/fx-queues/
+      - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
     environment:
       - FX_JVM_OPTS_OVERRIDE
@@ -92,7 +92,7 @@ services:
     environment:
       JAVA_TOOL_OPTIONS: "-Dfx.affinity.enabled=false"
     volumes:
-      - fx-queues:/dev/shm/fx-queues/
+      - fx-queues:/tmp/fx-queues/
       - ./fx-telemetry:/tmp/fx-telemetry
     command: ["echo", "Use scripts/run_benchmark.sh --profile docker to run an explicit workload."]
 
