@@ -4,6 +4,9 @@ import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -36,6 +39,7 @@ import java.util.Comparator;
 public final class QueuePreToucher {
 
     private static final long PRETOUCHER_INTERVAL_MILLIS = 10L;
+    private static final VarHandle INT_HANDLE = MethodHandles.byteBufferViewVarHandle(int[].class, ByteOrder.nativeOrder());
 
     private QueuePreToucher() {
         throw new UnsupportedOperationException("QueuePreToucher is a static factory");
@@ -69,11 +73,11 @@ public final class QueuePreToucher {
                         }
                         currentFile = latestFile;
                         // Map the new segment file
-                        final RandomAccessFile raf = new RandomAccessFile(currentFile, "r");
+                        final RandomAccessFile raf = new RandomAccessFile(currentFile, "rw");
                         channel = raf.getChannel();
                         final long size = channel.size();
                         if (size > 0) {
-                            buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
+                            buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, size);
                         }
                         touchedPosition = 0;
                     }
@@ -83,8 +87,10 @@ public final class QueuePreToucher {
                         // Pre-touch next 4 MB chunk per iteration (1000 pages of 4 KB)
                         final long targetPosition = Math.min(touchedPosition + (4 * 1024 * 1024), capacity);
                         while (touchedPosition < targetPosition) {
-                            // Read one byte to fault the page into the OS page cache
-                            buffer.get((int) touchedPosition);
+                            // Write one byte via CAS to fault the page into the OS page cache with WRITE permissions.
+                            // CAS ensures we only write if the appender hasn't reached here yet (memory is 0),
+                            // preventing data corruption if the hot-path appender overtakes the pretoucher.
+                            INT_HANDLE.compareAndSet(buffer, (int) touchedPosition, 0, 0);
                             touchedPosition += 4096; // advance by one 4KB page
                         }
                     }
