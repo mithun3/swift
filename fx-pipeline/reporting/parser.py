@@ -69,6 +69,7 @@ def extract_summary_stats(df: pd.DataFrame) -> Dict[str, float]:
     return {
         'P50': get_closest(0.50),
         'P90': get_closest(0.90),
+        'P95': get_closest(0.95),
         'P99': get_closest(0.99),
         'P99.9': get_closest(0.999),
         'P99.99': get_closest(0.9999),

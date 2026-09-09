@@ -149,6 +149,7 @@ def render_summary_tab(tab, all_datasets: List[Dict[str, Any]], sel_run_ids: Set
                 "Commit": info["commit"][:7],
                 "P50": stats['P50'],
                 "P90": stats['P90'],
+                "P95": stats.get('P95', 0.0),
                 "P99": stats['P99'],
                 "P99.9": stats['P99.9'],
                 "P99.99": stats.get('P99.99', 0.0),
@@ -181,7 +182,7 @@ def render_summary_tab(tab, all_datasets: List[Dict[str, Any]], sel_run_ids: Set
             mime='text/csv',
         )
         
-        numeric_cols = ["P50", "P90", "P99", "P99.9", "P99.99", "Max"]
+        numeric_cols = ["P50", "P90", "P95", "P99", "P99.9", "P99.99", "Max"]
         styled_df = df_summary.style.background_gradient(cmap='Blues', subset=numeric_cols).format({col: "{:,.2f}" if unit_divisor > 1 else "{:,.0f}" for col in numeric_cols})
         st.dataframe(styled_df, use_container_width=True)
         return df_summary
@@ -264,7 +265,7 @@ def render_stages_tab(tab, comp_datasets: List[Dict[str, Any]]):
             with col2:
                 comp_label = st.selectbox("Comparison Run", list(options.keys()), index=1, key="comp_run_sel")
             with col3:
-                metric = st.selectbox("Metric to Diff", ["P50", "P90", "P99", "P99.9", "P99.99", "Max"], index=2)
+                metric = st.selectbox("Metric to Diff", ["P50", "P90", "P95", "P99", "P99.9", "P99.99", "Max"], index=3)
                 
             base_stages = options[base_label].get("stages", {})
             comp_stages = options[comp_label].get("stages", {})
@@ -303,9 +304,63 @@ def render_stages_tab(tab, comp_datasets: List[Dict[str, Any]]):
         else:
             st.info("Please select at least 2 runs under **Select Runs to Compare** in the sidebar to diff stages.")
 
+def render_comprehensive_diff_tab(tab, comp_datasets: List[Dict[str, Any]]):
+    """
+    Renders the Comprehensive A/B Diff tab showing all metrics.
+    """
+    with tab:
+        st.header("Comprehensive A/B Diff")
+        options = {f"{d['info']['env'].upper()} - {d['info']['timestamp']}": d for d in comp_datasets}
+        if len(options) >= 2:
+            col1, col2 = st.columns(2)
+            with col1:
+                base_label = st.selectbox("Baseline Run", list(options.keys()), index=0, key="comp_base_run_sel")
+            with col2:
+                comp_label = st.selectbox("Comparison Run", list(options.keys()), index=1, key="comp_comp_run_sel")
+                
+            base_stages = options[base_label].get("stages", {})
+            comp_stages = options[comp_label].get("stages", {})
+            
+            if base_stages and comp_stages:
+                diff_records = []
+                metrics = ["P50", "P90", "P95", "P99", "P99.9", "P99.99", "Max"]
+                all_stages = set(base_stages.keys()).intersection(set(comp_stages.keys()))
+                for stage_name in all_stages:
+                    for metric in metrics:
+                        base_val = base_stages[stage_name].get(metric, 0) / unit_divisor
+                        comp_val = comp_stages[stage_name].get(metric, 0) / unit_divisor
+                        diff_val = comp_val - base_val
+                        pct_change = (diff_val / base_val * 100) if base_val > 0 else 0
+                        
+                        fmt = "{:,.2f}" if unit_divisor > 1 else "{:,.0f}"
+                        
+                        diff_records.append({
+                            "Stage": stage_name,
+                            "Metric": metric,
+                            "Base": fmt.format(base_val),
+                            "Comp": fmt.format(comp_val),
+                            "Delta": fmt.format(diff_val),
+                            "% Change": pct_change
+                        })
+                
+                stage_order = ['serv-0', 'queue-a', 'serv-a', 'queue-b', 'serv-b', 'queue-c', 'serv-c']
+                diff_records.sort(key=lambda x: (stage_order.index(x['Stage']) if x['Stage'] in stage_order else 99, metrics.index(x['Metric'])))
+                diff_df = pd.DataFrame(diff_records)
+                
+                def color_pct(val):
+                    color = 'red' if val > 5 else 'green' if val < -5 else 'gray'
+                    return f'color: {color}'
+                    
+                formatted_df = diff_df.style.map(color_pct, subset=['% Change']).format({"% Change": "{:+.2f}%"})
+                st.dataframe(formatted_df, use_container_width=True, height=600)
+            else:
+                st.warning("Missing stage breakdown data for selected runs.")
+        else:
+            st.info("Please select at least 2 runs under **Select Runs to Compare** in the sidebar to diff stages.")
+
 # Setup Tabs and Render
-tab_summary, tab_overlay, tab_trend, tab_variance, tab_stages = st.tabs([
-    "Summary Metrics", "Latency Overlay", "Trend Analysis", "Variance Box Plots", "Stage Breakdown"
+tab_summary, tab_overlay, tab_trend, tab_variance, tab_stages, tab_comp_diff = st.tabs([
+    "Summary Metrics", "Latency Overlay", "Trend Analysis", "Variance Box Plots", "Stage Breakdown", "Comprehensive A/B Diff"
 ])
 
 summary_df = render_summary_tab(tab_summary, all_run_datasets, selected_run_ids)
@@ -313,3 +368,4 @@ render_overlay_tab(tab_overlay, comparison_datasets)
 render_trend_tab(tab_trend, summary_df)
 render_variance_tab(tab_variance, summary_df)
 render_stages_tab(tab_stages, comparison_datasets)
+render_comprehensive_diff_tab(tab_comp_diff, comparison_datasets)

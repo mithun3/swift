@@ -25,7 +25,7 @@ echo "    Starting FX Pipeline Services"
 echo "=========================================="
 
 echo "Cleaning up old queues and telemetry..."
-rm -rf /tmp/fx-queues/*
+rm -rf "${FX_QUEUE_DIR:-/tmp/fx-queues}"/*
 rm -f "${FX_HLOG_DIR:-/tmp}"/fx-latency*.hlog
 
 
@@ -66,6 +66,7 @@ export JVM_OPTS="--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
 -XX:ZUncommitDelay=600 -XX:-ZUncommit \
 -XX:ZAllocationSpikeTolerance=3.0 -XX:CompileThreshold=500 -XX:+TieredCompilation \
 -Dfx.waitstrategy=${FX_WAIT_STRATEGY:-phased} \
+-Dfx.queue.base.dir=${FX_QUEUE_DIR:-/tmp/fx-queues} \
 -Dfx.telemetry.log.path=${FX_HLOG_DIR:-/tmp}/fx-latency.hlog \
 ${FX_JVM_OPTS_OVERRIDE:-} \
 $SELECTOR_OPT"
