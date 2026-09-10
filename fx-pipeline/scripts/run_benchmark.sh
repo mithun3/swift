@@ -50,6 +50,9 @@ export FX_RUN_ID="${ENV_LABEL}-$(date -u +%Y%m%dT%H%M%SZ)"
 RUN_OUTPUT_DIR=${FX_RUN_OUTPUT_DIR:-benchmark-runs/$ENV_LABEL/$FX_RUN_ID}
 QUEUE_PATH="${FX_QUEUE_DIR}/queue-a"
 
+# Create the output directory upfront for immediate visibility
+mkdir -p "$RUN_OUTPUT_DIR"
+
 source "scripts/runners/${FX_EXECUTION_MODE}_runner.sh"
 
 echo "==========================================="

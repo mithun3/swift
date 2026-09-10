@@ -3,7 +3,7 @@ import json
 import logging
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -54,27 +54,58 @@ def extract_summary_stats(df: pd.DataFrame) -> Dict[str, float]:
     """
     Extracts standard summary percentiles from a parsed .hgrm DataFrame.
     The values returned are in nanoseconds, maintaining the original scale.
-    
+    Also computes an approximate weighted mean from the cumulative histogram buckets.
+
     Args:
         df: Pandas DataFrame containing the parsed .hgrm data.
-        
+
     Returns:
-        Dictionary mapping percentile labels (e.g., 'P99') to latency values in nanoseconds.
+        Dictionary mapping labels (e.g. 'P99', 'Mean') to latency values in nanoseconds.
     """
     def get_closest(target: float) -> float:
-        # Find the row with Percentile closest to target
         idx = (df['Percentile'] - target).abs().idxmin()
-        return df.loc[idx, 'Value']
+        return float(df.loc[idx, 'Value'])
+
+    # Weighted mean approximation: derive per-bucket counts from cumulative TotalCount
+    df_sorted = df.sort_values('Value').reset_index(drop=True)
+    df_sorted['bucket_count'] = df_sorted['TotalCount'].diff().fillna(df_sorted['TotalCount'].iloc[0]).clip(lower=0)
+    total_weight = df_sorted['bucket_count'].sum()
+    mean_val = float(
+        (df_sorted['Value'] * df_sorted['bucket_count']).sum() / total_weight
+    ) if total_weight > 0 else 0.0
 
     return {
-        'P50': get_closest(0.50),
-        'P90': get_closest(0.90),
-        'P95': get_closest(0.95),
-        'P99': get_closest(0.99),
-        'P99.9': get_closest(0.999),
-        'P99.99': get_closest(0.9999),
-        'Max': df['Value'].max()
+        'Mean':    mean_val,
+        'P50':     get_closest(0.50),
+        'P90':     get_closest(0.90),
+        'P95':     get_closest(0.95),
+        'P99':     get_closest(0.99),
+        'P99.9':   get_closest(0.999),
+        'P99.99':  get_closest(0.9999),
+        'P99.999': get_closest(0.99999),
+        'Max':     float(df['Value'].max()),
     }
+
+
+def extract_percentile_at(df: pd.DataFrame, value_ns: float) -> float:
+    """
+    Given an absolute latency value in nanoseconds, returns the percentile
+    (0.0–1.0) at which that value falls in the histogram.
+    Useful for computing which percentile an SLA budget corresponds to.
+
+    Args:
+        df: Parsed .hgrm DataFrame.
+        value_ns: Latency threshold in nanoseconds.
+
+    Returns:
+        Percentile in [0.0, 1.0]. Returns 1.0 if value exceeds all histogram values.
+    """
+    if df is None or df.empty:
+        return 0.0
+    above = df[df['Value'] >= value_ns]
+    if above.empty:
+        return 1.0
+    return float(above.iloc[0]['Percentile'])
 
 def _parse_run_metadata(metadata_file: Path, env_name: str, run_id: str) -> Dict[str, Any]:
     """
@@ -127,7 +158,24 @@ def _parse_run_metadata(metadata_file: Path, env_name: str, run_id: str) -> Dict
     cpu_model = metadata.get("cpu_model", "Unknown")
     target_rate = metadata.get("target_rate_msgs_sec", "N/A")
     transport_mode = metadata.get("transport_mode", "tcp")
-    
+
+    # Raw integer message count for KPI cards and Regression Gate load comparison
+    message_count_raw: Optional[int] = None
+    raw_msg = metadata.get("message_count")
+    if raw_msg is not None:
+        try:
+            message_count_raw = int(raw_msg)
+        except (ValueError, TypeError):
+            pass
+
+    # Per-stage sample counts for Run Inspector drain validation
+    sample_count_per_stage: Dict[str, int] = {}
+    for stage_key, count_val in metadata.get("sample_counts", {}).items():
+        try:
+            sample_count_per_stage[stage_key] = int(count_val)
+        except (ValueError, TypeError):
+            pass
+
     return {
         "cpu_model": cpu_model,
         "target_rate": target_rate,
@@ -139,6 +187,8 @@ def _parse_run_metadata(metadata_file: Path, env_name: str, run_id: str) -> Dict
         "duration": duration,
         "total_samples": total_samples,
         "samples_per_sec": rate,
+        "message_count_raw": message_count_raw,
+        "sample_count_per_stage": sample_count_per_stage,
     }
 
 
