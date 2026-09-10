@@ -53,22 +53,29 @@ GRUB_FILE=/etc/default/grub
 REQUIRED_PARAMS="isolcpus=1-${MAX_CORE} nohz_full=1-${MAX_CORE} rcu_nocbs=1-${MAX_CORE} intel_idle.max_cstate=0 processor.max_cstate=0 idle=poll"
 
 if [ -f "$GRUB_FILE" ]; then
-    CURRENT_LINE=$(grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" | head -1)
-    NEEDS_UPDATE=false
-    for param in $REQUIRED_PARAMS; do
-        if ! echo "$CURRENT_LINE" | grep -qF "$param"; then
-            NEEDS_UPDATE=true
-            break
-        fi
-    done
-
-    if [ "$NEEDS_UPDATE" = true ]; then
-        cp "$GRUB_FILE" "${GRUB_FILE}.bak.$(date +%Y%m%d%H%M%S)"
-        sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"\(.*\)\"|GRUB_CMDLINE_LINUX_DEFAULT=\"\1 $REQUIRED_PARAMS\"|" "$GRUB_FILE"
+    CURRENT_LINE=$(grep -E '^GRUB_CMDLINE_LINUX(_DEFAULT)?=' "$GRUB_FILE" | head -1 || true)
+    
+    if [ -z "$CURRENT_LINE" ]; then
+        echo "GRUB_CMDLINE_LINUX=\"$REQUIRED_PARAMS\"" >> "$GRUB_FILE"
         echo "   Rebuilding GRUB config..."
         grub2-mkconfig -o /boot/grub2/grub.cfg
     else
-        echo "   All required GRUB parameters already present."
+        NEEDS_UPDATE=false
+        for param in $REQUIRED_PARAMS; do
+            if ! echo "$CURRENT_LINE" | grep -qF "$param"; then
+                NEEDS_UPDATE=true
+                break
+            fi
+        done
+
+        if [ "$NEEDS_UPDATE" = true ]; then
+            cp "$GRUB_FILE" "${GRUB_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+            sed -i -E "s|^(GRUB_CMDLINE_LINUX(_DEFAULT)?)=\"(.*)\"|\1=\"\3 $REQUIRED_PARAMS\"|" "$GRUB_FILE"
+            echo "   Rebuilding GRUB config..."
+            grub2-mkconfig -o /boot/grub2/grub.cfg
+        else
+            echo "   All required GRUB parameters already present."
+        fi
     fi
 else
     echo "   WARNING: $GRUB_FILE not found."
