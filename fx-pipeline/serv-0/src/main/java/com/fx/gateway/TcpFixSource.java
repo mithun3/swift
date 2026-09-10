@@ -62,6 +62,7 @@ public final class TcpFixSource implements GatewayEventLoop.FixMessageSource, Au
             if (activeClient == null) {
                 activeClient = serverChannel.accept(); // Non-blocking
                 if (activeClient != null) {
+                    activeClient.socket().setTcpNoDelay(true);
                     activeClient.configureBlocking(false);
                     logger.info("[TcpFixSource] Client connected: ", activeClient.getRemoteAddress());
                 }

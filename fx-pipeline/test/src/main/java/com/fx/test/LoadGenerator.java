@@ -247,6 +247,7 @@ public final class LoadGenerator {
     private static SocketChannel createSocketChannel() throws IOException {
         int port = Integer.getInteger("fx.load.port", 5001);
         SocketChannel channel = SocketChannel.open();
+        channel.socket().setTcpNoDelay(true);
         channel.socket().connect(new InetSocketAddress("127.0.0.1", port), CONNECT_TIMEOUT_MILLIS);
         channel.configureBlocking(false);
         return channel;
