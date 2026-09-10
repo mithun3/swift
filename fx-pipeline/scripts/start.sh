@@ -33,6 +33,14 @@ OS=$(uname)
 if [ "$OS" = "Linux" ]; then
     SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider"
     PREFIX_CMD=""
+    # Warn if the queue directory is not on a RAM-backed filesystem.
+    # Chronicle Queue's mmap segments must reside on tmpfs for sub-microsecond
+    # page-fault costs. /dev/shm is always tmpfs on Linux; /tmp may be ext4.
+    QUEUE_FS=$(stat -f -c '%T' "${FX_QUEUE_DIR:-/tmp/fx-queues}" 2>/dev/null || echo "unknown")
+    if [ "$QUEUE_FS" != "tmpfs" ]; then
+        echo "WARNING: Queue dir '${FX_QUEUE_DIR:-/tmp/fx-queues}' is on '$QUEUE_FS', not tmpfs."
+        echo "         Set FX_QUEUE_DIR=/dev/shm/fx-queues in your profile for sub-microsecond latency."
+    fi
 else
     SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.KQueueSelectorProvider"
     PREFIX_CMD="caffeinate -s"

@@ -76,8 +76,16 @@ else
     RUNTIME_ARCH=$(uname -m)
     JVM_OPTIONS="${FX_JVM_OPTS_OVERRIDE:-default}"
     JDK_VERSION=$(java -version 2>&1 | head -n 1)
-    CPUSETS_JSON="{}"
-    CPU_PROFILE="host"
+    # Record the actual taskset cpusets from the loaded profile (non-empty only).
+    # An empty cpuset string means "unconstrained" (no taskset applied to that service).
+    if [ -n "${FX_SERV_0_CPUSET:-}${FX_SERV_A_CPUSET:-}${FX_SERV_B_CPUSET:-}${FX_SERV_C_CPUSET:-}${FX_BENCHMARK_CPUSET:-}" ]; then
+        CPUSETS_JSON=$(printf '{"serv-0":"%s","serv-a":"%s","serv-b":"%s","serv-c":"%s","benchmark":"%s","telemetry":"unconstrained"}' \
+            "${FX_SERV_0_CPUSET:-}" "${FX_SERV_A_CPUSET:-}" "${FX_SERV_B_CPUSET:-}" \
+            "${FX_SERV_C_CPUSET:-}" "${FX_BENCHMARK_CPUSET:-}")
+    else
+        CPUSETS_JSON="{}"
+    fi
+    CPU_PROFILE="${FX_CPU_PROFILE:-host}"
 fi
 
 python3 scripts/generate_run_manifest.py \

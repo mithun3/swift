@@ -50,8 +50,16 @@ import net.openhft.chronicle.queue.ExcerptAppender;
  */
 public final class GatewayEventLoop extends AbstractEventLoop {
 
-    /** CPU core for the gateway thread. Core 0 handles FIX ingestion. */
-    public static final int CPU_CORE = 0;
+    /**
+     * CPU core for the gateway thread.
+     *
+     * <p>Resolved from the system property {@code fx.serv-0.cpucore} at class load
+     * (see {@link AbstractEventLoop#resolveCpuCore}), defaulting to {@code 0} when
+     * no property is set. Set {@code -Dfx.serv-0.cpucore=1} in {@code baremetal.env}
+     * to align with {@code FX_SERV_0_CPUSET="1"} and ensure AffinityLock pins to
+     * the same core that {@code taskset} already assigned.
+     */
+    public static final int CPU_CORE = resolveCpuCore("serv-0", 0);
 
     /** The FIX byte-level parser — pre-allocated, stateful (holds temp buffers). */
     private final FixDecoder decoder;

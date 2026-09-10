@@ -38,8 +38,16 @@ import net.openhft.chronicle.queue.ExcerptAppender;
  */
 public final class RiskValidationEventLoop extends AbstractEventLoop {
 
-    /** CPU core for the risk validation thread. Core 1 is isolated from the gateway. */
-    public static final int CPU_CORE = 1;
+    /**
+     * CPU core for the risk validation thread.
+     *
+     * <p>Resolved from the system property {@code fx.serv-a.cpucore} at class load
+     * (see {@link AbstractEventLoop#resolveCpuCore}), defaulting to {@code 1} when
+     * no property is set. Set {@code -Dfx.serv-a.cpucore=2} in {@code baremetal.env}
+     * to align with {@code FX_SERV_A_CPUSET="2"} and ensure AffinityLock pins to
+     * the same core that {@code taskset} already assigned.
+     */
+    public static final int CPU_CORE = resolveCpuCore("serv-a", 1);
 
     /**
      * The credit check engine — stateless, allocation-free validation logic.

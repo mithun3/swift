@@ -3,12 +3,13 @@ package com.fx.common.queue;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
 
 import java.io.File;
-import java.io.RandomAccessFile;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -29,85 +30,167 @@ import java.util.Comparator;
  * <p>
  * Since Chronicle Queue 2026.x moved its native Pretoucher to Enterprise-only (and the
  * open-source fallback triggers an infinite recursion bug), this daemon manually discovers
- * the latest {@code .cq4} file, maps it via {@link FileChannel#map}, and reads a single
- * byte per 4 KB page in a low-priority thread. When the hot-path appender reaches those
- * pages, they are already in the page cache.
+ * the latest {@code .cq4} file, maps it via {@link FileChannel#open}, and performs a
+ * compare-and-set on one {@code int} per 4 KB page in a low-priority thread. When the
+ * hot-path appender reaches those pages, they are already in the page cache.
+ *
+ * <h2>VarHandle element-index contract</h2>
+ * <p>
+ * {@link #INT_HANDLE} is created with
+ * {@code MethodHandles.byteBufferViewVarHandle(int[].class, ...)}, which views the
+ * {@link java.nio.ByteBuffer} as an {@code int[]}. Its index parameter is an
+ * <b>int-element index</b> — each element spans {@link Integer#BYTES} = 4 bytes —
+ * <em>not</em> a byte offset. To touch the page starting at byte offset {@code N},
+ * the correct element index is {@code N / Integer.BYTES}.
+ *
+ * <h2>Resource management</h2>
+ * <p>
+ * {@link FileChannel#open} is used in preference to
+ * {@code new RandomAccessFile(...).getChannel()} because {@code FileChannel.open}
+ * is self-contained: {@code close()} releases its file descriptor directly.
+ * The two-step approach requires closing <em>both</em> the channel and the
+ * {@code RandomAccessFile}; omitting either leaks a file descriptor per segment roll.
+ *
+ * <h2>Crash-loop protection</h2>
+ * <p>
+ * If an unexpected exception escapes the inner pre-touch loop, {@code touchedPosition}
+ * is reset to {@code 0}. Without this reset the daemon would re-enter immediately with
+ * the same bad offset and spin at 10 ms/iteration making no forward progress.
  *
  * @author FX Pipeline Team
- * @version 1.0.1
+ * @version 1.0.2
  */
 public final class QueuePreToucher {
 
+    /** Interval between pre-touch passes when the segment is fully touched or no file exists. */
     private static final long PRETOUCHER_INTERVAL_MILLIS = 10L;
-    private static final VarHandle INT_HANDLE = MethodHandles.byteBufferViewVarHandle(int[].class, ByteOrder.nativeOrder());
+
+    /**
+     * VarHandle for performing a compare-and-set on a {@link java.nio.ByteBuffer}
+     * viewed as an {@code int[]}.
+     *
+     * <p><b>Element-index contract:</b> the index argument is an <em>int-element index</em>
+     * — each element spans {@link Integer#BYTES} bytes. To access the int at byte offset
+     * {@code N}, pass {@code N / Integer.BYTES}.
+     *
+     * <p>The CAS with {@code expected=0, desired=0} forces a read-modify-write cycle that
+     * faults the page into the OS page cache with write permissions, without modifying
+     * any data already written by the Chronicle Queue appender.
+     */
+    private static final VarHandle INT_HANDLE =
+            MethodHandles.byteBufferViewVarHandle(int[].class, ByteOrder.nativeOrder());
 
     private QueuePreToucher() {
-        throw new UnsupportedOperationException("QueuePreToucher is a static factory");
+        throw new UnsupportedOperationException("QueuePreToucher is a static utility class");
     }
 
+    /**
+     * Starts a background pre-touch daemon for the given Chronicle Queue.
+     *
+     * <p>The daemon runs at {@link Thread#MIN_PRIORITY} so it does not compete with
+     * hot-path event loop threads for CPU budget. It is a daemon thread so the JVM
+     * will not wait for it on shutdown.
+     *
+     * @param queue the Chronicle Queue whose segment files should be pre-touched
+     */
     public static void start(final SingleChronicleQueue queue) {
         final File queueDir = new File(queue.fileAbsolutePath());
 
-        final Thread daemon = Thread.ofPlatform()
+        Thread.ofPlatform()
                 .name("pretoucher-" + queueDir.getName())
                 .daemon(true)
                 .priority(Thread.MIN_PRIORITY)
-                .unstarted(() -> runLoop(queueDir));
-
-        daemon.start();
+                .start(() -> runLoop(queueDir));
     }
 
     private static void runLoop(final File queueDir) {
         File currentFile = null;
         FileChannel channel = null;
         MappedByteBuffer buffer = null;
-        long touchedPosition = 0;
+        long touchedPosition = 0L;
 
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 final File latestFile = getLatestCq4File(queueDir);
                 if (latestFile != null) {
-                    if (currentFile == null || !currentFile.equals(latestFile)) {
-                        if (channel != null) {
-                            try { channel.close(); } catch (Exception ignored) {}
-                        }
+
+                    // On segment roll, open the new file and map it for pre-touching.
+                    if (!latestFile.equals(currentFile)) {
+                        closeQuietly(channel);
                         currentFile = latestFile;
-                        // Map the new segment file
-                        final RandomAccessFile raf = new RandomAccessFile(currentFile, "rw");
-                        channel = raf.getChannel();
+                        // FileChannel.open is self-contained: close() releases the fd.
+                        // Prefer this to RandomAccessFile.getChannel(), which requires
+                        // closing both the channel and the RandomAccessFile separately
+                        // to avoid a file-descriptor leak on each segment roll.
+                        channel = FileChannel.open(currentFile.toPath(),
+                                StandardOpenOption.READ, StandardOpenOption.WRITE);
                         final long size = channel.size();
-                        if (size > 0) {
-                            buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, size);
-                        }
-                        touchedPosition = 0;
+                        buffer = (size > 0)
+                                ? channel.map(FileChannel.MapMode.READ_WRITE, 0, size)
+                                : null;
+                        touchedPosition = 0L;
                     }
 
                     if (buffer != null) {
-                        final int capacity = buffer.capacity();
-                        // Pre-touch next 4 MB chunk per iteration (1000 pages of 4 KB)
-                        final long targetPosition = Math.min(touchedPosition + (4 * 1024 * 1024), capacity);
-                        while (touchedPosition < targetPosition) {
-                            // Write one byte via CAS to fault the page into the OS page cache with WRITE permissions.
-                            // CAS ensures we only write if the appender hasn't reached here yet (memory is 0),
-                            // preventing data corruption if the hot-path appender overtakes the pretoucher.
-                            INT_HANDLE.compareAndSet(buffer, (int) touchedPosition, 0, 0);
-                            touchedPosition += 4096; // advance by one 4KB page
-                        }
+                        preTouchNextChunk(buffer, touchedPosition);
+                        // Advance past this chunk. Cap at capacity so the next
+                        // iteration skips the inner loop once the segment is fully touched.
+                        touchedPosition = Math.min(
+                                touchedPosition + (4L * 1024L * 1024L),
+                                buffer.capacity());
                     }
                 }
                 Thread.sleep(PRETOUCHER_INTERVAL_MILLIS);
+
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
-                // File might be locked or unmapped temporarily, ignore and retry next cycle
+                // An unexpected error (e.g., buffer unmapped during a roll) could leave
+                // touchedPosition at an invalid offset. Reset to 0 so the next iteration
+                // retries from the start of the current segment rather than spinning
+                // forever on the same failing offset.
+                touchedPosition = 0L;
             }
         }
 
-        if (channel != null) {
-            try { channel.close(); } catch (Exception ignored) {}
+        closeQuietly(channel);
+    }
+
+    /**
+     * Pre-touches the next 4 MB chunk of the buffer, starting at {@code fromPosition}.
+     *
+     * <p>Performs one {@link VarHandle} compare-and-set per 4 KB page. The CAS uses
+     * {@code expected=0, desired=0}: if the appender has already written non-zero data
+     * to this page the CAS fails silently — the page fault still occurs on the attempt,
+     * which is the goal.
+     *
+     * <p><b>Element-index calculation:</b> {@link #INT_HANDLE} views the buffer as an
+     * {@code int[]}. The index must be {@code byteOffset / Integer.BYTES} because each
+     * int element spans {@link Integer#BYTES} = 4 bytes.
+     *
+     * @param buffer       the memory-mapped segment buffer
+     * @param fromPosition byte offset at which to start this chunk
+     */
+    private static void preTouchNextChunk(final MappedByteBuffer buffer, final long fromPosition) {
+        final int capacity = buffer.capacity();
+        final long limit = Math.min(fromPosition + (4L * 1024L * 1024L), capacity);
+        long pos = fromPosition;
+
+        while (pos < limit) {
+            // Divide by Integer.BYTES to convert byte offset → int-element index.
+            // Each 4 KB page boundary at byte offset N is at element index N / 4.
+            INT_HANDLE.compareAndSet(buffer, (int) (pos / Integer.BYTES), 0, 0);
+            pos += 4096L; // advance by one OS page (4 KB)
         }
     }
 
+    /**
+     * Returns the most recently modified {@code .cq4} file in the queue directory,
+     * or {@code null} if none exist.
+     *
+     * @param dir the Chronicle Queue data directory
+     * @return the latest {@code .cq4} file, or {@code null}
+     */
     private static File getLatestCq4File(final File dir) {
         final File[] files = dir.listFiles((d, name) -> name.endsWith(".cq4"));
         if (files == null || files.length == 0) {
@@ -116,5 +199,23 @@ public final class QueuePreToucher {
         return Arrays.stream(files)
                 .max(Comparator.comparingLong(File::lastModified))
                 .orElse(null);
+    }
+
+    /**
+     * Closes the given {@link FileChannel} silently, ignoring any {@link IOException}.
+     *
+     * <p>Used in the pre-touch loop where a close failure is non-fatal: the OS will
+     * reclaim the file descriptor when the object is garbage-collected.
+     *
+     * @param channel the channel to close; {@code null} is a no-op
+     */
+    private static void closeQuietly(final FileChannel channel) {
+        if (channel != null) {
+            try {
+                channel.close();
+            } catch (final IOException ignored) {
+                // Non-fatal — the OS will reclaim the fd at the next GC cycle.
+            }
+        }
     }
 }

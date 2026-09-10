@@ -114,3 +114,42 @@ This removes the `fx-pipeline_fx-queues` volume. It does not remove the bind-mou
 ```bash
 rm -rf ./fx-data/* ./fx-telemetry/*
 ```
+
+## 7. Pre-flight Verification Checklist (Baremetal)
+
+Run these commands **on the Vultr server before every benchmark** to confirm all OS tuning is active. Any failure should be remediated via `scripts/setup_baremetal_os.sh` before proceeding.
+
+| Check | Command | Expected output |
+|---|---|---|
+| GRUB params applied | `cat /proc/cmdline \| grep isolcpus` | `isolcpus=1-5` |
+| SMT disabled | `cat /sys/devices/system/cpu/smt/active` | `0` |
+| CPU cores isolated | `cat /sys/devices/system/cpu/isolated` | `1-5` |
+| Timer ticks disabled | `cat /sys/devices/system/cpu/nohz_full` | `1-5` |
+| THP set to madvise | `cat /sys/kernel/mm/transparent_hugepage/enabled` | `[madvise]` |
+| CPU governor | `cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor` | `performance` |
+| Logical core count | `nproc` | `4` (not 8, SMT disabled) |
+| Queue on tmpfs | `stat -f -c '%T' /dev/shm/fx-queues` | `tmpfs` |
+
+Quick one-liner to verify all at once:
+```bash
+echo "SMT=$(cat /sys/devices/system/cpu/smt/active) isolated=$(cat /sys/devices/system/cpu/isolated) thp=$(cat /sys/kernel/mm/transparent_hugepage/enabled | grep -o '\w*' | head -1) gov=$(cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor) nproc=$(nproc)"
+# Expected: SMT=0 isolated=1-5 thp=madvise gov=performance nproc=4
+```
+
+## 8. Known Application-Level Pitfalls
+
+### THP + QueuePreToucher Interaction (Fixed in v1.0.2)
+
+**Symptom:** Baremetal queue-a P50 is ~200µs instead of <5µs. Bimodal latency distribution. Max latency of 10–38ms.
+
+**Root cause (two compounding bugs):**
+
+1. **`QueuePreToucher` VarHandle indexing bug (fixed):** `byteBufferViewVarHandle(int[].class, ...)` requires an *int-element index* (`byteOffset / Integer.BYTES`), not a raw byte offset. The bug caused the pretoucher to touch only every 4th page (6.2% coverage) and crash silently at 32 MB, leaving 93.8% of the 128 MB segment unfaulted.
+
+2. **`-XX:+UseTransparentHugePages` in Linux profiles (removed):** Rocky Linux 9 defaults system THP to `always`. As the hot-path producer faulted each unfaulted page, `khugepaged` acquired `mmap_lock` (write) to coalesce 4 KB pages to 2 MB huge pages, stalling hot-path threads for 1–50 ms per coalescing event.
+
+**Fix:** `QueuePreToucher` v1.0.2 corrects the VarHandle index formula, fixes the `RandomAccessFile` fd leak, and adds a crash-loop guard. `-XX:+UseTransparentHugePages` is removed from all Linux profiles. `setup_baremetal_os.sh` sets system THP to `madvise`.
+
+**Why `local.env` intentionally omits `-XX:+UseTransparentHugePages`:** macOS does not support THP; the flag is silently ignored. The local profile uses a native HFS+ RAM disk where page faults cost ~100–500 ns regardless — making the pretoucher a no-op. This is the correct configuration and must not be changed.
+
+**Cross-environment validation:** Mac Docker (Linux VM with THP + broken pretoucher) showed P50 = 4,026,367 ns — **1,638× slower than Mac native** (2,459 ns). This confirms the bugs alone, without any OS configuration difference, account for most of the observed latency gap.

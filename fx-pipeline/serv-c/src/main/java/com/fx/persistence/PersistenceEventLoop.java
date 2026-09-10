@@ -51,8 +51,16 @@ import java.sql.SQLException;
  */
 public final class PersistenceEventLoop extends AbstractEventLoop {
 
-    /** CPU core for the persistence thread. Core 3 is isolated from all other services. */
-    public static final int CPU_CORE = 3;
+    /**
+     * CPU core for the persistence thread.
+     *
+     * <p>Resolved from the system property {@code fx.serv-c.cpucore} at class load
+     * (see {@link AbstractEventLoop#resolveCpuCore}), defaulting to {@code 3} when
+     * no property is set. Set {@code -Dfx.serv-c.cpucore=4} in {@code baremetal.env}
+     * to align with {@code FX_SERV_C_CPUSET="4"} and ensure AffinityLock pins to
+     * the same core that {@code taskset} already assigned.
+     */
+    public static final int CPU_CORE = resolveCpuCore("serv-c", 3);
 
     /**
      * Default JDBC URL for the H2 2.x in-memory database (MVStore engine).

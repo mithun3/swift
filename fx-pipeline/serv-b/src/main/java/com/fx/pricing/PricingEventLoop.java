@@ -31,8 +31,16 @@ import net.openhft.chronicle.queue.ExcerptAppender;
  */
 public final class PricingEventLoop extends AbstractEventLoop {
 
-    /** CPU core for the pricing thread — isolated from serv-0 (core 0) and serv-a (core 1). */
-    public static final int CPU_CORE = 2;
+    /**
+     * CPU core for the pricing thread.
+     *
+     * <p>Resolved from the system property {@code fx.serv-b.cpucore} at class load
+     * (see {@link AbstractEventLoop#resolveCpuCore}), defaulting to {@code 2} when
+     * no property is set. Set {@code -Dfx.serv-b.cpucore=3} in {@code baremetal.env}
+     * to align with {@code FX_SERV_B_CPUSET="3"} and ensure AffinityLock pins to
+     * the same core that {@code taskset} already assigned.
+     */
+    public static final int CPU_CORE = resolveCpuCore("serv-b", 2);
 
     /** Stateless spread computation engine — pre-allocated once. */
     private final SpreadEngine spreadEngine;

@@ -84,8 +84,35 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
     private static final long DRAIN_TIMEOUT_MILLIS =
             Long.getLong("fx.eventloop.drainTimeoutMillis", 30_000L);
 
-        private static final boolean AFFINITY_ENABLED =
+    private static final boolean AFFINITY_ENABLED =
             Boolean.parseBoolean(System.getProperty("fx.affinity.enabled", "true"));
+
+    /**
+     * Resolves the CPU core to pin a named event loop to.
+     *
+     * <p>Reads the system property {@code fx.<serviceName>.cpucore} first,
+     * falling back to {@code defaultCore} when the property is absent or unparseable.
+     * This follows the same {@code Integer.getInteger} convention used by
+     * {@link #DRAIN_TIMEOUT_MILLIS} and {@link #AFFINITY_ENABLED}, allowing
+     * runtime configuration without recompilation:
+     * <pre>
+     *   # baremetal.env — align AffinityLock with the taskset cpuset assignment:
+     *   -Dfx.serv-a.cpucore=2   (matches FX_SERV_A_CPUSET="2")
+     * </pre>
+     *
+     * <p>Property keys follow the {@code fx.*} namespace used throughout this
+     * codebase (see {@link com.fx.common.queue.QueuePaths},
+     * {@link com.fx.common.handler.WaitStrategy}).
+     *
+     * @param serviceName the short service name, e.g. {@code "serv-a"}, used to
+     *                    build the property key {@code fx.<serviceName>.cpucore}
+     * @param defaultCore the core index when no system property is set;
+     *                    {@code -1} disables CPU pinning
+     * @return the resolved CPU core index
+     */
+    protected static int resolveCpuCore(final String serviceName, final int defaultCore) {
+        return Integer.getInteger("fx." + serviceName + ".cpucore", defaultCore);
+    }
 
     /** Human-readable name for this event loop (used in thread naming and logs). */
     protected final String name;
