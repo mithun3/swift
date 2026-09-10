@@ -48,19 +48,42 @@ transport_modes = list(set(r.get("transport_mode", "tcp") for r in runs))
 target_rates = list(set(r.get("target_rate", "N/A") for r in runs))
 
 st.sidebar.header("Filters")
+
+time_filter_options = {
+    "All Time": None,
+    "Last 30 Mins": pd.Timedelta(minutes=30),
+    "Last 1 Hour": pd.Timedelta(hours=1),
+    "Last 2 Hours": pd.Timedelta(hours=2),
+    "Last 4 Hours": pd.Timedelta(hours=4),
+    "Last 12 Hours": pd.Timedelta(hours=12),
+    "Last 24 Hours": pd.Timedelta(hours=24),
+    "Last 7 Days": pd.Timedelta(days=7),
+    "Last 30 Days": pd.Timedelta(days=30),
+}
+selected_time_filter = st.sidebar.selectbox("Time Range", list(time_filter_options.keys()), index=0)
+
 selected_envs = st.sidebar.multiselect("Environments", environments, default=environments)
 selected_cpus = st.sidebar.multiselect("CPU Models", cpu_models, default=cpu_models)
 selected_transports = st.sidebar.multiselect("Transport Mode", transport_modes, default=transport_modes)
 selected_rates = st.sidebar.multiselect("Target Rate", target_rates, default=target_rates)
 
 # Filter runs
-filtered_runs = [
-    r for r in runs 
-    if r["env"] in selected_envs 
-    and r.get("cpu_model", "Unknown") in selected_cpus
-    and r.get("transport_mode", "tcp") in selected_transports
-    and r.get("target_rate", "N/A") in selected_rates
-]
+now = pd.Timestamp.utcnow()
+filtered_runs = []
+for r in runs:
+    if selected_time_filter != "All Time":
+        try:
+            run_time = pd.to_datetime(r["timestamp"], utc=True)
+            if (now - run_time) > time_filter_options[selected_time_filter]:
+                continue
+        except Exception as e:
+            logger.warning("Could not parse timestamp for run %s: %s", r.get("run_id"), e)
+            
+    if (r["env"] in selected_envs 
+        and r.get("cpu_model", "Unknown") in selected_cpus
+        and r.get("transport_mode", "tcp") in selected_transports
+        and r.get("target_rate", "N/A") in selected_rates):
+        filtered_runs.append(r)
 
 # Group by environment for the selector
 env_to_runs = defaultdict(list)

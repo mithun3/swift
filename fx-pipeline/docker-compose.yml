@@ -106,4 +106,4 @@ volumes:
       # uid=0,gid=0: owned by root inside the VM — matches container user context
       # On macOS Docker Desktop this still goes through VirtioFS; on Linux hosts
       # swap device: tmpfs for /dev/shm bind or huge=within_size for THP support.
-      o: "size=8G,mode=1777,uid=0,gid=0,huge=within_size"
+      o: "size=16G,mode=1777,uid=0,gid=0,huge=within_size"

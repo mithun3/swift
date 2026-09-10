@@ -138,18 +138,31 @@ echo "SMT=$(cat /sys/devices/system/cpu/smt/active) isolated=$(cat /sys/devices/
 
 ## 8. Known Application-Level Pitfalls
 
-### THP + QueuePreToucher Interaction (Fixed in v1.0.2)
+### 8.1. THP + QueuePreToucher Interaction (Fixed in v1.0.2)
 
 **Symptom:** Baremetal queue-a P50 is ~200µs instead of <5µs. Bimodal latency distribution. Max latency of 10–38ms.
 
 **Root cause (two compounding bugs):**
 
-1. **`QueuePreToucher` VarHandle indexing bug (fixed):** `byteBufferViewVarHandle(int[].class, ...)` requires an *int-element index* (`byteOffset / Integer.BYTES`), not a raw byte offset. The bug caused the pretoucher to touch only every 4th page (6.2% coverage) and crash silently at 32 MB, leaving 93.8% of the 128 MB segment unfaulted.
+1. **`QueuePreToucher` VarHandle byte-offset bug (fixed):** Initially, it was believed that `byteBufferViewVarHandle(int[].class, ...)` required an *int-element index* (`byteOffset / Integer.BYTES`). However, in Java 9+ it actually requires a **raw byte offset**. The previous code divided the offset by 4, causing the pretoucher to hit the same 4KB page multiple times and only ever reach byte offset 32 MB before the loop terminated. This left 93.8% (96 MB) of the 128 MB segment completely unfaulted.
 
 2. **`-XX:+UseTransparentHugePages` in Linux profiles (removed):** Rocky Linux 9 defaults system THP to `always`. As the hot-path producer faulted each unfaulted page, `khugepaged` acquired `mmap_lock` (write) to coalesce 4 KB pages to 2 MB huge pages, stalling hot-path threads for 1–50 ms per coalescing event.
 
-**Fix:** `QueuePreToucher` v1.0.2 corrects the VarHandle index formula, fixes the `RandomAccessFile` fd leak, and adds a crash-loop guard. `-XX:+UseTransparentHugePages` is removed from all Linux profiles. `setup_baremetal_os.sh` sets system THP to `madvise`.
+**Fix:** `QueuePreToucher` v1.0.2 corrects the VarHandle byte offset formula (adhering to zero GC and Disruptor principles by offloading page faults), fixes the `RandomAccessFile` fd leak, and adds a crash-loop guard. `-XX:+UseTransparentHugePages` is removed from all Linux profiles. `setup_baremetal_os.sh` sets system THP to `madvise`.
+
+**Gotcha: Why wasn't this caught at 10,000 TPS?**
+In earlier tests at 10,000 TPS, a 1,000,000 message payload generated total data volumes that fit entirely within the pre-touched 32 MB boundary. The bug remained completely hidden because the hot-path producer never advanced into the unfaulted regions. At higher throughputs (25,000 or 50,000 TPS) or larger volumes, the producer breached the 32 MB mark, suddenly exposing the 96 MB of unfaulted pages and triggering massive latency spikes.
 
 **Why `local.env` intentionally omits `-XX:+UseTransparentHugePages`:** macOS does not support THP; the flag is silently ignored. The local profile uses a native HFS+ RAM disk where page faults cost ~100–500 ns regardless — making the pretoucher a no-op. This is the correct configuration and must not be changed.
 
 **Cross-environment validation:** Mac Docker (Linux VM with THP + broken pretoucher) showed P50 = 4,026,367 ns — **1,638× slower than Mac native** (2,459 ns). This confirms the bugs alone, without any OS configuration difference, account for most of the observed latency gap.
+
+### 8.2. taskset vs isolcpus Conflict
+
+**Symptom:** End-to-end latency stuck in the multi-millisecond range (~2.8ms) on bare-metal Linux despite `isolcpus` being configured correctly.
+
+**Root cause:** Launching the JVM via `taskset -c 0,X` to allow background threads on Core 0 and the event loop on Core X overrides the `isolcpus` kernel parameter. The OS scheduler treats Core X as explicitly permitted for that process, and will dynamically migrate heavy background threads (like GC or the JDBC `db-writer`) onto the isolated Core X to balance load. These background threads then preempt the hot-path event loop, causing millisecond-scale latency spikes.
+
+Attempting to fix this by using `taskset -c 0` also fails, because OpenHFT `AffinityLock` natively respects the process's allowed CPU mask; it will silently fail to acquire Core X (reporting "CPU affinity unavailable") and leave the event loop stranded on Core 0 alongside the background threads.
+
+**Fix:** Do **not** use `taskset` for JVMs on bare-metal systems. Launch the JVM without CPU restrictions. Because the isolated cores are marked as `isolcpus`, the Linux scheduler will automatically restrict all naturally spawned JVM threads to the housekeeping core (Core 0). Inside the Java code, `AffinityLock.acquireLock(X)` will use a native JNI `sched_setaffinity` system call to pull *only* the single event-loop thread over to the isolated core, achieving perfect mechanical sympathy.

@@ -34,14 +34,14 @@ import java.util.Comparator;
  * compare-and-set on one {@code int} per 4 KB page in a low-priority thread. When the
  * hot-path appender reaches those pages, they are already in the page cache.
  *
- * <h2>VarHandle element-index contract</h2>
+ * <h2>VarHandle byte-offset contract</h2>
  * <p>
  * {@link #INT_HANDLE} is created with
  * {@code MethodHandles.byteBufferViewVarHandle(int[].class, ...)}, which views the
- * {@link java.nio.ByteBuffer} as an {@code int[]}. Its index parameter is an
- * <b>int-element index</b> — each element spans {@link Integer#BYTES} = 4 bytes —
- * <em>not</em> a byte offset. To touch the page starting at byte offset {@code N},
- * the correct element index is {@code N / Integer.BYTES}.
+ * {@link java.nio.ByteBuffer} as an {@code int[]}. In Java 9+, its index parameter is a
+ * <b>raw byte offset</b>, <em>not</em> an element index. To touch the page starting at
+ * byte offset {@code N}, the correct coordinate is {@code N}. This operation using
+ * primitive types ensures zero-allocation (Zero GC) overhead.
  *
  * <h2>Resource management</h2>
  * <p>
@@ -69,9 +69,9 @@ public final class QueuePreToucher {
      * VarHandle for performing a compare-and-set on a {@link java.nio.ByteBuffer}
      * viewed as an {@code int[]}.
      *
-     * <p><b>Element-index contract:</b> the index argument is an <em>int-element index</em>
-     * — each element spans {@link Integer#BYTES} bytes. To access the int at byte offset
-     * {@code N}, pass {@code N / Integer.BYTES}.
+     * <p><b>Byte-offset contract:</b> the index argument is a <em>raw byte offset</em>.
+     * To access the int at byte offset {@code N}, pass {@code N} directly. This approach
+     * adheres to Zero GC constraints as it avoids allocations during the compare-and-set.
      *
      * <p>The CAS with {@code expected=0, desired=0} forces a read-modify-write cycle that
      * faults the page into the OS page cache with write permissions, without modifying
@@ -164,9 +164,8 @@ public final class QueuePreToucher {
      * to this page the CAS fails silently — the page fault still occurs on the attempt,
      * which is the goal.
      *
-     * <p><b>Element-index calculation:</b> {@link #INT_HANDLE} views the buffer as an
-     * {@code int[]}. The index must be {@code byteOffset / Integer.BYTES} because each
-     * int element spans {@link Integer#BYTES} = 4 bytes.
+     * <p><b>Byte-offset calculation:</b> {@link #INT_HANDLE} accepts a raw byte offset.
+     * The index passed is exactly the byte offset.
      *
      * @param buffer       the memory-mapped segment buffer
      * @param fromPosition byte offset at which to start this chunk
@@ -177,9 +176,9 @@ public final class QueuePreToucher {
         long pos = fromPosition;
 
         while (pos < limit) {
-            // Divide by Integer.BYTES to convert byte offset → int-element index.
-            // Each 4 KB page boundary at byte offset N is at element index N / 4.
-            INT_HANDLE.compareAndSet(buffer, (int) (pos / Integer.BYTES), 0, 0);
+            // INT_HANDLE uses a raw byte offset.
+            // A CAS operation using primitive int is zero-allocation (Zero GC).
+            INT_HANDLE.compareAndSet(buffer, (int) pos, 0, 0);
             pos += 4096L; // advance by one OS page (4 KB)
         }
     }
