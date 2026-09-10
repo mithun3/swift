@@ -32,7 +32,7 @@ echo ""
 echo "3. Setting CPU governor to 'performance' on all cores..."
 for gov_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
     if [ -f "$gov_file" ]; then
-        echo performance > "$gov_file"
+        echo performance > "$gov_file" 2>/dev/null || echo "   Warning: Could not set performance governor on $gov_file (Device or resource busy)"
     fi
 done
 
