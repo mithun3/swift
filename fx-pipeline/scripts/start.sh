@@ -36,7 +36,9 @@ if [ "$OS" = "Linux" ]; then
     # Warn if the queue directory is not on a RAM-backed filesystem.
     # Chronicle Queue's mmap segments must reside on tmpfs for sub-microsecond
     # page-fault costs. /dev/shm is always tmpfs on Linux; /tmp may be ext4.
-    QUEUE_FS=$(stat -f -c '%T' "${FX_QUEUE_DIR:-/tmp/fx-queues}" 2>/dev/null || echo "unknown")
+    QUEUE_DIR="${FX_QUEUE_DIR:-/tmp/fx-queues}"
+    mkdir -p "$QUEUE_DIR"
+    QUEUE_FS=$(stat -f -c '%T' "$QUEUE_DIR" 2>/dev/null || echo "unknown")
     if [ "$QUEUE_FS" != "tmpfs" ]; then
         echo "WARNING: Queue dir '${FX_QUEUE_DIR:-/tmp/fx-queues}' is on '$QUEUE_FS', not tmpfs."
         echo "         Set FX_QUEUE_DIR=/dev/shm/fx-queues in your profile for sub-microsecond latency."
