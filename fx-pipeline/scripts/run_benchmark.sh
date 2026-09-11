@@ -14,6 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         --profile) PROFILE="$2"; shift 2 ;;
         --env-label) ENV_LABEL="$2"; shift 2 ;;
         --tcp|--direct) LOAD_MODE_FLAG="$1"; shift ;;
+        --no-cache) export FX_DOCKER_NO_CACHE="true"; shift ;;
         *) 
             if [ -z "$TARGET_RATE" ]; then
                 TARGET_RATE="$1"

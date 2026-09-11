@@ -7,8 +7,15 @@ ALL_SERVICES=("${PIPELINE_SERVICES[@]}" telemetry)
 runner_start_services() {
     echo "Starting docker services..."
     local skip_build=${FX_SKIP_BUILD:-false}
+    local no_cache=${FX_DOCKER_NO_CACHE:-false}
+    
+    local build_opts=""
+    if [ "$no_cache" = "true" ]; then
+        build_opts="--no-cache"
+    fi
+
     if [ "$skip_build" != "true" ]; then
-        docker build -t fx-pipeline:latest .
+        docker build $build_opts -t fx-pipeline:latest .
     fi
 
     # Set up cpuset variables
