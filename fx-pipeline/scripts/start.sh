@@ -47,7 +47,7 @@ else
     SELECTOR_OPT="-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.KQueueSelectorProvider"
     PREFIX_CMD="caffeinate -s"
 
-    echo "macOS detected. Creating 4GB RAM disk for /tmp/fx-queues/..."
+    echo "macOS detected. Creating 16GB RAM disk for /tmp/fx-queues/..."
     mkdir -p logs
     if [ -f "logs/ramdisk.dev" ]; then
         OLD_DEV=$(cat logs/ramdisk.dev)
@@ -56,7 +56,8 @@ else
         rm -f logs/ramdisk.dev
     fi
     mkdir -p /tmp/fx-queues
-    RAMDISK_DEV=$(hdiutil attach -nomount ram://8388608 | tr -d ' \t')
+    # 16GB = 16 * 1024 * 1024 * 1024 / 512 = 33554432 sectors
+    RAMDISK_DEV=$(hdiutil attach -nomount ram://33554432 | tr -d ' \t')
     newfs_hfs -v 'FX_QUEUES' "$RAMDISK_DEV" > /dev/null
     mount -t hfs "$RAMDISK_DEV" /tmp/fx-queues
     echo "$RAMDISK_DEV" > logs/ramdisk.dev

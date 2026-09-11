@@ -134,6 +134,9 @@ public final class GatewayEventLoop extends AbstractEventLoop {
                     0, messageSource.buffer().length);
 
             if (bytesRead > 0) {
+                // Reset the wait strategy back to phase 1.
+                waitStrategy.reset();
+
                 // A FIX message is available — process it.
                 processFixMessage(appender, bytesRead);
             } else {

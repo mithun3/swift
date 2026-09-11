@@ -166,3 +166,18 @@ In earlier tests at 10,000 TPS, a 1,000,000 message payload generated total data
 Attempting to fix this by using `taskset -c 0` also fails, because OpenHFT `AffinityLock` natively respects the process's allowed CPU mask; it will silently fail to acquire Core X (reporting "CPU affinity unavailable") and leave the event loop stranded on Core 0 alongside the background threads.
 
 **Fix:** Do **not** use `taskset` for JVMs on bare-metal systems. Launch the JVM without CPU restrictions. Because the isolated cores are marked as `isolcpus`, the Linux scheduler will automatically restrict all naturally spawned JVM threads to the housekeeping core (Core 0). Inside the Java code, `AffinityLock.acquireLock(X)` will use a native JNI `sched_setaffinity` system call to pull *only* the single event-loop thread over to the isolated core, achieving perfect mechanical sympathy.
+
+### 8.3. macOS Scheduler Preemption (Hockey Stick Spikes)
+
+**Symptom:** On macOS (`local` profile), latency is extremely good out to the 99th percentile (e.g., 66µs at 50k TPS), but suffers sudden, massive multi-millisecond spikes at P99.9, P99.99, and Max (e.g., 5.7ms to 89ms).
+
+**Root cause:** LMAX Disruptor principles dictate that a `busyspin` wait strategy must only be used when the hot-path thread can be strictly pinned to an isolated core. Because macOS fundamentally does not support thread pinning (`taskset` or `isolcpus`), OpenHFT `AffinityLock` falls back to an unpinned state. 
+
+Since your unpinned services are configured to busy-spin, they consume 100% of their respective CPU cores. The macOS scheduler responds to this heavy compute load by occasionally preempting the threads to run background processes (ZGC, Telemetry, system daemons) or migrating them between Performance (P) and Efficiency (E) cores. A typical OS context switch takes 5–10 milliseconds. At 50,000 TPS, a 5ms preemption stall delays ~250 messages. Since this only happens occasionally, it exclusively affects the extreme tail percentiles (P99.9+), resulting in the classic "bimodal" or "hockey stick" latency curve.
+
+**Fix:** This is an expected architectural limitation of running a busy-spin low-latency system on a general-purpose, non-isolated desktop OS. To mitigate (but not entirely eliminate) these spikes on macOS dev environments, the wait strategy for unpinned environments should be changed to yield to the OS:
+```bash
+# In config/profiles/local.env
+FX_WAIT_STRATEGY="phased"
+```
+This reduces the scheduler's aggressiveness by yielding CPU time when the queue is empty, preventing the 100% CPU lockup that triggers severe preemption, at the cost of slightly higher base latencies. To achieve a perfectly flat latency profile out to P99.99+, you must execute the pipeline on a native Linux bare-metal server configured with strict CPU isolation.

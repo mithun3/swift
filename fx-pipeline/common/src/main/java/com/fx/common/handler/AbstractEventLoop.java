@@ -321,6 +321,9 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                 final boolean eventRead = tailer.readDocument(flyweight);
 
                 if (eventRead) {
+                    // Reset the wait strategy back to phase 1.
+                    waitStrategy.reset();
+
                     // Capture the current tailer index as the sequence number.
                     final long sequence = tailer.index();
 

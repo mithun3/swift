@@ -105,6 +105,11 @@ public final class PhasedBackOffWaitStrategy implements WaitStrategy {
         this.spinCount = 0;
     }
 
+    @Override
+    public void reset() {
+        this.spinCount = 0;
+    }
+
     /**
      * Executes one idle iteration according to the current phase.
      *

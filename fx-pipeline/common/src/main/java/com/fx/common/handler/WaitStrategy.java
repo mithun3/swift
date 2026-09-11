@@ -33,6 +33,12 @@ public interface WaitStrategy {
     void idle();
 
     /**
+     * Resets the wait strategy to its initial state.
+     * Invoked when an event is successfully read.
+     */
+    default void reset() {}
+
+    /**
      * Returns the {@link WaitStrategy} selected by the {@code fx.waitstrategy}
      * system property.
      *
