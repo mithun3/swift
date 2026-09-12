@@ -14,6 +14,26 @@ SPEC.loader.exec_module(REPORT)
 
 
 class GenerateHtmlReportTest(unittest.TestCase):
+    def test_get_percentiles_matches_individual_lookups_in_one_pass(self):
+        with tempfile.TemporaryDirectory() as directory:
+            hgrm = Path(directory) / "fx-latency.hlog.hgrm"
+            hgrm.write_text(
+                "1000.0 0.500000000000 5\n"
+                "2000.0 0.900000000000 9\n"
+                "5000.0 0.990000000000 10\n"
+                "#[Total count = 10]\n",
+                encoding="utf-8",
+            )
+
+            batched, total = REPORT.get_percentiles(str(hgrm), (0.50, 0.90, 0.99))
+
+            self.assertEqual(10, total)
+            self.assertEqual((1000.0, 10), REPORT.get_percentile(str(hgrm), 0.50))
+            self.assertEqual((2000.0, 10), REPORT.get_percentile(str(hgrm), 0.90))
+            self.assertEqual(
+                {0.50: 1000.0, 0.90: 2000.0, 0.99: 5000.0}, batched
+            )
+
     def test_parse_arguments_preserves_legacy_positional_inputs(self):
         manifest, hlogs = REPORT.parse_arguments(["a.hlog", "b.hlog"])
 

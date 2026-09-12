@@ -6,7 +6,6 @@ import com.fx.common.queue.QueuePaths;
 import com.fx.common.telemetry.TelemetryBootstrap;
 import com.fx.common.telemetry.TelemetryRecorder;
 import org.h2.tools.Server;
-
 import java.io.File;
 import java.sql.SQLException;
 
@@ -85,6 +84,8 @@ public final class PersistenceMain {
         TelemetryRecorder e2eRecorder = null;
         TelemetryRecorder queueCRecorder = null;
         TelemetryRecorder servCRecorder = null;
+        TelemetryRecorder ringOccupancyRecorder = null;
+        TelemetryRecorder dbCommitRecorder = null;
 
         if (telemetryEnabled) {
             try {
@@ -98,6 +99,15 @@ public final class PersistenceMain {
                         new File(basePath + "-queue-c.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                 servCRecorder = new TelemetryRecorder(
                         new File(basePath + "-serv-c.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
+
+                // Diagnostics for the queue-c/H2 capacity-ceiling investigation (LATENCY_RCA.md
+                // §"Bare-metal Vultr benchmark archive") — ring occupancy is a raw count, not a
+                // latency, so its highest-trackable-value is BatchPersistenceEngine.RING_SIZE
+                // rather than TELEMETRY_HIGHEST_LATENCY_NANOS.
+                ringOccupancyRecorder = new TelemetryRecorder(
+                        new File(basePath + "-ring-occupancy.hlog"), BatchPersistenceEngine.RING_SIZE, TELEMETRY_FLUSH_INTERVAL_MILLIS);
+                dbCommitRecorder = new TelemetryRecorder(
+                        new File(basePath + "-db-commit.hlog"), TELEMETRY_HIGHEST_LATENCY_NANOS, TELEMETRY_FLUSH_INTERVAL_MILLIS);
                         
                 logger.info("[serv-c] Telemetry enabled. Writing latency logs to: " + basePath + "*");
             } catch (final Exception e) {
@@ -110,12 +120,15 @@ public final class PersistenceMain {
 
         // ── Event Loop Construction ───────────────────────────────────────────
         final PersistenceEventLoop loop = new PersistenceEventLoop(
-                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, queueCRecorder, servCRecorder);
+                PersistenceEventLoop.DEFAULT_JDBC_URL, e2eRecorder, queueCRecorder, servCRecorder,
+                ringOccupancyRecorder, dbCommitRecorder);
 
         // ── Shutdown Hook ─────────────────────────────────────────────────────
         final TelemetryRecorder finalE2e = e2eRecorder;
         final TelemetryRecorder finalQueueCRecorder = queueCRecorder;
         final TelemetryRecorder finalServCRecorder = servCRecorder;
+        final TelemetryRecorder finalRingOccupancyRecorder = ringOccupancyRecorder;
+        final TelemetryRecorder finalDbCommitRecorder = dbCommitRecorder;
         Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(() -> {
             logger.info("[serv-c] Shutdown signal received.");
             loop.stop();
@@ -129,6 +142,8 @@ public final class PersistenceMain {
             if (finalE2e != null) finalE2e.close();
             if (finalQueueCRecorder != null) finalQueueCRecorder.close();
             if (finalServCRecorder != null) finalServCRecorder.close();
+            if (finalRingOccupancyRecorder != null) finalRingOccupancyRecorder.close();
+            if (finalDbCommitRecorder != null) finalDbCommitRecorder.close();
             
             if (finalE2e != null) {
                 logger.info("[serv-c] Telemetry flushed to: " + telemetryLogPath + "*");

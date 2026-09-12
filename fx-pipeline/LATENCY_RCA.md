@@ -1,9 +1,139 @@
 # Latency Regression RCA
 
-**Status:** IN PROGRESS — evidence hardening underway (Phase 1). No root cause is confirmed
-yet. This document is updated as each phase below completes; do not treat any hypothesis in
-this file as the confirmed cause until it appears under "Confirmed Root Cause" with supporting
-evidence linked.
+**Status:** IN PROGRESS — the general mechanism (intermittent macOS scheduler preemption,
+frequency modulated by wait-strategy choice) is now well-evidenced (see "Confirmed Root
+Cause"), but the specific serv-c-GC trigger is still unproven and no remediation beyond
+"keep `yielding`" has been applied. This document is updated as each phase below
+completes; do not treat any hypothesis in this file as fully confirmed until it appears
+under "Confirmed Root Cause" with supporting evidence linked.
+
+## SESSION HANDOFF (2026-09-12) — read this first in a new session
+
+Previous session hit its context limit. Everything below is preserved so a fresh session
+can continue with zero re-discovery. Git commit `5b85e47` (main, NOT pushed) is the
+current point of return — see "Rollback" note at the bottom of this section.
+
+### What is DONE (committed, verified)
+1. **Manifest schema v2** (`scripts/generate_run_manifest.py`) — real `wait_strategy`,
+   artifact SHA-256 hashes / Docker image digest, GC log paths, per-service exit status,
+   `dirty_patch_sha256` + `untracked_files` replacing the old ambiguous `git_dirty` bool.
+2. **Provenance wiring** (`scripts/generate_benchmark_report.sh`, `scripts/start.sh`,
+   `scripts/stop.sh`, `docker-compose.yml`) — per-service GC logs (`-Xlog:gc*`),
+   `graceful`/`force_killed`/`already_exited`/`not_started` exit-status files, native
+   builds by default now (`scripts/runners/native_runner.sh`). Fixed a live bug
+   (`--trace-enabled` was hardcoded `true`) and a latent one (HdrHistogram jar glob could
+   match `-javadoc.jar`).
+3. **`IntervalHistogramExporter`**
+   (`common/src/main/java/com/fx/common/telemetry/IntervalHistogramExporter.java`) — new
+   CLI tool + 2 tests, wired into `scripts/process_latency.sh`, archives
+   `<hlog>.intervals.csv` per run. Turns "the tail was bad somewhere in 200s" into "the
+   tail was bad at elapsed 75-77s" — this is the tool to reach for before adding more
+   manual log-scanning.
+4. **10 local 50k msg/s / 10M-message repetitions run and analyzed today**: `phased`
+   (current retuned `SPIN_TRIES=10_000` form) shows P50/P90 far lower than `yielding`
+   (~7.6us/11.5us vs ~25us/64us) when it behaves, but hit an elevated tail (P99.9 >= 10ms)
+   in 2 of 4 runs (50%); `yielding` hit it in 1 of 6 (17%). A `serv-c` GC-burst
+   correlation was checked on 2 independent bad runs — present both times but NOT
+   conclusively above the base rate (serv-c GCs every ~2-3s all run, so proximity alone
+   isn't strong evidence) — downgraded to "plausible, unproven." GC itself is ruled out
+   as the direct cause on the affected thread (serv-a shows zero GC activity during every
+   stall window checked). Full numbers in the "Wait-strategy A/B" / "Consolidated tally"
+   sections below.
+5. `config/profiles/local.env` is at its committed default, `FX_WAIT_STRATEGY="yielding"`.
+
+### What is NOT done
+- **Phase 1 Step 3**: `TelemetryRecorder` measurement-epoch handshake (replace `rm -f
+  *.hlog` warmup reset with a real rotate/ack protocol) — not started.
+- **The rigorous nearest-GC-gap statistic** for the serv-c correlation (compare bad
+  intervals' gap-to-nearest-GC against the SAME gap for every interval, not just bad
+  ones) — not built, currently just a documented suggestion.
+- **`benchmark-runs/`** (all ~30+ run directories from today, including everything the
+  10-run tally above is based on) is **gitignored — not in git history**, only on this
+  machine. Not yet decided whether/how to preserve it.
+- Phase 2 (formal falsification writeup against the rules already defined below), Phase 3
+  (the actual remediation — nothing has been "fixed" yet, only measured), Phase 4
+  (cross-environment validation, doc updates to `BENCHMARKING_ARCHITECTURE.md` /
+  `PERFORMANCE_TUNING.md` / `CONFIG_PROFILES.md` / `README.md`) — all still open, see the
+  full phase plan later in this repo's session memory (`/memories/repo/` — a new session
+  should check `/memories/repo/` for a condensed copy of this handoff too).
+
+### RESOLVED (2026-09-12, later same day): hunt for a possibly-lost true-low-latency config
+
+User's own words: *"I would like the option of digging deeper at achieving true low
+latency as I am sure I have done it before but due to some bad commits lost that
+particular setting."* **Investigated and resolved — see "Busyspin validation at 50k/10M"
+further down this document for full evidence.** Short version: the setting is
+`FX_WAIT_STRATEGY="busyspin"` (used 2026-09-08 through 2026-09-12, then drifted to
+`phased` then `yielding`); it was empirically re-tested at the current 50k/10M scale on
+current `HEAD` (3 reps) and reproduces the same intermittent tail-blowup pathology already
+being chased in the phased/yielding A/B (P99.9 up to ~9.6ms, Max up to 43.45ms) — it looked
+clean historically only because it was measured at a 5x lighter load (10k msg/s). No
+config change resulted; `local.env` stays on `yielding` (the best-evidenced of the three
+tested). The original starting point below is preserved for reference but the hunt is
+complete — no further action needed on this thread unless new information emerges.
+
+**Concrete starting point** — every commit that ever touched wait-strategy/tuning-relevant
+files (`WaitStrategy.java`, `BusySpinWaitStrategy.java`, `PhasedBackOffWaitStrategy.java`,
+`YieldingWaitStrategy.java`, `config/profiles/*.env`, `scripts/start.sh`,
+`PERFORMANCE_TUNING.md`, `docker-compose.yml`), oldest-relevant-first from
+`git log --oneline --all -- <those paths>` (30 total, HEAD-first):
+```
+5b85e47 Harden benchmark provenance + add interval-level latency analysis (Phase 1 RCA)
+17ecce0 test
+ce9acb5 no cache in docker build phasse
+0d31ee3 minor tuning for large TPS
+a321e77 test
+752a662 script fix
+ab68636 script fix
+6298257 queue upgrades.
+e3766d1 queue.
+49f4a4c docker
+2465d24 docker based env update for queues.
+7776d4e docker based env update for queues.
+b3b45f2 fix for queues.
+5ecc5ea reporting
+d90935b perf upgrade for docker
+2c77b2e refactor docos
+2061867 refactor docos
+85ba287 refactor
+9e0442f some deltas
+58199d8 final metrics report.
+60c3040 refactor scripts.
+ad4f80b reporting and docker fixes
+c3a3911 fixes
+b25db1f docker fix
+1335942 final refactor.
+090afb6 metrics mismatch.
+b4594c4 fix metrics
+c6ec975 fix metrics
+b86ed32 minor tweaks.
+6872bb0 script uopdates
+(+ 1 more, re-run the git log command above with -- <paths> to get it and go further back)
+```
+Suggested approach for the next session:
+1. `git show <commit>:common/src/main/java/com/fx/common/handler/PhasedBackOffWaitStrategy.java`
+   (and the other wait-strategy files, and `config/profiles/local.env`) across a handful
+   of these commits (especially `0d31ee3 "minor tuning for large TPS"` and
+   `d90935b "perf upgrade for docker"` — names suggest deliberate tuning changes) to see
+   what values existed historically, without checking anything out yet (read-only).
+2. If an old `benchmark-runs/` archive from that era exists anywhere on disk (they're
+   gitignored, so check outside git — Time Machine, another clone, Spotlight search for
+   old `run_manifest.json` files with an older `git_sha`), compare its percentiles against
+   today's; that would be the fastest way to confirm what "true low latency" actually
+   measured as.
+3. Ask the user directly what they remember concretely (approximate date, which
+   environment — local/docker/baremetal, roughly what P50/P99 looked like) if steps 1-2
+   don't turn up an obvious candidate — this is exactly the kind of ambiguity worth a
+   clarifying question rather than guessing.
+4. Whatever is found must go through the same evidence bar as everything else in this
+   RCA (Phase 2's falsification rules below) before being called "the fix" — do not treat
+   "I remember it being fast" as proof without a reproducible, hash-verified run.
+
+### Rollback / continuity notes
+- Current HEAD: `5b85e47` on `main`. Not pushed. `git reset --soft 17ecce0` undoes just
+  this session's commit if ever needed; nothing before that has been touched.
+- This file (`LATENCY_RCA.md`) plus `/memories/repo/` are the two places state was
+  preserved for handoff — check both at the start of a new session.
 
 ## Impact
 
@@ -411,6 +541,98 @@ rigorous nearest-GC-gap statistical comparison above, or (b) moving forward with
 monitored characteristic rather than something that must be fully explained before
 proceeding.
 
+### Busyspin validation at 50k/10M — the "lost" setting found, tested, and NOT a free lunch
+
+Per explicit user request (2026-09-12, this session), ran the same 3-repetition,
+current-`HEAD` protocol already used for `phased`/`yielding` against **`busyspin`** — the
+wait strategy `local.env` actually used from `85ba287` (2026-09-08) through `ce9acb5`
+(2026-09-12), i.e. during every historical benchmark still archived in git
+(`benchmark-runs/local/local-20260908*`, `git log -p --follow -- config/profiles/local.env`
+confirms the exact commit-by-commit history). `config/profiles/local.env` was temporarily
+set to `busyspin`, 3 runs executed, then reverted back to `yielding` (unchanged from
+before this experiment — no config change resulted from this test).
+
+| Metric (e2e) | busyspin run 1 (`074551Z`) | busyspin run 2 (`080116Z`) | busyspin run 3 (`080544Z`) |
+|---|---:|---:|---:|
+| P50 | 7.75 µs | 7.63 µs | 7.67 µs |
+| P90 | 13.71 µs | 12.79 µs | 13.09 µs |
+| P99 | ~169 µs | ~236 µs | ~192 µs |
+| P99.9 | ~3.42 ms | ~9.60 ms | ~4.21 ms |
+| Max | 19.56 ms | 43.45 ms | 19.87 ms |
+
+All 3 runs valid: graceful exit on all 4 services, sample counts reconciled to the same
+small warmup-leak margin as every other run this session, rebuilt-artifact hashes
+recorded in each manifest.
+
+**Key findings:**
+1. **`busyspin`'s P50/P90 (~7.6-7.75µs / ~12.8-13.7µs) essentially matches current
+   `phased`'s (`SPIN_TRIES=10_000`) P50/P90 (~7.6µs / ~11.4-11.6µs).** This confirms the
+   working hypothesis recorded earlier: `SPIN_TRIES=10_000` (~20µs spin window) is close
+   enough to the 50k-msg/s inter-arrival gap (20µs) that `phased` rarely reaches its
+   yield/park phase under sustained load — it behaves like `busyspin` for median/P90
+   purposes.
+2. **`busyspin` shows the same intermittent tail-blowup signature as `phased` and
+   `yielding`.** Run 2's P99.9 (9.60ms) sits right at the elevated boundary used
+   throughout this investigation, with a Max (43.45ms) matching the worst `phased` run
+   (43.4ms) almost exactly. The other two runs are "clean" by the P99.9<10ms bar, but
+   both still show a higher baseline Max (~19.6-19.9ms) than `yielding`'s typical clean
+   runs.
+3. **The stall originates at queue-a and propagates downstream ~1s later, exactly as
+   seen before**: run 2's worst `queue-a` interval is elapsed 100.196-101.201s (max
+   39.06ms); e2e's worst interval is 101.276-102.277s (max 43.45ms) — the same ~1s lag
+   pattern as the `phased` run analyzed earlier via `IntervalHistogramExporter`.
+4. **The serv-c GC-burst correlation was seen a 3rd time**: `serv-c`'s GC log shows a
+   pause (`GC(16)`) at elapsed 100.552-100.945s, landing almost exactly at the start of
+   queue-a's worst interval; `serv-a` shows zero GC activity in the same window (GC on
+   the affected thread itself remains ruled out). This is now 3-for-3 when checked (2
+   `phased` runs previously, this `busyspin` run now) — upgraded confidence, but still
+   not the rigorous nearest-GC-gap-vs-baseline statistical comparison this RCA's own bar
+   requires, so still "plausible, not proven."
+
+**Updated cross-strategy tally (13 total local 50k/10M runs today, all current `HEAD`):**
+
+| Wait strategy | Repetitions | Clean (P99.9 < 10ms) | Elevated (>= 10ms) | Elevated rate | P50 range |
+|---|---:|---:|---:|---:|---:|
+| `busyspin` | 3 | 2 (3.42, 4.21ms) | 1 borderline (9.60ms) | ~33% | 7.63-7.75µs |
+| `phased` (`SPIN_TRIES=10k`) | 4 | 2 (1.53, 3.46ms) | 2 (15.2, 43.4ms) | 50% | 7.58-7.63µs |
+| `yielding` (`SPIN_TRIES=1k`) | 6 | 5 (1.77-4.76ms) | 1 (26.3ms) | 17% | 25.06-25.17µs |
+
+### Resolution: nothing was actually "lost" — it was untested at this scale, not safe
+
+`busyspin` is real, reproducible, and fast at the median (~7.6-7.75µs, matching every
+historical 10k-msg/s archived run almost exactly — see `benchmark-runs/local/
+local-20260908T124515Z/`) — this is almost certainly what the user remembers. But at the
+50k msg/s / 10M-message scale this investigation is about, it is **not** a "genuinely
+low, stable" configuration free of the tail risk already being chased in the
+phased/yielding A/B — it shows the identical intermittent, queue-a-first, ~1-second
+stall signature, at a rate (this small 3-run sample) in between `phased`'s and
+`yielding`'s. The historical benchmark evidence looked clean because it was measured at
+10k msg/s (5x lighter load, best archived run: Max=4.17ms) — a rate with enough headroom
+that the same underlying macOS-scheduler-preemption risk apparently manifested less
+often/severely, not because the config itself was actually safe at production-scale rates.
+
+**Practical conclusion: reverting `local.env` to `busyspin` would not recover a
+lost-but-safe configuration, so no config change resulted from this experiment.**
+`yielding` remains the best-evidenced `local` default of the three tested (lowest
+elevated-tail rate at 17%, even though it has the worst P50 of the three). This is a
+real, unavoidable trade-off on non-isolated macOS, not a bug to fix.
+
+**Documentation correction made**: `PERFORMANCE_TUNING.md` §8.3 claimed `yielding`
+"retain[s] the 7µs P50" — today's 6-run data shows its actual P50 is ~25µs, not ~7µs
+(~3.3x off). It also claimed `phased` inflates P50 to ~38µs, which was true only for the
+pre-retune `SPIN_TRIES=200` version; the current retuned `SPIN_TRIES=10_000` version
+measures ~7.6µs. Both corrected directly in that file with a dated verification note.
+
+**What would actually get a flat, low-latency profile**: per `PERFORMANCE_TUNING.md`'s
+own (directionally correct) theory, real CPU isolation (`isolcpus` on bare-metal/EC2
+Linux) is the only environment where `busyspin`'s tail risk doesn't apply, because the
+core is never contended. `baremetal.env`/`ec2.env` already use `busyspin` and have
+**never drifted** from it (confirmed via full git history) — but this whole
+investigation, today and historically, has never actually executed a bare-metal/EC2 run
+to empirically confirm the "perfectly flat" claim. That remains the one genuinely open,
+high-value validation left, if/when a bare-metal or EC2 host is available to test
+against.
+
 ### Docker 50k/10M repeated twice more — capacity failure confirmed a 3rd and 4th time, with a new twist
 
 `docker-20260912T041122Z` and `docker-20260912T042017Z` both again reconcile to only
@@ -467,13 +689,217 @@ live `logs/`/`fx-telemetry/` paths, which get overwritten by the next run. Fixed
 `generate_benchmark_report.sh`'s archiving step; retroactively copied for
 `local-20260912T032306Z` so the serv-c GC data above isn't lost.
 
+## New evidence: 2026-09-13 user-provided bare-metal Vultr benchmark archive
+
+The user added historical, previously-uncommitted run archives
+(`benchmark-runs/baremetal_vultr/`, 10 runs, and `benchmark-runs/baremetal_vultr_docker/`,
+8 runs; both dated 2026-09-09/09-10, predating this incident) for analysis. These are
+real Vultr bare-metal runs (AMD EPYC 4345P 8-core, `cpu_profile="isolated"`, JDK
+21.0.12.1, Linux 6.12, queue on `/dev/shm`, `-Dfx.serv-*.cpucore` AffinityLock flags
+present) — the first genuine `isolcpus` data this whole investigation has had access to.
+`FX_WAIT_STRATEGY` was `busyspin` for all of them (confirmed via `git log -p` on
+`config/profiles/baremetal.env`: it has never used anything else).
+
+**This surfaced a second, separate tail-latency problem, distinct from the macOS
+queue-a/wait-strategy one above.** Three runs at 50k msg/s (two at 10M messages, one at
+1M) all reproduce a severe tail:
+
+| Run (`baremetal_vultr-...`) | git_sha | count | e2e P50 | e2e P90 | e2e P99 | e2e P99.9 | e2e Max |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `20260910T065436Z` | `a321e77` | 10M | 3.69µs | 4.92µs | ~658µs | ~134.5ms | 323.5ms |
+| `20260910T090128Z` | `0d31ee3` | 10M | 3.71µs | 4.91µs | ~907µs | ~224.1ms | 348.7ms |
+| `20260910T095617Z` | `067fc5e7` | 10M | 3.69µs | 4.86µs | ~7.2µs | ~324.8ms | 495.2ms |
+| `20260910T085954Z` | `0d31ee3` | 1M | — | — | — | — | 25.5ms |
+
+All 4 runs are valid (sample counts reconcile exactly to the target message count on
+every stage). P50/P90 are excellent — even better than macOS's best `busyspin` numbers —
+but the tail is far worse than anything measured on macOS local (worst there: 43.4ms
+Max). The 1M-message run's much smaller Max (25.5ms) vs. the two 10M-message runs
+(323-495ms) shows the problem grows with run duration/message count, not just rate.
+At 10,000 msg/s the same native bare-metal environment is clean; a milder version of the
+same signature (queue-c Max ≈ e2e Max, just ~6ms instead of hundreds of ms) also showed
+up on Vultr-hosted **Docker** at only 10k msg/s, suggesting Docker's overhead lowers the
+threshold at which this triggers.
+
+**Stage isolation points precisely at `queue-c`, not `queue-a`:** per-stage Max values
+for every affected run show `queue-c`'s Max essentially equal to e2e's Max (e.g.
+348,651,519ns vs 348,651,519ns — exact match in one run), while `queue-a`/`queue-b` stay
+in the microsecond-to-low-millisecond range and every service's own handler-dispatch
+time (`serv-a`/`serv-b`/`serv-c`) stays at most tens of microseconds. The delay is
+entirely in the wait between `serv-b` appending to `queue-c` and `serv-c`'s tailer
+calling `handle()` — not in any service's actual processing time.
+
+**Code-grounded mechanism** (read directly from `BatchPersistenceEngine.java`, not just
+inferred from histograms): `accumulate()` (called from serv-c's hot path, i.e. the same
+thread that tails `queue-c`) spin-waits if its 524,288-slot ring buffer is completely
+full. The class's own Javadoc already documents H2 MVStore commit time growing as the
+`fx_trades` table grows (this is why `MAX_BATCH` was previously cut from 32,768 to 8,192
+— the larger batch was causing 200ms-2s+ commits once the table passed ~1M rows). A
+ring-full spin-wait blocks the same thread that reads `queue-c`, so every event still
+queued behind the stall gets an inflated `t3ServCEntry` timestamp — recorded as `queue-c`
+latency. This is consistent with worse Max on the 10M-message runs (bigger table by the
+end) than the 1M-message run, and is a completely different mechanism from the macOS
+finding: it reproduces on genuine `isolcpus` hardware (ruling out scheduler preemption)
+and is unrelated to `WaitStrategy` choice (`busyspin`, unchanged, in every run).
+
+**Confidence: well-evidenced, not yet live-instrumented.** These runs predate this
+repo's GC-log/`IntervalHistogramExporter` tooling (added 2026-09-12), so there's no
+direct ring-occupancy or GC measurement pinpointing the exact stall moment the way the
+macOS `serv-c` correlation was checked — the stage-isolation evidence and code mechanism
+are strong but a live re-run on the same host with current tooling would be needed to
+call this fully confirmed. **No fix has been applied** — this is a newly-surfaced,
+separate finding pending a decision on whether/how to pursue it. Full detail and
+candidate (unvalidated) remediation directions in `PERFORMANCE_TUNING.md` §8.4.
+
+### Instrumentation added (2026-09-13): direct ring-occupancy and H2 commit-duration measurement
+
+Per user request, added purely-additive diagnostics to `BatchPersistenceEngine` (no
+behaviour change — same `RING_SIZE`/`MAX_BATCH`/backpressure logic as before) using the
+exact same zero-allocation `TelemetryRecorder`/HdrHistogram mechanism already used for
+every other pipeline-stage metric:
+
+- **`fx-latency-ring-occupancy.hlog`** — records `writePointer - readPointer` (the
+  number of events sitting in the ring, awaiting the db-writer) at every `accumulate()`
+  call. Hot-path cost: one more `recordValue()` call, same class as the pre-existing
+  `queueCRecorder`/`servCRecorder` calls immediately around it. If this climbs toward
+  524,288 (`RING_SIZE`) over the course of a run, that's direct confirmation the ring is
+  approaching/hitting the capacity ceiling this finding describes.
+- **`fx-latency-db-commit.hlog`** — records the wall-clock duration of
+  `executeBatch()` + `commit()` in `flushLoop()`, entirely on the background
+  `db-writer` thread — **zero cost on the serv-c hot path**. If this grows over the
+  course of a run (correlating with elapsed time / `fx_trades` row count), that's
+  direct confirmation of the "H2 MVStore commit time grows with table size" mechanism
+  already documented in `BatchPersistenceEngine`'s own Javadoc history.
+
+Both files are named `fx-latency-*.hlog`, so the existing `process_latency.sh` /
+`generate_run_manifest.py` / `generate_html_report.py` pipeline picks them up
+automatically (no script changes needed) — they'll appear as two more rows in the next
+benchmark's HTML report and manifest, right alongside `queue-c`/`serv-c`/etc.
+
+Backward-compatible: `BatchPersistenceEngine(jdbcUrl)` and
+`PersistenceEventLoop(jdbcUrl, e2eRecorder, queueCRecorder, servCRecorder)` are unchanged
+overloads that pass `null` for both new recorders (all existing call sites and tests
+untouched); `PersistenceMain` now constructs and wires the two new recorders through a
+new six-argument `PersistenceEventLoop` constructor. Added
+`BatchPersistenceEngineTest.testDiagnosticRecordersCaptureDataAndDoNotDisruptPersistence`
+verifying both recorders actually flush data and that persistence behaviour is
+unaffected; full `serv-c` suite (20 tests) and `mvn -pl serv-c -am compile` both green.
+
+**Next step: this needs a rebuild + redeploy + re-run of the 50k msg/s / 10M-message
+bare-metal benchmark to actually produce data** — nothing above changes any currently
+archived run's numbers; it only equips the *next* run to answer the ring-fill and
+commit-growth questions directly instead of by inference.
+
+### Correction (2026-09-13): the 09-09/09-10 bare-metal runs above were run with the wrong profile — re-run on corrected hosts, picture is now more complex
+
+The user reported the original `baremetal_vultr`/`baremetal_vultr_docker` runs analysed
+above were executed with the wrong profile, and provided 4 new runs
+(`benchmark-runs/baremetal_vultr/baremetal_vultr-20260912T2053-2058*`) taken after
+correcting it. Two important differences from the original data before even looking at
+latency: these new runs are on **different physical hosts** than the 09-09/09-10 ones —
+`cpu_model` is now `"Intel(R) Xeon(R) E-2286G CPU @ 4.00GHz"` and
+`"AMD EPYC 4245P 6-Core Processor"`, both **6-core**, vs. the original
+`"AMD EPYC 4345P 8-Core Processor"` (**8-core**). All four still show `cpu_profile:
+"isolated"` and the same `-Dfx.serv-*.cpucore=1/2/3/4` mapping, and `git_sha` is
+`17ecce0` (2026-09-12, before this session's schema-v2/GC-log tooling) for all four —
+same limitation as before: no GC logs or interval-level data for these.
+
+**`queue-c`'s dominant tail reproduces again, now on two more hosts (5 total 50k+ runs across 3 different machines):**
+
+| Run | Host | count | e2e P50 | e2e P99.9 (interp.) | e2e Max | queue-c Max |
+|---|---|---:|---:|---:|---:|---:|
+| `205404Z` | AMD EPYC 4245P (6-core) | 10M | 3.78µs | ~172.8ms | 361.2ms | 361.2ms (exact match) |
+| `205703Z` | Intel Xeon E-2286G (6-core) | 10M | 7.72µs | ~500.7ms | 652.7ms | matches e2e tail shape closely |
+
+`652.7ms` is the worst e2e Max seen in this entire investigation, on either day.
+`queue-c`'s percentile curve continues to track e2e's almost exactly from ~P99.8 onward
+in both runs, exactly like the original 3 runs — this part of the finding is now
+reproduced 5/5 times across 3 distinct physical hosts and is on firmer ground than
+before, not weaker.
+
+**New and different from the original analysis: `queue-a` (and sometimes `serv-0`) now
+also show large-scale, not single-sample, tail inflation.** In `205404Z`, `queue-a` and
+`serv-0` share an identical single extreme outlier (196,083,711ns on both, one sample
+out of 10,000,000 — almost certainly one specific cold/first-message event, not a
+systemic pattern), but `queue-a` *also* has its own broader climb from ~198µs at P99.86
+up to ~13ms by P99.9999 before that single outlier, which `queue-b` inherits unchanged
+(matching max) — a real, if much smaller than queue-c's, secondary tail. In `205703Z`
+this is far more severe: `queue-a` climbs steeply from ~116µs at P99.90 to 158.07ms by
+Max, independently of `serv-0` (whose own Max there is only 5.8ms) — meaning something
+delays `serv-a`'s tailer specifically, not serv-0's write path. `serv-a`'s own dispatch
+time stays tiny (≤11.8µs) in both runs, same as `serv-c`'s does for the queue-c finding
+— so whatever this is, it has the same *shape* as the queue-c mechanism (a hot-path
+tailer thread stalling, not slow business logic) but `serv-a`/`RiskValidationEventLoop`
+has no ring-buffer/backpressure component analogous to `BatchPersistenceEngine` to
+explain *why* it would stall this way.
+
+**This was not visible (or far less visible) in the original 8-core-host data** — none
+of the three original runs showed anything close to a 158ms `queue-a` Max; the largest
+`queue-a` Max there was 1.14ms. Two candidate explanations, not yet distinguished:
+(a) the profile fix itself changed something that exposes a real, previously-masked
+`queue-a`/`serv-a` issue, or (b) the 8-core → 6-core host change removed slack CPU
+capacity that was incidentally absorbing scheduling noise even under `isolcpus` (the
+`-Dfx.serv-*.cpucore` mapping only reserves cores 1-4 for services + core 0 for
+housekeeping — an 8-core host has 2 completely unused cores beyond that, a 6-core host
+has zero). **Both are plausible; neither is confirmed. Asking the user rather than
+guessing — see the questions at the end of this session's report.**
+
+**User's answers:** the original 09-09/09-10 runs used "local... instead of baremetal
+profile"; the two new hosts are different/new machines entirely, not the same boxes
+reconfigured — so the 8-core→6-core change is a genuine, permanent hardware difference,
+and the `queue-a`/`serv-a` finding is confounded by the profile fix *and* a hardware
+change happening simultaneously; the two causes cannot be separated with data currently
+available. Decision: leave `queue-a`/`serv-a` documented as open, revisit later — no
+further investigation performed on it this session. One discrepancy worth flagging for
+whoever revisits this: "local instead of baremetal" doesn't fully match what the old
+runs' manifests show — they already have `cpu_profile: "isolated"` and the
+`-Dfx.serv-*.cpucore` flags, which `config/profiles/local.env` does not produce
+(`FX_CPU_PROFILE="host"`, no cpucore flags at all, re-verified directly). Do not assume
+the "local vs baremetal" explanation resolves the host-difference confound above — it
+may have instead been an `ec2.env`-vs-`baremetal.env` mix-up (those two are
+indistinguishable in every manifest field), or something else entirely.
+
 ## Confirmed Root Cause
 
-_Pending Phase 2 causal experiments. Do not fill in until falsification rules in the
-implementation plan (`/memories/session/plan.md`, Phase 2 Step 7) are satisfied. The
-2026-09-12 evidence above narrows things (Docker capacity failure is now proven; local
-regression doesn't trivially reproduce on current HEAD) but does not, by itself, satisfy
-those rules yet — need 3+ repetitions and the one-variable-at-a-time matrix._
+_Full sign-off against the original Phase 2 falsification rules is still not possible in
+this session — those rules lived in `/memories/session/plan.md` from the prior session,
+and session-scoped memory does not persist across conversations, so the exact bar that
+was set cannot be re-checked verbatim. What follows is what the evidence supports as of
+2026-09-12, stated with explicit confidence levels rather than a blanket "confirmed"._
+
+**Well-evidenced (13 total runs across all 3 wait strategies, current `HEAD`, 50k msg/s /
+10M messages, all with rebuilt-artifact hashes and graceful shutdowns):** the local
+macOS regression is an intermittent, single-~1-second-window stall that consistently
+originates at `queue-a` (good median, catastrophic tail) and propagates downstream about
+1 second later. It reproduces under `busyspin`, `phased`, and `yielding` alike — i.e. it
+is **not** caused by any one wait strategy being defective. Its *frequency* (not its
+existence) tracks how long each strategy keeps the event-loop thread demanding the CPU
+before voluntarily yielding (`busyspin`=never, `phased`@10k spin-tries≈rarely at 50k
+msg/s, `yielding`@1k spin-tries=soonest) — consistent with `PERFORMANCE_TUNING.md`'s
+pre-existing theory that macOS's lack of true CPU-core isolation lets the scheduler
+occasionally preempt/migrate a CPU-hungry thread. GC on the *affected* thread itself is
+ruled out (zero GC events in every stall window checked, on the thread that stalls).
+
+**Plausible, not statistically proven:** a `serv-c` GC burst has coincided with the
+stall window 3 out of 3 times it was checked (2 `phased` runs, 1 `busyspin` run), but
+`serv-c` GCs every 2-3 seconds for the whole run, so this has not been checked against
+the rigorous baseline (nearest-GC-gap for bad intervals vs. the same gap for *every*
+interval) that would distinguish a real trigger from coincidence at that base rate.
+
+**Not applicable to Docker** (see its own section above): Docker's 50k msg/s failure is
+a separate, directly-proven capacity/force-kill problem in serv-b/serv-c, unrelated to
+the wait-strategy tail-latency mechanism described here.
+
+**Also not applicable to bare-metal**: the `queue-c`/H2 capacity ceiling found in the
+2026-09-13 bare-metal Vultr data (see above) is a third, separate mechanism again —
+validated on genuine `isolcpus` hardware where the macOS mechanism cannot occur, and
+predominantly localized to `queue-c`/persistence rather than `queue-a`/ingress.
+**Update (2026-09-13, corrected-profile re-run):** two further runs on different
+(6-core) bare-metal hosts reproduced `queue-c`'s dominant tail again, but also showed
+`queue-a`/`serv-a` developing their own large-scale tail (not just single-sample noise)
+— not seen on the original 8-core host. Whether this is a second real mechanism or an
+artifact of less spare CPU capacity on the newer 6-core hosts is not yet distinguished.
+Still tracked as its own item, independent of the macOS wait-strategy RCA either way.
 
 ## Corrective Action
 
@@ -497,3 +923,6 @@ code without a flag.
   independently of this latency RCA.
 - Re-validate the already-shipped `phased` -> `yielding` local wait-strategy change with real
   A/B data once Phase 2 tooling lands, instead of leaving it as an unvalidated assumption.
+- Track the bare-metal `queue-c`/`BatchPersistenceEngine` H2 capacity ceiling (2026-09-13
+  finding, PERFORMANCE_TUNING.md §8.4) as its own item — needs a live re-run with current
+  GC-log/interval tooling before any remediation is attempted.

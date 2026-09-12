@@ -129,6 +129,9 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
      * than here, so that per-stage sample counts reflect events actually processed by that
      * stage instead of only events that reach this terminal stage.
      *
+     * <p>Equivalent to passing {@code null} for the ring-occupancy and db-commit
+     * diagnostic recorders — see the six-argument constructor.
+     *
      * @param jdbcUrl        JDBC URL for the database sink
      * @param e2eRecorder    optional HdrHistogram recorder for end-to-end latency
      * @param queueCRecorder optional HdrHistogram recorder for queue-c latency
@@ -139,6 +142,30 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
                                  final TelemetryRecorder e2eRecorder,
                                  final TelemetryRecorder queueCRecorder,
                                  final TelemetryRecorder servCRecorder) throws SQLException {
+        this(jdbcUrl, e2eRecorder, queueCRecorder, servCRecorder, null, null);
+    }
+
+    /**
+     * Constructs the persistence event loop with optional telemetry recording, including
+     * the two diagnostic recorders added for the queue-c/H2 capacity-ceiling investigation
+     * (see {@code LATENCY_RCA.md} §"Bare-metal Vultr benchmark archive"). Both are purely
+     * additive observability handed straight to {@link BatchPersistenceEngine}, which is
+     * the only component with visibility into ring occupancy and commit duration.
+     *
+     * @param jdbcUrl               JDBC URL for the database sink
+     * @param e2eRecorder           optional HdrHistogram recorder for end-to-end latency
+     * @param queueCRecorder        optional HdrHistogram recorder for queue-c latency
+     * @param servCRecorder         optional HdrHistogram recorder for serv-c latency
+     * @param ringOccupancyRecorder optional recorder for ring occupancy at accumulate() time
+     * @param dbCommitRecorder      optional recorder for H2 executeBatch()+commit() duration
+     * @throws SQLException if the database connection cannot be established
+     */
+    public PersistenceEventLoop(final String jdbcUrl,
+                                 final TelemetryRecorder e2eRecorder,
+                                 final TelemetryRecorder queueCRecorder,
+                                 final TelemetryRecorder servCRecorder,
+                                 final TelemetryRecorder ringOccupancyRecorder,
+                                 final TelemetryRecorder dbCommitRecorder) throws SQLException {
         super(
                 "persist-c",
                 QueueFactory.createWithOverride(QueuePaths.QUEUE_C, "queue-c"),
@@ -146,7 +173,7 @@ public final class PersistenceEventLoop extends AbstractEventLoop {
                 new ErrorQueueWriter(QueuePaths.QUEUE_ERR),
                 CPU_CORE
         );
-        this.persistenceEngine  = new BatchPersistenceEngine(jdbcUrl);
+        this.persistenceEngine  = new BatchPersistenceEngine(jdbcUrl, ringOccupancyRecorder, dbCommitRecorder);
         this.e2eRecorder        = e2eRecorder;
         this.queueCRecorder     = queueCRecorder;
         this.servCRecorder      = servCRecorder;

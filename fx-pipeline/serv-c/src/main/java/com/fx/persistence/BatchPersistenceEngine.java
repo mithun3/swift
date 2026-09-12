@@ -1,6 +1,8 @@
 package com.fx.persistence;
 
 import com.fx.common.event.FxMarketEvent;
+import com.fx.common.telemetry.StageMetrics;
+import com.fx.common.telemetry.TelemetryRecorder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -70,8 +72,12 @@ public final class BatchPersistenceEngine implements AutoCloseable {
      *
      * <p>Memory footprint: 524,288 &times; ~128 bytes per {@link BatchRow} &asymp; 64 MB.
      * All slots are pre-allocated at construction &mdash; zero GC after startup.
+     *
+     * <p>Public so callers can size an occupancy-tracking {@link TelemetryRecorder}'s
+     * highest-trackable-value correctly (see {@link #ringOccupancyRecorder}) without
+     * duplicating this number.
      */
-    private static final int RING_SIZE = 524_288;
+    public static final int RING_SIZE = 524_288;
     private static final int MASK = RING_SIZE - 1;
 
     /**
@@ -143,12 +149,49 @@ public final class BatchPersistenceEngine implements AutoCloseable {
     private final PreparedStatement insertStatement;
 
     /**
-     * Constructs the persistence engine with a JDBC connection to the given URL.
+     * Optional diagnostic recorder for ring occupancy ({@code writePointer - readPointer})
+     * at the moment each event is accumulated. Zero-allocation, same mechanism as the
+     * pipeline-stage recorders. {@code null} when telemetry is disabled.
+     */
+    private final TelemetryRecorder ringOccupancyRecorder;
+
+    /**
+     * Optional diagnostic recorder for the wall-clock duration of
+     * {@code executeBatch()} + {@code commit()} in {@link #flushLoop()}. Recorded
+     * entirely on the background {@code db-writer} thread, so it has no cost on the
+     * serv-c hot path. {@code null} when telemetry is disabled.
+     */
+    private final TelemetryRecorder dbCommitRecorder;
+
+    /**
+     * Constructs the persistence engine with a JDBC connection to the given URL,
+     * with no diagnostic recording.
+     *
+     * <p>Equivalent to {@code BatchPersistenceEngine(jdbcUrl, null, null)}.
      *
      * @param jdbcUrl JDBC URL (e.g., {@code "jdbc:h2:mem:fxdb;DB_CLOSE_DELAY=-1"})
      * @throws SQLException if the connection or schema initialisation fails
      */
     public BatchPersistenceEngine(final String jdbcUrl) throws SQLException {
+        this(jdbcUrl, null, null);
+    }
+
+    /**
+     * Constructs the persistence engine with a JDBC connection to the given URL and
+     * optional diagnostic recorders for the queue-c/H2 capacity-ceiling investigation
+     * (see {@code LATENCY_RCA.md} §"Bare-metal Vultr benchmark archive"). Purely
+     * additive observability — neither recorder changes ring/batch/commit behaviour.
+     *
+     * @param jdbcUrl                JDBC URL (e.g., {@code "jdbc:h2:mem:fxdb;DB_CLOSE_DELAY=-1"})
+     * @param ringOccupancyRecorder  optional recorder for ring occupancy at accumulate() time
+     * @param dbCommitRecorder       optional recorder for H2 executeBatch()+commit() duration
+     * @throws SQLException if the connection or schema initialisation fails
+     */
+    public BatchPersistenceEngine(final String jdbcUrl,
+                                   final TelemetryRecorder ringOccupancyRecorder,
+                                   final TelemetryRecorder dbCommitRecorder) throws SQLException {
+        this.ringOccupancyRecorder = ringOccupancyRecorder;
+        this.dbCommitRecorder      = dbCommitRecorder;
         this.connection = DriverManager.getConnection(jdbcUrl, "sa", "");
         initSchema();
         this.insertStatement = connection.prepareStatement(
@@ -202,6 +245,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
         while (w - r >= RING_SIZE) {
             Thread.onSpinWait();
             r = readPointer.get();
+        }
+
+        if (ringOccupancyRecorder != null) {
+            ringOccupancyRecorder.recordValue(w - r);
         }
 
         final BatchRow row = ringBuffer[(int) (w & MASK)];
@@ -287,8 +334,10 @@ public final class BatchPersistenceEngine implements AutoCloseable {
                 // H2 processes the transaction — commit latency is hidden from the pipeline.
                 readPointer.set(r + batchSize);
 
+                final long commitStartNanos = System.nanoTime();
                 insertStatement.executeBatch();
                 connection.commit();
+                StageMetrics.record(dbCommitRecorder, commitStartNanos, System.nanoTime());
 
                 // Phase 2: signal durability — flush() and the exit condition use this.
                 committedPointer.set(r + batchSize);

@@ -73,21 +73,24 @@ def _format_cell(value_ns: float) -> str:
     return f'<span class="{css}">{format_latency_ns(value_ns)}</span>'
 
 
-def get_percentile(hgrm_file: str, target_pct: float):
+def get_percentiles(hgrm_file: str, target_pcts: tuple[float, ...]):
     """
-    Parses an HdrHistogram .hgrm file and returns the value (in ns) whose
-    recorded percentile is closest to target_pct.
+    Parses an HdrHistogram .hgrm file once and returns the value (in ns) whose
+    recorded percentile is closest to each entry in target_pcts, plus the total
+    count. A single linear pass replaces one independent file read + full
+    re-parse per requested percentile.
 
     Args:
-        hgrm_file:  Path to the .hgrm text file produced by HdrHistogram.
-        target_pct: Target percentile in [0.0, 1.0] (e.g. 0.99 for P99).
+        hgrm_file:   Path to the .hgrm text file produced by HdrHistogram.
+        target_pcts: Percentiles in [0.0, 1.0] to extract (e.g. (0.50, 0.99)).
 
     Returns:
-        Tuple (value_ns: float, total_count: int).
-        value_ns is 0.0 if the file is missing or empty.
+        Tuple (values: dict[float, float], total_count: int). ``values`` maps
+        each requested percentile to its closest recorded value in ns (0.0 for
+        all targets if the file is missing or empty).
     """
-    closest_pct = -1.0
-    closest_val = 0.0
+    closest_pct = {target: -1.0 for target in target_pcts}
+    closest_val = {target: 0.0 for target in target_pcts}
     total_count = 0
     try:
         with open(hgrm_file, 'r') as f:
@@ -109,15 +112,37 @@ def get_percentile(hgrm_file: str, target_pct: float):
                     try:
                         val = float(parts[0])  # value in nanoseconds
                         pct = float(parts[1])  # percentile in [0, 1]
-                        if abs(pct - target_pct) < abs(closest_pct - target_pct):
-                            closest_pct = pct
-                            closest_val = val
                     except ValueError:
-                        pass
+                        continue
+                    for target in target_pcts:
+                        if abs(pct - target) < abs(closest_pct[target] - target):
+                            closest_pct[target] = pct
+                            closest_val[target] = val
     except OSError as e:
         print(f"Error parsing {hgrm_file}: {e}", file=sys.stderr)
-        return 0.0, 0
+        return {target: 0.0 for target in target_pcts}, 0
     return closest_val, total_count
+
+
+def get_percentile(hgrm_file: str, target_pct: float):
+    """
+    Parses an HdrHistogram .hgrm file and returns the value (in ns) whose
+    recorded percentile is closest to target_pct.
+
+    Single-percentile convenience wrapper around get_percentiles() — prefer
+    calling get_percentiles() directly when multiple percentiles are needed
+    from the same file, to avoid re-reading and re-parsing it once per value.
+
+    Args:
+        hgrm_file:  Path to the .hgrm text file produced by HdrHistogram.
+        target_pct: Target percentile in [0.0, 1.0] (e.g. 0.99 for P99).
+
+    Returns:
+        Tuple (value_ns: float, total_count: int).
+        value_ns is 0.0 if the file is missing or empty.
+    """
+    values, total_count = get_percentiles(hgrm_file, (target_pct,))
+    return values[target_pct], total_count
 
 
 def file_to_base64(filepath: str) -> str:
@@ -302,12 +327,15 @@ def main():
 
         # All percentile values are stored as raw nanoseconds.
         # format_latency_ns() handles display-time unit conversion.
-        p50,  total = get_percentile(hgrm, 0.50)
-        p90,  _     = get_percentile(hgrm, 0.90)
-        p99,  _     = get_percentile(hgrm, 0.99)
-        p999, _     = get_percentile(hgrm, 0.999)
-        p9999, _    = get_percentile(hgrm, 0.9999)
-        max_val, _  = get_percentile(hgrm, 1.0)
+        # One pass over the file yields every percentile needed here, instead
+        # of re-opening and re-scanning it once per percentile.
+        percentiles, total = get_percentiles(hgrm, (0.50, 0.90, 0.99, 0.999, 0.9999, 1.0))
+        p50     = percentiles[0.50]
+        p90     = percentiles[0.90]
+        p99     = percentiles[0.99]
+        p999    = percentiles[0.999]
+        p9999   = percentiles[0.9999]
+        max_val = percentiles[1.0]
 
         img_b64 = file_to_base64(png) if os.path.exists(png) else ""
 

@@ -2,12 +2,14 @@ package com.fx.unit;
 
 import com.fx.common.event.EventStatus;
 import com.fx.common.event.FxMarketEvent;
+import com.fx.common.telemetry.TelemetryRecorder;
 import com.fx.persistence.BatchPersistenceEngine;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -216,6 +218,49 @@ class BatchPersistenceEngineTest {
 
         assertDoesNotThrow(localEngine::close,
                 "close() must never throw, even when the underlying connection was already shut down");
+    }
+
+    @Test
+    @DisplayName("ring-occupancy and db-commit diagnostic recorders capture data without disrupting persistence")
+    void testDiagnosticRecordersCaptureDataAndDoNotDisruptPersistence() throws Exception {
+        final File ringOccupancyLog = File.createTempFile("ring-occupancy", ".hlog");
+        final File dbCommitLog = File.createTempFile("db-commit", ".hlog");
+        ringOccupancyLog.deleteOnExit();
+        dbCommitLog.deleteOnExit();
+
+        // Long flush interval: only the final close()-triggered flush should produce
+        // interval data in this test, isolating the assertion from background-thread timing.
+        final TelemetryRecorder ringOccupancyRecorder =
+                new TelemetryRecorder(ringOccupancyLog, BatchPersistenceEngine.RING_SIZE, 60_000L);
+        final TelemetryRecorder dbCommitRecorder =
+                new TelemetryRecorder(dbCommitLog, 10_000_000_000L, 60_000L);
+        final long ringOccupancyHeaderOnlySize = ringOccupancyLog.length();
+        final long dbCommitHeaderOnlySize = dbCommitLog.length();
+
+        final String url = "jdbc:h2:mem:test_diag_" + System.nanoTime() + ";DB_CLOSE_DELAY=-1";
+        try (final BatchPersistenceEngine diagEngine =
+                     new BatchPersistenceEngine(url, ringOccupancyRecorder, dbCommitRecorder)) {
+            populateEvent(event, 900L, EventStatus.PRICED);
+            diagEngine.accumulate(event, true);
+            diagEngine.flush();
+
+            try (Connection c = DriverManager.getConnection(url, "sa", "");
+                 Statement s = c.createStatement();
+                 ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM fx_trades WHERE correlation_id = 900")) {
+                assertTrue(rs.next());
+                assertEquals(1L, rs.getLong(1), "row must still be persisted with diagnostic recorders attached");
+            }
+        } finally {
+            ringOccupancyRecorder.close();
+            dbCommitRecorder.close();
+        }
+
+        // close() flushes any samples recorded since the last background flush — since the
+        // interval was 60s, this final flush is the only way the recorded values reach disk.
+        assertTrue(ringOccupancyLog.length() > ringOccupancyHeaderOnlySize,
+                "ring-occupancy recorder must have flushed at least one sample to " + ringOccupancyLog);
+        assertTrue(dbCommitLog.length() > dbCommitHeaderOnlySize,
+                "db-commit recorder must have flushed at least one sample to " + dbCommitLog);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
