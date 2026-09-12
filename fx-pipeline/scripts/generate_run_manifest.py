@@ -2,6 +2,7 @@
 """Generate a JSON manifest describing one benchmark run."""
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -39,21 +40,47 @@ def command_output(command: list[str], fallback: str = "unknown") -> str:
     return output.splitlines()[0] if output else fallback
 
 
-def git_metadata() -> tuple[str, bool | None]:
-    """Returns the current Git commit and dirty state when available."""
+def git_metadata() -> tuple[str, bool | None, str, list[str]]:
+    """Returns the current Git commit, dirty state, dirty-patch hash, and untracked files.
+
+    A boolean ``dirty`` flag alone cannot distinguish "harmless untracked scratch file"
+    from "tracked file modified" runs, and gives no way to tell whether two dirty runs
+    actually ran the same code. ``dirty_patch_sha256`` hashes the tracked-file diff (empty
+    when the tree is clean, or when dirtiness is only from untracked files) and
+    ``untracked_files`` lists paths so both sources of dirtiness are recorded explicitly.
+    """
     sha = command_output(["git", "rev-parse", "HEAD"])
     if sha == "unknown":
-        return sha, None
+        return sha, None, "", []
     try:
-        result = subprocess.run(
+        status_result = subprocess.run(
             ["git", "status", "--porcelain"],
             check=True,
             capture_output=True,
             text=True,
         )
     except (OSError, subprocess.CalledProcessError):
-        return sha, None
-    return sha, bool(result.stdout.strip())
+        return sha, None, "", []
+
+    status_lines = status_result.stdout.splitlines()
+    dirty = bool(status_lines)
+    untracked_files = [line[3:] for line in status_lines if line.startswith("??")]
+
+    patch_sha256 = ""
+    if dirty:
+        try:
+            diff_result = subprocess.run(
+                ["git", "diff", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            if diff_result.stdout:
+                patch_sha256 = hashlib.sha256(diff_result.stdout.encode("utf-8")).hexdigest()
+        except (OSError, subprocess.CalledProcessError):
+            patch_sha256 = ""
+
+    return sha, dirty, patch_sha256, untracked_files
 
 
 def stage_name(hlog_path: str) -> str:
@@ -69,7 +96,7 @@ def stage_name(hlog_path: str) -> str:
 
 def build_manifest(arguments: argparse.Namespace) -> dict:
     """Builds manifest data from invocation parameters and generated artifacts."""
-    git_sha, git_dirty = git_metadata()
+    git_sha, git_dirty, dirty_patch_sha256, untracked_files = git_metadata()
     hlog_paths = [os.path.abspath(path) for path in arguments.hlogs]
     hlog_mtimes_utc = {}
     sample_counts = {}
@@ -88,12 +115,14 @@ def build_manifest(arguments: argparse.Namespace) -> dict:
         else None
     )
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "run_id": arguments.run_id,
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment_label": arguments.environment,
         "git_sha": git_sha,
         "git_dirty": git_dirty,
+        "dirty_patch_sha256": dirty_patch_sha256,
+        "untracked_files": untracked_files,
         "runtime_os": arguments.runtime_os or platform.platform(),
         "runtime_arch": arguments.runtime_arch or platform.machine(),
         "jdk_version": arguments.jdk_version or command_output(["java", "-version"]),
@@ -103,12 +132,17 @@ def build_manifest(arguments: argparse.Namespace) -> dict:
         "expected_duration_seconds": expected_duration_seconds,
         "actual_load_duration_seconds": arguments.actual_load_duration,
         "trace_enabled": arguments.trace_enabled == "true",
+        "wait_strategy": getattr(arguments, "wait_strategy", "") or "unknown",
         "queue_path": arguments.queue_path,
         "cpu_count": arguments.cpu_count,
         "cpu_profile": arguments.cpu_profile,
         "cpu_model": arguments.cpu_model,
         "cpusets": json.loads(arguments.cpusets),
         "effective_jvm_options": arguments.jvm_options,
+        "docker_image_digest": getattr(arguments, "docker_image_digest", "") or "",
+        "artifact_hashes": json.loads(getattr(arguments, "artifact_hashes", "{}") or "{}"),
+        "gc_log_paths": json.loads(getattr(arguments, "gc_log_paths", "{}") or "{}"),
+        "service_exit_status": json.loads(getattr(arguments, "exit_status", "{}") or "{}"),
         "hlog_paths": hlog_paths,
         "hlog_mtimes_utc": hlog_mtimes_utc,
         "sample_counts": sample_counts,
@@ -134,6 +168,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--jdk-version", default="")
     parser.add_argument("--runtime-os", default="")
     parser.add_argument("--runtime-arch", default="")
+    parser.add_argument("--wait-strategy", default="")
+    parser.add_argument("--docker-image-digest", default="")
+    parser.add_argument("--artifact-hashes", default="{}")
+    parser.add_argument("--gc-log-paths", default="{}")
+    parser.add_argument("--exit-status", default="{}")
     parser.add_argument("hlogs", nargs="+")
     return parser.parse_args()
 

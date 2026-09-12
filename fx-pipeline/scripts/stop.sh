@@ -38,7 +38,13 @@ fi
 WAIT_TIMEOUT_SECONDS=${FX_STOP_TIMEOUT_SECONDS:-40}
 
 # Stops one labelled service (as written to services.pid by start.sh) and blocks
-# until its process exits, or force-kills it after WAIT_TIMEOUT_SECONDS.
+# until its process exits, or force-kills it after WAIT_TIMEOUT_SECONDS. Records a
+# coarse drain outcome to logs/<label>.exitstatus for benchmark-manifest provenance
+# (a real POSIX exit code isn't recoverable here — stop.sh is a separate script
+# invocation from the one that backgrounded the process, so it isn't a waitable
+# child of this shell; "graceful vs force_killed vs already_exited" is what
+# actually matters for RCA and is safe to capture without touching the
+# PID/SIGTERM mechanics above).
 stop_service() {
     local label="$1"
     local pid
@@ -46,10 +52,12 @@ stop_service() {
 
     if [ -z "$pid" ]; then
         echo "  (No PID found for $label — already stopped or never started.)"
+        echo "not_started" > "logs/${label}.exitstatus"
         return
     fi
     if ! ps -p "$pid" > /dev/null 2>&1; then
         echo "  $label (PID $pid) is not running."
+        echo "already_exited" > "logs/${label}.exitstatus"
         return
     fi
 
@@ -63,9 +71,12 @@ stop_service() {
         if [ "$waited_half_seconds" -ge $((WAIT_TIMEOUT_SECONDS * 2)) ]; then
             echo "  WARNING: $label (PID $pid) did not exit within ${WAIT_TIMEOUT_SECONDS}s — forcing kill."
             kill -9 "$pid" 2>/dev/null || true
-            break
+            echo "force_killed" > "logs/${label}.exitstatus"
+            echo "  $label stopped."
+            return
         fi
     done
+    echo "graceful" > "logs/${label}.exitstatus"
     echo "  $label stopped."
 }
 

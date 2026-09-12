@@ -2,6 +2,16 @@
 
 runner_start_services() {
     echo "Starting native services..."
+    local skip_build=${FX_SKIP_BUILD:-false}
+    if [ "$skip_build" != "true" ]; then
+        # Native has no build/tag step by default (unlike Docker's conditional
+        # `docker build`), so identical git_sha never proved identical binaries —
+        # rebuild by default; reuse is opt-in and explicit via FX_SKIP_BUILD=true.
+        echo "Building native artifacts (set FX_SKIP_BUILD=true to reuse existing target/ jars)..."
+        mvn -q clean package dependency:copy-dependencies -DskipTests
+    else
+        echo "FX_SKIP_BUILD=true — reusing existing target/ jars without rebuilding."
+    fi
     if [ -f logs/services.pid ]; then
         echo "Services already running. Stopping them first..."
         ./scripts/stop.sh || true

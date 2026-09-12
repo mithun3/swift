@@ -27,6 +27,8 @@ echo "=========================================="
 echo "Cleaning up old queues and telemetry..."
 rm -rf "${FX_QUEUE_DIR:-/tmp/fx-queues}"/*
 rm -f "${FX_HLOG_DIR:-/tmp}"/fx-latency*.hlog
+mkdir -p logs
+rm -f logs/*.exitstatus logs/*-gc.log
 
 
 OS=$(uname)
@@ -91,7 +93,7 @@ source "$(dirname "$0")/lib/common.sh"
 
 echo "Starting serv-c (Persistence Egress)..."
 TS_CMD=$(apply_taskset "${FX_SERV_C_CPUSET:-}")
-$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/*" com.fx.persistence.PersistenceMain > logs/serv-c.log 2>&1 &
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -Xlog:gc*:file=logs/serv-c-gc.log:time,uptime,level,tags:filecount=1 -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-c/target/dependency/*" com.fx.persistence.PersistenceMain > logs/serv-c.log 2>&1 &
 echo "$! serv-c" >> "$PID_FILE"
 sleep 1
 
@@ -107,19 +109,19 @@ fi
 
 echo "Starting serv-b (Pricing Matching)..."
 TS_CMD=$(apply_taskset "${FX_SERV_B_CPUSET:-}")
-$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/*" com.fx.pricing.PricingMain > logs/serv-b.log 2>&1 &
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -Xlog:gc*:file=logs/serv-b-gc.log:time,uptime,level,tags:filecount=1 -cp "serv-b/target/serv-b-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-b/target/dependency/*" com.fx.pricing.PricingMain > logs/serv-b.log 2>&1 &
 echo "$! serv-b" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-a (Risk Validation)..."
 TS_CMD=$(apply_taskset "${FX_SERV_A_CPUSET:-}")
-$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/*" com.fx.risk.RiskMain > logs/serv-a.log 2>&1 &
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -Xlog:gc*:file=logs/serv-a-gc.log:time,uptime,level,tags:filecount=1 -cp "serv-a/target/serv-a-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-a/target/dependency/*" com.fx.risk.RiskMain > logs/serv-a.log 2>&1 &
 echo "$! serv-a" >> "$PID_FILE"
 sleep 1
 
 echo "Starting serv-0 (Client Gateway) in TCP mode..."
 TS_CMD=$(apply_taskset "${FX_SERV_0_CPUSET:-}")
-$PREFIX_CMD $TS_CMD java $JVM_OPTS -Dfx.gateway.port=5001 -Dfx.gateway.mode=tcp -cp "serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/*" com.fx.gateway.GatewayMain > logs/serv-0.log 2>&1 &
+$PREFIX_CMD $TS_CMD java $JVM_OPTS -Xlog:gc*:file=logs/serv-0-gc.log:time,uptime,level,tags:filecount=1 -Dfx.gateway.port=5001 -Dfx.gateway.mode=tcp -cp "serv-0/target/serv-0-1.0.0-SNAPSHOT.jar:common/target/common-1.0.0-SNAPSHOT.jar:serv-0/target/dependency/*" com.fx.gateway.GatewayMain > logs/serv-0.log 2>&1 &
 echo "$! serv-0" >> "$PID_FILE"
 
 echo "=========================================="

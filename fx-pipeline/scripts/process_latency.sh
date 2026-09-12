@@ -24,19 +24,19 @@ HDR_JAR=""
 
 # Check local targets first (built by our project)
 if [ -d "test/target/dependency" ]; then
-    HDR_JAR=$(find . -name "HdrHistogram-*.jar" -print -quit 2>/dev/null)
+    HDR_JAR=$(find . -name "HdrHistogram-*.jar" -not -name "*-javadoc.jar" -not -name "*-sources.jar" -print -quit 2>/dev/null)
 fi
 
 # Check ~/.m2
 if [ -z "$HDR_JAR" ]; then
-    HDR_JAR=$(find ~/.m2/repository/org/hdrhistogram/HdrHistogram -name "HdrHistogram-*.jar" -print -quit 2>/dev/null || true)
+    HDR_JAR=$(find ~/.m2/repository/org/hdrhistogram/HdrHistogram -name "HdrHistogram-*.jar" -not -name "*-javadoc.jar" -not -name "*-sources.jar" -print -quit 2>/dev/null || true)
 fi
 
 # Fallback to downloading via Maven if it's missing entirely
 if [ -z "$HDR_JAR" ]; then
     echo "HdrHistogram jar not found locally. Attempting to download via Maven..."
     mvn dependency:get -Dartifact=org.hdrhistogram:HdrHistogram:2.2.2 -Dtransitive=false
-    HDR_JAR=$(find ~/.m2/repository/org/hdrhistogram/HdrHistogram -name "HdrHistogram-*.jar" -print -quit 2>/dev/null || true)
+    HDR_JAR=$(find ~/.m2/repository/org/hdrhistogram/HdrHistogram -name "HdrHistogram-*.jar" -not -name "*-javadoc.jar" -not -name "*-sources.jar" -print -quit 2>/dev/null || true)
 fi
 
 if [ -z "$HDR_JAR" ]; then
@@ -82,7 +82,20 @@ for HLOG_FILE in "$@"; do
         continue
     fi
 
-    # 3. Generate the plot
+    # 3. Export per-interval percentiles (pinpoints exactly when a spike happened,
+    #    instead of only seeing it in the aggregate .hgrm distribution). Non-fatal:
+    #    a missing common jar or an unreadable log must not fail the whole benchmark.
+    INTERVALS_FILE="${HLOG_FILE}.intervals.csv"
+    COMMON_JAR="common/target/common-1.0.0-SNAPSHOT.jar"
+    if [ -f "$COMMON_JAR" ]; then
+        echo "Exporting per-interval percentiles to $INTERVALS_FILE..."
+        java -cp "$HDR_JAR:$COMMON_JAR" com.fx.common.telemetry.IntervalHistogramExporter \
+            "$HLOG_FILE" "$INTERVALS_FILE" || echo "Warning: interval export failed for $HLOG_FILE"
+    else
+        echo "Warning: $COMMON_JAR not found; skipping interval export for $HLOG_FILE"
+    fi
+
+    # 4. Generate the plot
     if command -v python3 &>/dev/null; then
         echo "Generating latency plots..."
         python3 scripts/plot_latency.py "$HLOG_FILE"
