@@ -175,9 +175,11 @@ Attempting to fix this by using `taskset -c 0` also fails, because OpenHFT `Affi
 
 Since your unpinned services are configured to busy-spin, they consume 100% of their respective CPU cores. The macOS scheduler responds to this heavy compute load by occasionally preempting the threads to run background processes (ZGC, Telemetry, system daemons) or migrating them between Performance (P) and Efficiency (E) cores. A typical OS context switch takes 5–10 milliseconds. At 50,000 TPS, a 5ms preemption stall delays ~250 messages. Since this only happens occasionally, it exclusively affects the extreme tail percentiles (P99.9+), resulting in the classic "bimodal" or "hockey stick" latency curve.
 
-**Fix:** This is an expected architectural limitation of running a busy-spin low-latency system on a general-purpose, non-isolated desktop OS. To mitigate (but not entirely eliminate) these spikes on macOS dev environments, the wait strategy for unpinned environments should be changed to yield to the OS:
+**Historical Fix & Timer Slack Pitfall (`phased`):** Initially, to mitigate these spikes, the wait strategy was changed to `phased` (which spins, yields, then parks via `LockSupport.parkNanos(1000)`). While this successfully brought the 89ms preemption Max down to ~7ms, it completely destroyed the baseline P50 latency (inflating it from 7µs to ~38µs). The root cause is OS timer granularity: calling `parkNanos(1000)` on macOS results in an actual sleep of 30–50µs.
+
+**Modern Fix (`yielding`):** The correct LMAX Disruptor architectural approach for shared-CPU, non-isolated environments is to cooperatively yield *without ever parking*.
 ```bash
 # In config/profiles/local.env
-FX_WAIT_STRATEGY="phased"
+FX_WAIT_STRATEGY="yielding"
 ```
-This reduces the scheduler's aggressiveness by yielding CPU time when the queue is empty, preventing the 100% CPU lockup that triggers severe preemption, at the cost of slightly higher base latencies. To achieve a perfectly flat latency profile out to P99.99+, you must execute the pipeline on a native Linux bare-metal server configured with strict CPU isolation.
+The `yielding` strategy spins for 1,000 iterations to absorb micro-bursts (retaining the 7µs P50), and then continuously invokes `Thread.yield()` indefinitely. `Thread.yield()` cooperatively relinquishes the CPU to other threads, preventing the OS scheduler from forcefully preempting the pipeline (eliminating the 89ms spikes), while completely avoiding the 30–50µs timer slack of `parkNanos`. To achieve a perfectly flat latency profile out to P99.99+ with `busyspin`, you must execute the pipeline on a native Linux bare-metal server configured with strict CPU isolation.

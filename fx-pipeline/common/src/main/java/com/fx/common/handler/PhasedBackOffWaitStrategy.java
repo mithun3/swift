@@ -71,11 +71,11 @@ public final class PhasedBackOffWaitStrategy implements WaitStrategy {
     /**
      * Number of {@link Thread#onSpinWait()} iterations before transitioning to yield.
      *
-     * <p>200 iterations × ~2 ns/iter on ARM (Apple Silicon) = ~400 ns spin window.
-     * This covers the 99% case where a Chronicle Queue appender publishes within
-     * 400 ns of the tailer's last poll.
+     * <p>10000 iterations × ~2 ns/iter on ARM (Apple Silicon) = ~20 µs spin window.
+     * At 50k TPS, inter-arrival time is 20µs. This ensures we don't fall back to
+     * yielding/parking prematurely during sustained load.
      */
-    private static final int SPIN_TRIES  = 200;
+    private static final int SPIN_TRIES  = 10_000;
 
     /**
      * Cumulative iteration threshold before transitioning to park.
@@ -134,8 +134,10 @@ public final class PhasedBackOffWaitStrategy implements WaitStrategy {
             // for housekeeping threads. Wake-up latency ~1-2 µs is acceptable when
             // the pipeline has no events to process.
             LockSupport.parkNanos(PARK_NANOS);
-            // Reset so the next event arrival re-enters the spin phase.
-            spinCount = 0;
+            // Intentionally NOT resetting spinCount here. The state remains parked
+            // to avoid oscillating between phase 1 and 3 on a truly empty queue.
+            // AbstractEventLoop calls reset() to bring us back to Phase 1 when
+            // an event successfully arrives.
         }
     }
 }

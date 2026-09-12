@@ -95,11 +95,15 @@ $PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "serv-c/target/serv-c-1.0.0-SNAPSHOT.jar:
 echo "$! serv-c" >> "$PID_FILE"
 sleep 1
 
-echo "Starting Telemetry Stitcher (Distributed Tracing)..."
-TS_CMD=$(apply_taskset "${FX_TELEMETRY_CPUSET:-}")
-$PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/*" com.fx.common.telemetry.TelemetryMain > logs/telemetry.log 2>&1 &
-echo "$! telemetry" >> "$PID_FILE"
-sleep 1
+if [ "${FX_ENABLE_TRACING:-false}" = "true" ]; then
+    echo "Starting Telemetry Stitcher (Distributed Tracing)..."
+    TS_CMD=$(apply_taskset "${FX_TELEMETRY_CPUSET:-}")
+    $PREFIX_CMD $TS_CMD java $JVM_OPTS -cp "common/target/common-1.0.0-SNAPSHOT.jar:common/target/dependency/*" com.fx.common.telemetry.TelemetryMain > logs/telemetry.log 2>&1 &
+    echo "$! telemetry" >> "$PID_FILE"
+    sleep 1
+else
+    echo "Skipping Telemetry Stitcher (FX_ENABLE_TRACING is not true)..."
+fi
 
 echo "Starting serv-b (Pricing Matching)..."
 TS_CMD=$(apply_taskset "${FX_SERV_B_CPUSET:-}")

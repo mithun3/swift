@@ -46,13 +46,15 @@ public interface WaitStrategy {
      *   <tr><th>Property value</th><th>Strategy returned</th><th>Best for</th></tr>
      *   <tr><td>{@code busyspin} (default)</td><td>{@link BusySpinWaitStrategy#INSTANCE}</td>
      *       <td>Native Linux with {@code isolcpus}</td></tr>
+     *   <tr><td>{@code yielding}</td><td>new {@link YieldingWaitStrategy}</td>
+     *       <td>macOS native / Shared CPUs where low latency is required</td></tr>
      *   <tr><td>{@code phased}</td><td>new {@link PhasedBackOffWaitStrategy}</td>
-     *       <td>Docker / VM / shared-CPU environments</td></tr>
+     *       <td>Docker / VM / heavily overloaded CPU environments</td></tr>
      * </table>
      *
-     * <p>Each call returns a separate {@link PhasedBackOffWaitStrategy} instance
-     * when {@code phased} is selected, because that strategy holds mutable
-     * per-consumer state ({@code spinCount}). {@link BusySpinWaitStrategy} is a
+     * <p>Each call returns a separate {@link PhasedBackOffWaitStrategy} or
+     * {@link YieldingWaitStrategy} instance when requested, because those strategies
+     * hold mutable per-consumer state. {@link BusySpinWaitStrategy} is a
      * stateless singleton — returning the shared instance is safe.
      *
      * @return the configured {@link WaitStrategy}; never {@code null}
@@ -62,10 +64,11 @@ public interface WaitStrategy {
         final String strategy = System.getProperty("fx.waitstrategy", "busyspin");
         return switch (strategy) {
             case "busyspin" -> BusySpinWaitStrategy.INSTANCE;
+            case "yielding" -> new YieldingWaitStrategy();
             case "phased"   -> new PhasedBackOffWaitStrategy();
             default         -> throw new IllegalArgumentException(
                     "Unknown fx.waitstrategy: '" + strategy
-                            + "'. Expected 'busyspin' or 'phased'.");
+                            + "'. Expected 'busyspin', 'yielding', or 'phased'.");
         };
     }
 }
