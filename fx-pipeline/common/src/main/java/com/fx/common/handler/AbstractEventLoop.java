@@ -275,7 +275,8 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
             // 
             // Route to either optimized or standard event loop based on configuration.
             // Optimized loop uses batching + busy-spin tailer for sub-100µs tail latency.
-            if (com.fx.common.queue.TailerOptimizationConfig.USE_OPTIMIZED_EVENTLOOP) {
+            if (com.fx.common.queue.TailerOptimizationConfig.USE_OPTIMIZED_EVENTLOOP
+                    && usesOptimizedEventLoop()) {
                 runLoopOptimized(appender);
             } else {
                 runLoop(appender);
@@ -296,6 +297,17 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                 appender.close();
             }
         }
+    }
+
+    /**
+     * Indicates whether the global optimized Chronicle Queue loop applies to
+     * this event loop. Queue-backed services use it by default; source-backed
+     * loops such as the TCP gateway can opt out and retain their custom poller.
+     *
+     * @return {@code true} when the optimized Chronicle loop is applicable
+     */
+    protected boolean usesOptimizedEventLoop() {
+        return true;
     }
 
     /**

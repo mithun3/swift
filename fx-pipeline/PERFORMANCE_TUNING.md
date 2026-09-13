@@ -78,6 +78,23 @@ Use the local profile for repeatable native (macOS/Linux) measurements:
 ```
 This script builds the project (`scripts/build.sh --skip-tests`), starts from clean queue/telemetry state, waits for event-loop readiness, runs the workload, drains services producer-first, and archives the manifest and report. Pass `--no-build` to skip the build step and reuse the existing jars.
 
+Keep this profile as the standard local baseline. The optimized event loop must
+not be enabled by default on macOS: local runs do not have isolated CPUs, so
+busy-spinning can increase CPU contention and distort tail-latency comparisons.
+For an optimized local compatibility check, create/use a separate profile whose
+`FX_JVM_OPTS_OVERRIDE` adds:
+
+```text
+-Dfx.use.optimized.eventloop=true -Dfx.batch.size=128
+```
+
+Treat that result as diagnostic only. The authoritative sub-100us measurement is
+the optimized bare-metal run:
+
+```bash
+./scripts/run_benchmark.sh --profile baremetal --env-label baremetal_vultr 50000 10000000
+```
+
 ### Docker Benchmark
 For a Docker comparison, use the docker profile with the exact same workload:
 ```bash

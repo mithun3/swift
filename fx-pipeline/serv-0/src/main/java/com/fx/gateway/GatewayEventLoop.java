@@ -147,6 +147,18 @@ public final class GatewayEventLoop extends AbstractEventLoop {
     }
 
     /**
+     * The gateway consumes a TCP source rather than a Chronicle Queue input.
+     * Keep its source-specific loop when the optimized queue loop is enabled
+     * for the downstream services.
+     *
+     * @return {@code false}; the gateway must use {@link #runLoop(ExcerptAppender)}
+     */
+    @Override
+    protected boolean usesOptimizedEventLoop() {
+        return false;
+    }
+
+    /**
      * Processes a single FIX message from the source buffer.
      *
      * <p>

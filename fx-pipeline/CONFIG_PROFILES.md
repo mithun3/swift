@@ -16,6 +16,19 @@ variable is automatically exported to child processes (runners, report scripts, 
 | [`baremetal.env`](config/profiles/baremetal.env) | `baremetal` | Native JVM | Vultr Bare Metal, Rocky Linux 9 (production benchmark) |
 | [`ec2.env`](config/profiles/ec2.env) | `ec2` | Native JVM | AWS EC2 dedicated / bare-metal, Rocky Linux 9 |
 
+### Profile and optimization policy
+
+Keep `local.env` as the standard macOS baseline. Do not enable
+`-Dfx.use.optimized.eventloop=true` there by default: macOS does not provide the
+isolated CPU, scheduler, and affinity conditions required to evaluate the
+busy-spin tailer fairly. An optimized local run is useful as a compatibility and
+regression check, but its latency is not representative of the bare-metal target
+and it may consume significantly more CPU.
+
+Use a separate, explicitly named local profile (for example, `local-optimized`)
+for that experiment. The optimized flags are already enabled in `baremetal.env`,
+where the production tail-latency result must be validated.
+
 ```bash
 # Select a profile with --profile:
 ./scripts/run_benchmark.sh --profile docker    10000 1000000

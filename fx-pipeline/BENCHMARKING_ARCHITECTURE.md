@@ -248,6 +248,14 @@ stale histogram files were mixed into the input list.
 ./scripts/run_benchmark.sh --profile baremetal --env-label baremetal_vultr 10000 1000000
 ```
 
+The `local` profile remains the standard macOS baseline and must not enable the
+optimized busy-spin event loop by default. macOS has no isolated CPU scheduling
+environment, so an optimized local run is only a compatibility/regression check
+and is not evidence for the sub-100us target. Use a separate explicitly named
+local profile with `-Dfx.use.optimized.eventloop=true -Dfx.batch.size=128` when
+that check is needed. Validate the target on bare metal, where the optimized
+flags are enabled in `config/profiles/baremetal.env`.
+
 `run_benchmark.sh` dynamically uses configuration profiles from `config/profiles/*.env`, handles macOS/Linux/Docker environments, starts services, waits until all event-loops report readiness, and delegates the measured run. It stops services in producer-first order, processes exactly eight stage histograms, generates a manifest and HTML report, and archives all artifacts under `benchmark-runs/<environment>/<run-id>/`.
 
 **Build behavior:** before starting services, `run_benchmark.sh` builds the project via `scripts/build.sh --skip-tests` — except when the profile's `FX_EXECUTION_MODE` is `docker`, since the Docker image build already compiles the jars in its own maven stage. Override the default with `--no-build` (skip) or `--build` (force) on any profile.
