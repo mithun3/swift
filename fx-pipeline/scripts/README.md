@@ -37,5 +37,5 @@ the docker two-path hlog design, CPU profile semantics, and runtime override exa
 
 ## Testing & Diagnostics
 * `test.sh` - Diagnostic script to print the default Java `SelectorProvider` on the host OS.
-* `test_generate_html_report.py` - Unit tests for the HTML report generation script.
-* `test_generate_run_manifest.py` - Unit tests for the run manifest generation script.
+* `tests/test_generate_html_report.py` - Unit tests for the HTML report generation script.
+* `tests/test_generate_run_manifest.py` - Unit tests for the run manifest generation script.

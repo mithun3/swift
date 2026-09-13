@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-MODULE_PATH = Path(__file__).with_name("generate_html_report.py")
+MODULE_PATH = Path(__file__).resolve().parent.parent / "generate_html_report.py"
 SPEC = importlib.util.spec_from_file_location("generate_html_report", MODULE_PATH)
 REPORT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REPORT)

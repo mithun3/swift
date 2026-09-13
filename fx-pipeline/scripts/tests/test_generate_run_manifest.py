@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-MODULE_PATH = Path(__file__).with_name("generate_run_manifest.py")
+MODULE_PATH = Path(__file__).resolve().parent.parent / "generate_run_manifest.py"
 SPEC = importlib.util.spec_from_file_location("generate_run_manifest", MODULE_PATH)
 MANIFEST = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MANIFEST)
