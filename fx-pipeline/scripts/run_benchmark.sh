@@ -8,6 +8,7 @@ ENV_LABEL=""
 TARGET_RATE=""
 MESSAGE_COUNT=""
 LOAD_MODE_FLAG="--tcp"
+DO_BUILD=true
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -15,6 +16,7 @@ while [[ "$#" -gt 0 ]]; do
         --env-label) ENV_LABEL="$2"; shift 2 ;;
         --tcp|--direct) LOAD_MODE_FLAG="$1"; shift ;;
         --no-cache) export FX_DOCKER_NO_CACHE="true"; shift ;;
+        --no-build) DO_BUILD=false; shift ;;
         *) 
             if [ -z "$TARGET_RATE" ]; then
                 TARGET_RATE="$1"
@@ -30,9 +32,14 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [ -z "$PROFILE" ] || [ -z "$TARGET_RATE" ] || [ -z "$MESSAGE_COUNT" ]; then
-    echo "Usage: $0 --profile <profile> [--env-label <label>] <target-rate> <message-count> [--tcp|--direct]"
+    echo "Usage: $0 --profile <profile> [--env-label <label>] <target-rate> <message-count> [--tcp|--direct] [--no-build]"
     echo "Example: $0 --profile local --env-label baremetal_vultr 10000 1000000"
     exit 1
+fi
+
+if [ "$DO_BUILD" = true ]; then
+    echo "Building modules before benchmark (use --no-build to skip)..."
+    ./scripts/build.sh --skip-tests
 fi
 
 export PROFILE
