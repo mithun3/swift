@@ -901,6 +901,83 @@ predominantly localized to `queue-c`/persistence rather than `queue-a`/ingress.
 artifact of less spare CPU capacity on the newer 6-core hosts is not yet distinguished.
 Still tracked as its own item, independent of the macOS wait-strategy RCA either way.
 
+## Confirmed regression: `fx.use.optimized.eventloop=true` (batched + busy-spin tailer) makes bare-metal tail latency worse, not better
+
+**Context:** an attempt to reach a sub-100µs P99.9 target added `OptimizedQueueTailer`
+(busy-spin wrapper) and a batched `AbstractEventLoop.runLoopOptimized()` path (process up
+to `fx.batch.size` events per outer loop iteration before re-checking the wait strategy),
+gated behind `-Dfx.use.optimized.eventloop=true`.
+
+**Data-corruption bug found and fixed first:** the initial implementation read documents via
+a no-op callback (`tailer.readDocument(msg -> {})`), which consumed each Chronicle Queue
+document without decoding it into the target flyweight. Every event handled by the optimized
+loop was an empty/default object. This was invisible in per-stage dispatch metrics (computed
+from purely local timestamps) but produced zero recorded samples for `queue-a`/`queue-b`/
+`queue-c`, end-to-end, and `db-commit` (all of which depend on timestamp fields propagated
+from upstream stages). Fixed in `OptimizedQueueTailer.readDocument(ReadMarshallable)` by
+passing the real flyweight through to `underlying.readDocument(message)`, and
+`runLoopOptimized()` was rewritten to call it directly instead of going through the
+structurally-broken index-only `EventBatchBuffer`. Regression test:
+`common/src/test/java/com/fx/unit/OptimizedQueueTailerTest.java`.
+
+**After the fix, two full bare-metal 50k msg/s / 10M message runs
+(`baremetal_vultr-20260913T042945Z`, `baremetal_vultr-20260913T050157Z`, same git SHA
+`1ffb00e1`) both reproduced a clear regression** relative to the pre-optimization bare-metal
+baseline (`baremetal_vultr-20260913T004300Z`, P99.9 = 15.7µs, max = 4.19ms):
+
+| Metric | Baseline (no opt) | Run 1 (042945Z) | Run 2 (050157Z) |
+|---|---:|---:|---:|
+| e2e P99.9 | 15.7 µs | 21.3 µs | 40.9 µs |
+| e2e P99.99 | — | 1,885 µs | 6,963 µs |
+| e2e Max | 4.19 ms | 12.4 ms | 22.0 ms |
+| queue-a max | 1.95 ms | 12.07 ms | 8.57 ms |
+| queue-b max | — | 2.26 ms | 12.48 ms |
+| queue-c max | 456.7 µs | 1.49 ms | 21.35 ms |
+| db-commit max | — | 68.2 ms | 41.5 ms |
+| intervals (of 202) with P99.9 ≥ 100µs | ~7-16 (baseline range) | 63 | 64 |
+
+P50/P90/P99 are essentially unchanged from baseline in both runs — the regression is purely
+in the tail. ~31% of one-second intervals have a P99.9 ≥ 100µs in both optimized runs (not a
+single-run fluke), and the dominant contributor shifts between queue-a, queue-b, and queue-c
+across the two runs, which points at the batching mechanism itself (processing up to 128
+events before yielding to the wait strategy) rather than any one queue's tailer. `db-commit`
+tens-of-milliseconds max spikes are a new failure mode not present in the baseline at all.
+
+**Status: confirmed regression, not adopted.** `-Dfx.use.optimized.eventloop=true` must
+remain opt-in/experimental only (see `config/profiles/local.env` and `baremetal.env` policy
+notes) and must not be treated as a validated improvement.
+
+**Update (2026-09-13, batch-size isolation attempt): `fx.batch.size=8` does not fix it.**
+A third bare-metal run (`baremetal_vultr-20260913T060533Z`, same git SHA `1ffb00e1`, only
+`fx.batch.size` changed 128 → 8) still reproduces the regression at essentially the same
+severity: e2e P99.9 = 42.5µs (worse than both batch=128 runs), e2e max = 6.1ms, and 62/202
+intervals still have P99.9 ≥ 100µs (batch=128 runs: 63 and 64/202 — i.e. unchanged within
+noise). `db-commit` max reached 88.4ms, the worst of the three optimized runs so far.
+
+**Correction (2026-09-13): the batch-size experiment did not actually vary the hot path.**
+A fourth run at `fx.batch.size=1` (`baremetal_vultr-20260913T063556Z`) was added to try to
+isolate batching from busy-spin, but review of `AbstractEventLoop#runLoopOptimized` shows
+`tailer.readDocument()` is called once per event regardless of batch size — the batch size
+only bounds how many consecutive successful reads run before the outer loop re-checks the
+`running` flag (a cheap volatile read). So all four optimized runs (two at batch=128, one at
+batch=8, one at batch=1) exercise the *same* hot-path call pattern: `OptimizedQueueTailer`'s
+busy-spin/yield/sleep read, invoked once per event. The batch-size knob was therefore not a
+meaningful experimental variable in this implementation, and the P99.9 spread across the four
+runs (21µs → 41µs → 42.5µs → 110µs) is most likely run-to-run variance, not a batch-size
+effect — note P99.9 trended *worse*, not better, as batch size shrank.
+
+What *is* consistent across all four optimized runs and absent from the pre-optimization
+baseline: `db-commit` max is 41-88ms in every optimized run (batch=128: 68.2ms, 41.5ms;
+batch=8: 88.4ms; batch=1: 70.1ms) vs. no such spike in the baseline; e2e P99.9 is worse than
+the 15.7µs baseline in all four; and the bad-interval count stays in the same 62-78/202
+(~31-39%) range regardless of batch size. This points at `OptimizedQueueTailer`'s busy-spin
+tailer itself — the one component common to every optimized run — rather than batching.
+
+Next isolating step (the one that actually changes the hot path): temporarily swap
+`OptimizedQueueTailer` for a plain `ExcerptTailer.readDocument(flyweight)` inside
+`runLoopOptimized()`, keeping the rest of the loop structure identical, and re-run on bare
+metal. If the regression disappears, busy-spin is the confirmed cause.
+
 ## Corrective Action
 
 _Pending — will be scoped to exactly the branch proven in Phase 2 (see plan Phase 3 Step 9).
@@ -926,3 +1003,10 @@ code without a flag.
 - Track the bare-metal `queue-c`/`BatchPersistenceEngine` H2 capacity ceiling (2026-09-13
   finding, PERFORMANCE_TUNING.md §8.4) as its own item — needs a live re-run with current
   GC-log/interval tooling before any remediation is attempted.
+- Root-cause the `fx.use.optimized.eventloop` batching regression (confirmed 2026-09-13,
+  see "Confirmed regression" section above) before any further attempt at a sub-100µs
+  target: likely candidates are the up-to-128-event batch window delaying the wait
+  strategy's reset, and/or bursty downstream pressure on `BatchPersistenceEngine` from
+  processing a full batch before any backpressure signal is checked. Try a much smaller
+  `fx.batch.size` (e.g. 1-32) and/or excluding serv-c from the optimized loop as isolating
+  experiments.

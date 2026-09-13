@@ -406,9 +406,7 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
 
         final int batchSize = com.fx.common.queue.TailerOptimizationConfig.BATCH_SIZE;
 
-        // Create optimized tailer (zero-allocation after construction)
-        try (final com.fx.common.queue.OptimizedQueueTailer tailer =
-                com.fx.common.queue.OptimizedQueueTailer.create(inputQueue, name)) {
+        try (final ExcerptTailer tailer = inputQueue.createTailer(name)) {
 
             while (running.get()) {
                 int processedInBatch = 0;
@@ -447,7 +445,7 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
             }
 
             // Drain-then-stop: same as runLoop()
-            drainRemainingBacklog(tailer.underlying(), appender);
+            drainRemainingBacklog(tailer, appender);
         }
     }
 
