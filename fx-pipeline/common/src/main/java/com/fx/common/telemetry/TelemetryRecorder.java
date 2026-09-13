@@ -46,9 +46,13 @@ public final class TelemetryRecorder implements AutoCloseable {
         
         openStreamAndWriteHeader();
 
-        this.backgroundThread = new Thread(this::flushLoop, "telemetry-flusher");
-        this.backgroundThread.setDaemon(true);
-        this.backgroundThread.start();
+        if ("on_close".equals(TelemetryBootstrap.flushMode())) {
+            this.backgroundThread = null;
+        } else {
+            this.backgroundThread = new Thread(this::flushLoop, "telemetry-flusher");
+            this.backgroundThread.setDaemon(true);
+            this.backgroundThread.start();
+        }
     }
     
     private void openStreamAndWriteHeader() throws FileNotFoundException {
@@ -117,11 +121,13 @@ public final class TelemetryRecorder implements AutoCloseable {
     @Override
     public void close() {
         running.set(false);
-        backgroundThread.interrupt();
-        try {
-            backgroundThread.join(2000);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
+        if (backgroundThread != null) {
+            backgroundThread.interrupt();
+            try {
+                backgroundThread.join(2000);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
         // Flush the final partial interval — data recorded since the last background flush.

@@ -984,12 +984,28 @@ _Done:_ The `OptimizedQueueTailer` component has been identified as harmful to b
 
 _Pending Phase 4: independent local / Docker / bare-metal validation matrix._
 
-## Rollback
+    code without a flag.
 
-Every change in this remediation is applied behind a reversible profile/config switch
-(`config/profiles/*.env`, `TelemetryBootstrap` flush-mode toggle). Rolling back means reverting
-the specific profile value or config flag; no change is applied directly to shared hot-path
-code without a flag.
+## Phase 5: Bare-Metal P99.99 Tail Analysis (2026-09-13)
+
+After removing the `OptimizedQueueTailer` and restoring the baseline in run `baremetal_vultr-20260913T065434Z`, the `P99.9` latency dropped to an excellent 12.3µs. However, the `P99.99` latency spiked to **624µs**, and the maximum latency hit **8.22ms**.
+
+Analysis of the per-stage metrics showed:
+- `queue-a` `P99.99` jumped to 459µs and Max to 6.1ms.
+- `serv-0` Max hit 19.8ms.
+
+**Hypothesis: Telemetry Thread Interference**
+On the 6-core bare-metal host, cores 1, 2, 3, and 4 are pinned to the event loop threads using `AffinityLock`. However, the JVM spawns **10 unpinned background threads** (9 `TelemetryRecorder` flusher threads + 1 `BatchPersistenceEngine` db-writer). 
+
+Because `taskset` is not applied at the JVM level (`FX_SERV_*_CPUSET=""`), these background threads inherit the default affinity mask. When the 9 telemetry threads simultaneously wake up every 1000ms to perform blocking I/O (writing to `/tmp`), they compete for the 2 remaining unpinned cores. This likely forces the OS scheduler to spill them over onto the 4 isolated event loop cores, or causes system-wide memory bus/disk contention, preempting the hot path.
+
+**Action Taken:**
+Implemented `fx.telemetry.flush.mode` in `TelemetryBootstrap` and `TelemetryRecorder`. 
+- `periodic`: default behavior, background thread flushes every 1s.
+- `on_close`: background thread is completely disabled; flushing only occurs during shutdown.
+
+**Pending Validation:**
+Run the benchmark on the bare-metal host with `-Dfx.telemetry.flush.mode=on_close`. If the `P99.99` latency drops significantly, we will have conclusively proven that background I/O threads are the cause of the tail latency.
 
 ## Follow-ups
 

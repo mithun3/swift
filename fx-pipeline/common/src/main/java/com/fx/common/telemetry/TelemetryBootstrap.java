@@ -32,4 +32,12 @@ public final class TelemetryBootstrap {
     public static String basePath() {
         return logPath().replace(HLOG_SUFFIX, "");
     }
+
+    /** 
+     * How often to flush telemetry to disk ({@code fx.telemetry.flush.mode}, default {@code periodic}).
+     * Supported values: "periodic" (background thread flushes every second), "on_close" (flush only at shutdown).
+     */
+    public static String flushMode() {
+        return System.getProperty("fx.telemetry.flush.mode", "periodic");
+    }
 }
