@@ -3,21 +3,26 @@ package com.fx.common.handler;
 import net.openhft.chronicle.queue.ExcerptTailer;
 
 /**
- * {@code EventBatchBuffer} — Pre-allocated batch buffer for reducing
+ * {@code EventBatchBuffer} — Pre-allocated batch buffer intended to reduce
  * Chronicle Queue tailer wake-up frequency via batched reads.
  *
- * <h2>Pattern: Amortize Context-Switching Overhead</h2>
+ * <p><b>UNUSED / KNOWN BROKEN:</b> {@link #fillBatch(ExcerptTailer)} only
+ * captures each document's index via a no-op reader callback — it never
+ * decodes the document's fields into an event object. Chronicle Queue's
+ * {@code readDocument} is a forward-only consume operation, so by the time
+ * {@link #nextIndex()} is used to "process" an earlier index, that document's
+ * content is already gone. Every event this class touches was silently
+ * delivered to handlers as an empty/default flyweight. This caused
+ * {@code queue-a}/{@code queue-b}/{@code queue-c}, end-to-end, and db-commit
+ * telemetry to record zero samples in bare-metal runs (2026-09-13) while
+ * per-stage dispatch metrics, which depend only on locally-set timestamps,
+ * kept working.
  *
- * <p>Instead of processing events one-at-a-time (each read potentially
- * triggering a tailer wait/yield + OS scheduler decision), batch N events
- * into a pre-allocated buffer in one bulk operation. This amortizes tailer
- * wake-up overhead across N events, dramatically reducing scheduler
- * intervention frequency on the hot path.
- *
- * <p>This follows the LMAX Disruptor pattern: read-ahead from the ring buffer
- * in batches, then dispatch multiple events before yielding to the OS.
- * For Chronicle Queue at 50k msg/s with batch size 128, this reduces
- * scheduler wake-ups by ~4× (every 128 events vs. every event).
+ * <p>{@link com.fx.common.handler.AbstractEventLoop#runLoopOptimized} no
+ * longer uses this class — it calls
+ * {@link com.fx.common.queue.OptimizedQueueTailer#readDocument} directly,
+ * which decodes into the real flyweight. Do not reintroduce this class on
+ * the hot path without first fixing the decode gap described above.
  *
  * <h2>Zero-GC Design</h2>
  *
@@ -27,34 +32,6 @@ import net.openhft.chronicle.queue.ExcerptTailer;
  *   <li>Reusable across the entire benchmark/production run.</li>
  *   <li>No String, no temporary objects created in {@link #fillBatch(ExcerptTailer)}.</li>
  *   <li>No lambdas or anonymous classes on hot path (zero closure allocation).</li>
- * </ul>
- *
- * <h2>API Example</h2>
- *
- * <pre>
- *   EventBatchBuffer batch = new EventBatchBuffer(128);
- *   while (running) {
- *       int count = batch.fillBatch(tailer);
- *       if (count > 0) {
- *           for (int i = 0; i < count; i++) {
- *               long index = batch.nextIndex();
- *               handle(flyweight, index, true, appender);
- *           }
- *       } else {
- *           waitStrategy.idle();  // Batch empty — yield
- *       }
- *   }
- * </pre>
- *
- * <h2>Book/LMAX Mapping</h2>
- *
- * <p>Implements the Disruptor's batch-processing pattern:
- * <ul>
- *   <li><b>Single writer:</b> Tailer thread reads in batch, no concurrent access.</li>
- *   <li><b>Pre-allocated event objects:</b> Batch indices are stored in
- *       pre-allocated array (no allocations during operation).</li>
- *   <li><b>Mechanical sympathy:</b> Batch size is tuned to cache-line
- *       efficiency and CPU utilization (default: 128).</li>
  * </ul>
  *
  * @author FX Pipeline Team

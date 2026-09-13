@@ -380,14 +380,13 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
      *
      * <p><b>Differs from {@link #runLoop(ExcerptAppender)} in:</b>
      * <ul>
-     *   <li>Uses {@link EventBatchBuffer} to batch up to N events per poll.</li>
-     *   <li>Fills the batch once, processes N events, then refills — amortizing
-     *       tailer overhead across the batch (reduces wake-ups ~4× at 50k msg/s).</li>
      *   <li>Uses {@link com.fx.common.queue.OptimizedQueueTailer} for busy-spin
      *       behavior instead of blocking on empty queue.</li>
+     *   <li>Processes up to {@code BATCH_SIZE} events per outer iteration before
+     *       re-checking {@link #running}, amortizing loop-condition and
+     *       wait-strategy overhead across the batch.</li>
      *   <li>Same pre-allocated {@link #flyweight} reused across all batch events.</li>
-     *   <li>Zero-GC: batch buffer pre-allocated at construction, no per-batch
-     *       allocations during operation.</li>
+     *   <li>Zero-GC: no per-event or per-batch allocations during operation.</li>
      * </ul>
      *
      * <p><b>Feature flag:</b> Behind {@code -Dfx.use.optimized.eventloop=true}
@@ -405,55 +404,50 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
             return;
         }
 
-        // Create optimized tailer and batch buffer (both zero-allocation after construction)
+        final int batchSize = com.fx.common.queue.TailerOptimizationConfig.BATCH_SIZE;
+
+        // Create optimized tailer (zero-allocation after construction)
         try (final com.fx.common.queue.OptimizedQueueTailer tailer =
                 com.fx.common.queue.OptimizedQueueTailer.create(inputQueue, name)) {
-            
-            final EventBatchBuffer batch = new EventBatchBuffer();
 
             while (running.get()) {
-                // Batch reads: fill up to batchSize events from queue in one go
-                int batchCount = batch.fillBatch(tailer.underlying());
+                int processedInBatch = 0;
 
-                if (batchCount > 0) {
-                    // Reset wait strategy — we have work to do
-                    waitStrategy.reset();
+                // Process up to batchSize events before re-checking running()/wait
+                // strategy — amortizes tailer wake-up overhead across the batch.
+                while (processedInBatch < batchSize) {
+                    flyweight.reset();
 
-                    // Process all events in the batch before polling queue again
-                    // This amortizes the tailer wake-up cost across batchCount events
-                    for (int i = 0; i < batchCount; i++) {
-                        flyweight.reset();
-
-                        // Get the index of the next event in the batch
-                        long sequence = batch.nextIndex();
-
-                        try {
-                            // Delegate to the concrete subclass for business logic
-                            // endOfBatch=true: we know there might be more in the queue
-                            // after this batch, but we signal end-of-batch here anyway
-                            // to allow handlers to flush buffers if needed
-                            handle(flyweight, sequence, true, appender);
-                        } catch (final Exception ex) {
-                            // Route the poisoned event to the error queue rather than
-                            // crashing the pipeline thread. The error writer is
-                            // allocation-free and Chronicle-backed.
-                            errorWriter.write(flyweight, name, ex.getMessage());
-                            // Swallow — the loop continues with the next event in batch
-                        }
+                    // readDocument decodes the queue's document directly into the
+                    // pre-allocated flyweight (see OptimizedQueueTailer#readDocument).
+                    final boolean eventRead = tailer.readDocument(flyweight);
+                    if (!eventRead) {
+                        break;
                     }
-                } else {
-                    // Batch empty — invoke the configured WaitStrategy
-                    // This allows the tailer to yield/sleep gracefully when queue
-                    // is truly empty, avoiding 100% CPU burn in polling mode
+
+                    waitStrategy.reset();
+                    final long sequence = tailer.index();
+
+                    try {
+                        handle(flyweight, sequence, true, appender);
+                    } catch (final Exception ex) {
+                        // Route the poisoned event to the error queue rather than
+                        // crashing the pipeline thread.
+                        errorWriter.write(flyweight, name, ex.getMessage());
+                    }
+
+                    processedInBatch++;
+                }
+
+                if (processedInBatch == 0) {
+                    // Queue was empty for the entire batch attempt — defer to
+                    // the configured WaitStrategy instead of busy-looping here.
                     waitStrategy.idle();
                 }
             }
 
             // Drain-then-stop: same as runLoop()
             drainRemainingBacklog(tailer.underlying(), appender);
-        } catch (final Throwable failure) {
-            // Log the failure and rethrow to allow the run() method to handle it
-            throw new RuntimeException("[" + name + "] Optimized runLoop failed", failure);
         }
     }
 

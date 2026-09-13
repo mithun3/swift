@@ -2,6 +2,7 @@ package com.fx.common.queue;
 
 import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptTailer;
+import net.openhft.chronicle.wire.ReadMarshallable;
 
 /**
  * {@code OptimizedQueueTailer} — Drop-in wrapper for {@link ExcerptTailer}
@@ -56,7 +57,7 @@ import net.openhft.chronicle.queue.ExcerptTailer;
  * <p>This class wraps {@link ExcerptTailer} but does NOT implement the full
  * tailer interface. It only exposes methods used by
  * {@link com.fx.common.handler.AbstractEventLoop}:
- * {@link #readDocument(Object)}, {@link #index()}, {@link #close()},
+ * {@link #readDocument(ReadMarshallable)}, {@link #index()}, {@link #close()},
  * {@link #underlying()}.
  *
  * <p>For advanced tailer operations (seek, direction, etc.), users can access
@@ -123,17 +124,17 @@ public final class OptimizedQueueTailer implements AutoCloseable {
      * <p><b>Zero-allocation:</b> No objects created during spin loop; only
      * primitive comparisons and {@link Thread#onSpinWait()}.
      *
-     * @param <T> the message type (typically {@code FxMarketEvent})
-     * @param message the message wrapper to populate with queue data
-     * @return {@code true} if a document was read into {@code message},
-     *         {@code false} if the queue is empty
+     * @param message the {@link ReadMarshallable} (e.g. {@code FxMarketEvent})
+     *                to decode the queue's document into
+     * @return {@code true} if a document was read and decoded into
+     *         {@code message}, {@code false} if the queue is empty
      */
-    public <T> boolean readDocument(final T message) {
+    public boolean readDocument(final ReadMarshallable message) {
         // Fast path: try to read directly — if data is already available,
-        // this avoids spin/yield overhead entirely.
-        if (underlying.readDocument(msg -> {
-            // DocumentContext callback — fires only if message is available
-        })) {
+        // this avoids spin/yield overhead entirely. Must pass the actual
+        // message through so Chronicle decodes the document's fields into it;
+        // a no-op callback here would silently discard the event's data.
+        if (underlying.readDocument(message)) {
             lastIndex = underlying.index();
             return true;
         }
@@ -144,9 +145,7 @@ public final class OptimizedQueueTailer implements AutoCloseable {
         // without context-switch latency.
         for (int spinAttempt = 0; spinAttempt < TailerOptimizationConfig.SPIN_ATTEMPTS; spinAttempt++) {
             Thread.onSpinWait();  // CPU hint: reduce memory bus contention
-            if (underlying.readDocument(msg -> {
-                // Message available — callback fires
-            })) {
+            if (underlying.readDocument(message)) {
                 lastIndex = underlying.index();
                 return true;
             }
@@ -157,9 +156,7 @@ public final class OptimizedQueueTailer implements AutoCloseable {
         // runnable threads may be contending for the core.
         for (int yieldAttempt = 0; yieldAttempt < TailerOptimizationConfig.YIELD_ATTEMPTS; yieldAttempt++) {
             Thread.yield();  // Yield to OS scheduler
-            if (underlying.readDocument(msg -> {
-                // Message available
-            })) {
+            if (underlying.readDocument(message)) {
                 lastIndex = underlying.index();
                 return true;
             }
@@ -177,9 +174,7 @@ public final class OptimizedQueueTailer implements AutoCloseable {
         }
 
         // Final attempt after backoff
-        if (underlying.readDocument(msg -> {
-            // Message available
-        })) {
+        if (underlying.readDocument(message)) {
             lastIndex = underlying.index();
             return true;
         }
@@ -200,9 +195,9 @@ public final class OptimizedQueueTailer implements AutoCloseable {
     /**
      * Returns the index of the last successfully read document.
      *
-     * <p>Updated only after {@link #readDocument(Object)} returns {@code true}.
-     * Safe to call from the tailer thread at any time; no synchronization
-     * needed (single-writer principle).
+     * <p>Updated only after {@link #readDocument(ReadMarshallable)} returns
+     * {@code true}. Safe to call from the tailer thread at any time; no
+     * synchronization needed (single-writer principle).
      *
      * @return the current tailer index
      */
