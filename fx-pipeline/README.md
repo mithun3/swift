@@ -229,11 +229,13 @@ scripts/stop.sh
 The pipeline includes a coordinated-omission-aware load generator and an HdrHistogram telemetry recorder. See [`BENCHMARKING_ARCHITECTURE.md`](./BENCHMARKING_ARCHITECTURE.md) for full details on the benchmarking architecture, and [`CONFIG_PROFILES.md`](./CONFIG_PROFILES.md) for the complete configuration profile reference.
 
 ```bash
-# Clean local native TCP benchmark. Starts the pipeline, waits for all event loops,
-# runs the load, drains producer-first, generates the report, and archives it.
+# Clean local native TCP benchmark. Builds the project (scripts/build.sh --skip-tests),
+# starts the pipeline, waits for all event loops, runs the load, drains producer-first,
+# generates the report, and archives it. Pass --no-build to reuse the existing build.
 ./scripts/run_benchmark.sh --profile local 10000 1000000
 
-# Docker benchmark with the same workload.
+# Docker benchmark with the same workload. The host build is skipped automatically
+# (the Dockerfile builds the jars itself); pass --build to force it anyway.
 ./scripts/run_benchmark.sh --profile docker 10000 1000000
 
 # Advanced downstream-only mode: start the pipeline, then bypass serv-0.

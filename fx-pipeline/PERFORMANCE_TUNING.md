@@ -76,14 +76,14 @@ Use the local profile for repeatable native (macOS/Linux) measurements:
 ```bash
 ./scripts/run_benchmark.sh --profile local 10000 1000000
 ```
-This script starts from clean queue/telemetry state, waits for event-loop readiness, runs the workload, drains services producer-first, and archives the manifest and report.
+This script builds the project (`scripts/build.sh --skip-tests`), starts from clean queue/telemetry state, waits for event-loop readiness, runs the workload, drains services producer-first, and archives the manifest and report. Pass `--no-build` to skip the build step and reuse the existing jars.
 
 ### Docker Benchmark
 For a Docker comparison, use the docker profile with the exact same workload:
 ```bash
 ./scripts/run_benchmark.sh --profile docker 10000 1000000
 ```
-*(To bypass image rebuilds, prefix with `FX_SKIP_BUILD=true`)*
+The host-side `build.sh` is skipped automatically for the docker profile — the Dockerfile's own maven stage builds the jars inside the image. *(To bypass the Docker image rebuild itself, prefix with `FX_SKIP_BUILD=true`; to force the host build anyway, pass `--build`.)*
 
 ### Bare-Metal Benchmark
 Use the baremetal profile when testing on remote dedicated hardware:

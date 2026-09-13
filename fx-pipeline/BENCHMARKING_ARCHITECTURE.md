@@ -235,20 +235,22 @@ stale histogram files were mixed into the input list.
 ### Orchestrated (recommended)
 
 ```bash
-# 1. Build all modules
-scripts/build.sh
-
-# 2. Run a clean local TCP benchmark. Defaults are 10K msg/s and 1M messages.
+# 1. Run a clean local TCP benchmark. Defaults are 10K msg/s and 1M messages.
+#    scripts/build.sh runs automatically first for native profiles (local/baremetal/ec2).
 ./scripts/run_benchmark.sh --profile local 10000 1000000
 
-# 3. Run Docker with the exact same workload for an environment comparison.
+# 2. Run Docker with the exact same workload for an environment comparison.
+#    The docker profile skips the host build.sh automatically — the Dockerfile's
+#    own maven stage builds the jars inside the image instead.
 ./scripts/run_benchmark.sh --profile docker 10000 1000000
 
-# 4. (Optional) Run with a custom environment label to distinguish baremetal servers.
+# 3. (Optional) Run with a custom environment label to distinguish baremetal servers.
 ./scripts/run_benchmark.sh --profile baremetal --env-label baremetal_vultr 10000 1000000
 ```
 
 `run_benchmark.sh` dynamically uses configuration profiles from `config/profiles/*.env`, handles macOS/Linux/Docker environments, starts services, waits until all event-loops report readiness, and delegates the measured run. It stops services in producer-first order, processes exactly eight stage histograms, generates a manifest and HTML report, and archives all artifacts under `benchmark-runs/<environment>/<run-id>/`.
+
+**Build behavior:** before starting services, `run_benchmark.sh` builds the project via `scripts/build.sh --skip-tests` — except when the profile's `FX_EXECUTION_MODE` is `docker`, since the Docker image build already compiles the jars in its own maven stage. Override the default with `--no-build` (skip) or `--build` (force) on any profile.
 
 Set `FX_RUN_ID` to pair runs under one identifier, or set `FX_RUN_OUTPUT_DIR` to choose an archive directory explicitly. `run_benchmark.sh` remains available for `--direct` downstream-only measurements.
 

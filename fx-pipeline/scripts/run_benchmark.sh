@@ -8,7 +8,8 @@ ENV_LABEL=""
 TARGET_RATE=""
 MESSAGE_COUNT=""
 LOAD_MODE_FLAG="--tcp"
-DO_BUILD=true
+# Tri-state: unset means "pick a sensible default once the profile's execution mode is known"
+DO_BUILD=""
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -17,6 +18,7 @@ while [[ "$#" -gt 0 ]]; do
         --tcp|--direct) LOAD_MODE_FLAG="$1"; shift ;;
         --no-cache) export FX_DOCKER_NO_CACHE="true"; shift ;;
         --no-build) DO_BUILD=false; shift ;;
+        --build) DO_BUILD=true; shift ;;
         *) 
             if [ -z "$TARGET_RATE" ]; then
                 TARGET_RATE="$1"
@@ -32,14 +34,9 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [ -z "$PROFILE" ] || [ -z "$TARGET_RATE" ] || [ -z "$MESSAGE_COUNT" ]; then
-    echo "Usage: $0 --profile <profile> [--env-label <label>] <target-rate> <message-count> [--tcp|--direct] [--no-build]"
+    echo "Usage: $0 --profile <profile> [--env-label <label>] <target-rate> <message-count> [--tcp|--direct] [--no-build|--build]"
     echo "Example: $0 --profile local --env-label baremetal_vultr 10000 1000000"
     exit 1
-fi
-
-if [ "$DO_BUILD" = true ]; then
-    echo "Building modules before benchmark (use --no-build to skip)..."
-    ./scripts/build.sh --skip-tests
 fi
 
 export PROFILE
@@ -51,6 +48,21 @@ fi
 set -a
 source "config/profiles/${PROFILE}.env"
 set +a
+
+# docker mode builds the jars itself inside the Dockerfile's maven stage, so the
+# host-side build.sh is redundant there unless explicitly requested via --build.
+if [ -z "$DO_BUILD" ]; then
+    if [ "$FX_EXECUTION_MODE" = "docker" ]; then
+        DO_BUILD=false
+    else
+        DO_BUILD=true
+    fi
+fi
+
+if [ "$DO_BUILD" = true ]; then
+    echo "Building modules before benchmark (use --no-build to skip)..."
+    ./scripts/build.sh --skip-tests
+fi
 
 export ENV_LABEL="${ENV_LABEL:-${FX_ENV_LABEL:-$PROFILE}}"
 
