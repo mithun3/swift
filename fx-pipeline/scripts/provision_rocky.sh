@@ -48,37 +48,15 @@ sed -i "s/^isolated_cores=.*/isolated_cores=1-${MAX_CORE}/" /etc/tuned/cpu-parti
 tuned-adm profile cpu-partitioning
 
 echo ""
-echo "5. Patching GRUB for absolute CPU isolation and C-state disabling..."
-GRUB_FILE=/etc/default/grub
+echo "5. Patching Kernel parameters via grubby for absolute CPU isolation and C-state disabling..."
 REQUIRED_PARAMS="isolcpus=1-${MAX_CORE} nohz_full=1-${MAX_CORE} rcu_nocbs=1-${MAX_CORE} intel_idle.max_cstate=0 processor.max_cstate=0 idle=poll"
 
-if [ -f "$GRUB_FILE" ]; then
-    CURRENT_LINE=$(grep -E '^GRUB_CMDLINE_LINUX(_DEFAULT)?=' "$GRUB_FILE" | head -1 || true)
-    
-    if [ -z "$CURRENT_LINE" ]; then
-        echo "GRUB_CMDLINE_LINUX=\"$REQUIRED_PARAMS\"" >> "$GRUB_FILE"
-        echo "   Rebuilding GRUB config..."
-        grub2-mkconfig -o /boot/grub2/grub.cfg
-    else
-        NEEDS_UPDATE=false
-        for param in $REQUIRED_PARAMS; do
-            if ! echo "$CURRENT_LINE" | grep -qF "$param"; then
-                NEEDS_UPDATE=true
-                break
-            fi
-        done
-
-        if [ "$NEEDS_UPDATE" = true ]; then
-            cp "$GRUB_FILE" "${GRUB_FILE}.bak.$(date +%Y%m%d%H%M%S)"
-            sed -i -E "s|^(GRUB_CMDLINE_LINUX(_DEFAULT)?)=\"(.*)\"|\1=\"\3 $REQUIRED_PARAMS\"|" "$GRUB_FILE"
-            echo "   Rebuilding GRUB config..."
-            grub2-mkconfig -o /boot/grub2/grub.cfg
-        else
-            echo "   All required GRUB parameters already present."
-        fi
-    fi
+# On modern Rocky Linux (RHEL 8/9/10), grubby is the standard tool to update BLS entries
+if command -v grubby &> /dev/null; then
+    echo "   Applying parameters via grubby..."
+    grubby --update-kernel=ALL --args="$REQUIRED_PARAMS"
 else
-    echo "   WARNING: $GRUB_FILE not found."
+    echo "   WARNING: grubby not found. Kernel parameters could not be updated."
 fi
 
 echo ""
