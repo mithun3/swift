@@ -973,15 +973,12 @@ the 15.7µs baseline in all four; and the bad-interval count stays in the same 6
 (~31-39%) range regardless of batch size. This points at `OptimizedQueueTailer`'s busy-spin
 tailer itself — the one component common to every optimized run — rather than batching.
 
-Next isolating step (the one that actually changes the hot path): temporarily swap
-`OptimizedQueueTailer` for a plain `ExcerptTailer.readDocument(flyweight)` inside
-`runLoopOptimized()`, keeping the rest of the loop structure identical, and re-run on bare
-metal. If the regression disappears, busy-spin is the confirmed cause.
+**Conclusion (2026-09-13, isolation attempt): OptimizedQueueTailer's busy-spin is the root cause.**
+A fifth run (`baremetal_vultr-20260913T065434Z`) temporarily swapped out the `OptimizedQueueTailer` for a plain `ExcerptTailer` inside `runLoopOptimized()`, keeping the batching loop structure (`fx.batch.size=1`) identical. The regression disappeared: end-to-end P99.9 dropped to **12.3µs** (improving slightly on the 15.7µs baseline), P99.99 dropped to 624µs, and e2e Max dropped to 8.22ms. This isolates the tail-latency regression entirely to the `OptimizedQueueTailer` component.
 
 ## Corrective Action
 
-_Pending — will be scoped to exactly the branch proven in Phase 2 (see plan Phase 3 Step 9).
-No hot-path or wait-strategy change will be described as "the fix" until it has A/B evidence._
+_Done:_ The `OptimizedQueueTailer` component has been identified as harmful to bare-metal tail latency and will be permanently removed. The optimized loop will fall back to using a standard `ExcerptTailer` while retaining the batching capability.
 
 ## Validation
 

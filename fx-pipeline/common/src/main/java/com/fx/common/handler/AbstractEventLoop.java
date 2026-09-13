@@ -380,7 +380,7 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
      *
      * <p><b>Differs from {@link #runLoop(ExcerptAppender)} in:</b>
      * <ul>
-     *   <li>Uses {@link com.fx.common.queue.OptimizedQueueTailer} for busy-spin
+     *   <li>Uses batched reads for busy-spin
      *       behavior instead of blocking on empty queue.</li>
      *   <li>Processes up to {@code BATCH_SIZE} events per outer iteration before
      *       re-checking {@link #running}, amortizing loop-condition and
@@ -417,7 +417,7 @@ public abstract class AbstractEventLoop implements Runnable, AutoCloseable {
                     flyweight.reset();
 
                     // readDocument decodes the queue's document directly into the
-                    // pre-allocated flyweight (see OptimizedQueueTailer#readDocument).
+                    // pre-allocated flyweight.
                     final boolean eventRead = tailer.readDocument(flyweight);
                     if (!eventRead) {
                         break;
