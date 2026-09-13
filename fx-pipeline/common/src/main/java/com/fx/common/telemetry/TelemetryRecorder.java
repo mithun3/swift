@@ -46,13 +46,9 @@ public final class TelemetryRecorder implements AutoCloseable {
         
         openStreamAndWriteHeader();
 
-        if ("on_close".equals(TelemetryBootstrap.flushMode())) {
-            this.backgroundThread = null;
-        } else {
-            this.backgroundThread = new Thread(this::flushLoop, "telemetry-flusher");
-            this.backgroundThread.setDaemon(true);
-            this.backgroundThread.start();
-        }
+        this.backgroundThread = new Thread(this::flushLoop, "telemetry-flusher");
+        this.backgroundThread.setDaemon(true);
+        this.backgroundThread.start();
     }
     
     private void openStreamAndWriteHeader() throws FileNotFoundException {
@@ -88,26 +84,28 @@ public final class TelemetryRecorder implements AutoCloseable {
             try {
                 Thread.sleep(intervalMillis);
                 
-                // If the benchmark script deleted the file to clear warmup data, reopen it.
+                final boolean isPeriodic = "periodic".equals(TelemetryBootstrap.flushMode());
+
+                // If the benchmark script deleted the file to clear warmup data, reopen it
+                // and discard the warmup data from the active histogram.
                 if (!logFile.exists()) {
                     if (printStream != null) {
                         printStream.close();
                     }
                     openStreamAndWriteHeader();
+                    // Discard the warmup data by swapping it out.
+                    intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+                    continue; // Skip writing the discarded warmup data
                 }
 
-                // getIntervalHistogram() safely swaps the underlying histogram structures
-                // and returns the inactive one, populated with the latest interval's data.
-                intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
-                
-                if (intervalHistogram.getTotalCount() > 0) {
-                    // Use the single-argument overload — it reads startTimeStamp and
-                    // endTimeStamp directly from the histogram's own internal fields,
-                    // which are maintained correctly by SingleWriterRecorder.
-                    // The previous 3-arg overload required computing a wall-clock offset
-                    // from a base time, which produced near-zero values and collapsed
-                    // all percentiles to 0.00 µs.
-                    logWriter.outputIntervalHistogram(intervalHistogram);
+                if (isPeriodic) {
+                    // getIntervalHistogram() safely swaps the underlying histogram structures
+                    // and returns the inactive one, populated with the latest interval's data.
+                    intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+                    
+                    if (intervalHistogram.getTotalCount() > 0) {
+                        logWriter.outputIntervalHistogram(intervalHistogram);
+                    }
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
